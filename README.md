@@ -7,7 +7,8 @@ Formulario web estático para evaluar riesgos y controles de seguridad en escena
 1. Abrir `index.html` en el navegador.
 2. Seleccionar arquitectura y completar datos de riesgos/controles.
 3. Presionar **Calcular resultados** para ver métricas globales.
-4. Presionar **Exportar informe Excel** para descargar `informe-evaluacion-oauth2-oidc.xls`.
+4. Presionar **Exportar informe Excel** para descargar un archivo con nombre dinámico:
+   `informe-evaluacion-oauth2-oidc-<organizacion>-<timestamp>.xls`.
 
 ## Despliegue en GitHub Pages
 

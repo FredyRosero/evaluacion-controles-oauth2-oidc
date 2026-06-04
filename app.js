@@ -82,6 +82,8 @@ const WEIGHTS = {
   periodicity: 0.1,
   scope: 0.1
 };
+const THRESHOLD_NOT_EFFECTIVE = 40;
+const THRESHOLD_PARTIAL_EFFECTIVE = 70;
 
 const architectureSelect = document.getElementById('architecture');
 const riskContainer = document.getElementById('riskContainer');
@@ -257,9 +259,23 @@ function controlScore(dimensions) {
 }
 
 function classifyByThreshold(value) {
-  if (value < 40) return 'No es eficiente/eficaz';
-  if (value < 70) return 'Es parcialmente eficiente/eficaz';
-  return 'Es eficiente/eficaz';
+  if (value < THRESHOLD_NOT_EFFECTIVE) return 'none';
+  if (value < THRESHOLD_PARTIAL_EFFECTIVE) return 'partial';
+  return 'effective';
+}
+
+function classifyEfficiency(value) {
+  const level = classifyByThreshold(value);
+  if (level === 'none') return 'No es eficiente';
+  if (level === 'partial') return 'Es parcialmente eficiente';
+  return 'Es eficiente';
+}
+
+function classifyEfficacy(value) {
+  const level = classifyByThreshold(value);
+  if (level === 'none') return 'No es eficaz';
+  if (level === 'partial') return 'Es parcialmente eficaz';
+  return 'Es eficaz';
 }
 
 function collectEvaluation() {
@@ -320,10 +336,10 @@ function collectEvaluation() {
   const allControls = risks.flatMap((r) => r.controls);
   const weightedRatios = allControls.map((c) => {
     const risk = risks.find((r) => r.riskCode === c.riskCode);
-    if (!risk) return 0;
-    const ratio = c.cost <= 0 ? 100 : Math.min(100, (risk.businessLoss / c.cost) * 100);
+    if (!risk || risk.businessLoss <= 0 || c.cost <= 0) return null;
+    const ratio = Math.min(100, (risk.businessLoss / c.cost) * 100);
     return ratio * (c.score / 100);
-  });
+  }).filter((ratio) => ratio !== null);
 
   const efficiencyQ = weightedRatios.length
     ? weightedRatios.reduce((a, b) => a + b, 0) / weightedRatios.length
@@ -331,17 +347,15 @@ function collectEvaluation() {
 
   const efficacyByRisk = risks.map((risk) => {
     if (risk.controls.length === 0) return 0;
-    return Math.max(...risk.controls.map((c) => c.score));
+    return Math.max(0, ...risk.controls.map((c) => c.score));
   });
 
   const efficacyQ = efficacyByRisk.length
     ? efficacyByRisk.reduce((a, b) => a + b, 0) / efficacyByRisk.length
     : 0;
 
-  const efficiencyQl = classifyByThreshold(efficiencyQ)
-    .replace('eficiente/eficaz', 'eficiente');
-  const efficacyQl = classifyByThreshold(efficacyQ)
-    .replace('eficiente/eficaz', 'eficaz');
+  const efficiencyQl = classifyEfficiency(efficiencyQ);
+  const efficacyQl = classifyEfficacy(efficacyQ);
 
   return {
     context: {
@@ -457,10 +471,12 @@ function exportToExcel(data) {
 </Workbook>`;
 
   const blob = new Blob([workbookXml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+  const safeOrganization = (data.context.organization || 'organizacion').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '-');
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'informe-evaluacion-oauth2-oidc.xls';
+  link.download = `informe-evaluacion-oauth2-oidc-${safeOrganization}-${timestamp}.xls`;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
