@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evaluación de Controles OAuth2/OIDC</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; line-height: 1.4; }
+    h1, h2 { margin-bottom: 8px; }
+    fieldset { margin-bottom: 16px; padding: 12px; }
+    label { display: block; margin-top: 8px; font-weight: 600; }
+    input, select, textarea { width: 100%; max-width: 720px; padding: 8px; margin-top: 4px; box-sizing: border-box; }
+    textarea { min-height: 72px; }
+    .risk-card, .control-card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; margin-top: 12px; }
+    .inline { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+    th { background: #f5f5f5; }
+    .muted { color: #555; font-size: 14px; }
+    button { padding: 10px 14px; margin-right: 8px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Evaluación de Controles OAuth2/OIDC</h1>
+  <p class="muted">Formulario para evaluación de riesgos y controles con exportación a Excel.</p>
+
+  <fieldset>
+    <legend><strong>Contexto de evaluación</strong></legend>
+    <label for="organization">Organización</label>
+    <input id="organization" type="text" placeholder="Ej. Banco XYZ" />
+
+    <label for="systemName">Sistema evaluado</label>
+    <input id="systemName" type="text" placeholder="Ej. Plataforma API Corporativa" />
+
+    <label for="architecture">Arquitectura</label>
+    <select id="architecture"></select>
+
+    <label for="scopeNotes">Notas de alcance</label>
+    <textarea id="scopeNotes" placeholder="Detalles del alcance de la evaluación"></textarea>
+  </fieldset>
+
+  <section>
+    <h2>Riesgos y controles</h2>
+    <div id="riskContainer"></div>
+  </section>
+
+  <section>
+    <h2>Resultados globales</h2>
+    <table>
+      <tbody>
+        <tr><th>Eficiencia cuantitativa global</th><td id="metricEfficiencyQ">-</td></tr>
+        <tr><th>Eficacia cuantitativa global</th><td id="metricEfficacyQ">-</td></tr>
+        <tr><th>Eficiencia cualitativa global</th><td id="metricEfficiencyQl">-</td></tr>
+        <tr><th>Eficacia cualitativa global</th><td id="metricEfficacyQl">-</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div style="margin-top: 16px;">
+    <button id="calculateBtn" type="button">Calcular resultados</button>
+    <button id="exportBtn" type="button">Exportar informe Excel</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
