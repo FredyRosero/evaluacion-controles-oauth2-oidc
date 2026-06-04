@@ -2215,6 +2215,371 @@ El modelo permite relacionar:
 9. nivel de exposición observado;
 10. hallazgo, brecha u observación.
 
+#### 5.1.1. Diagrama de modelo de dominio
+
+El siguiente diagrama presenta el modelo de dominio conceptual que soporta la matriz de evaluación y el entregable web. El modelo distingue cinco niveles de agregación: el catálogo predefinido propuesto por la tesis, el escenario seleccionado, la evaluación concreta de una arquitectura, los registros por relación riesgo-control, y los resultados por riesgo y globales.
+
+~~~mermaid
+classDiagram
+    direction LR
+
+    class CatalogoEvaluacion {
+      +id
+      +version
+      +descripcion
+    }
+
+    class Escenario {
+      +id
+      +nombre
+      +descripcion
+    }
+
+    class EvaluacionArquitectura {
+      +id
+      +fecha
+      +evaluador
+      +ambiente
+      +versionCatalogo
+    }
+
+    class RiesgoCatalogo {
+      +id
+      +tipo
+      +nombre
+      +descripcion
+    }
+
+    class ControlEsperado {
+      +id
+      +tipo
+      +nombre
+      +descripcion
+      +costoTotal
+    }
+
+    class RiesgoControl {
+      +id
+      +justificacion
+      +gradoMitigacion
+      +obligatorio
+      +pesoMitigacion
+    }
+
+    class ReferenciaTecnica {
+      +id
+      +tipo
+      +nombre
+      +seccion
+    }
+
+    class RegistroMatriz {
+      +id
+      +activoAfectado
+      +lucroCesante
+      +amenaza
+      +vulnerabilidad
+      +probabilidad
+      +impacto
+      +nivelRiesgo
+      +costoAsignado
+      +aporteEficacia
+      +observacion
+    }
+
+    class EvaluacionControl {
+      +madurez
+      +automatizacion
+      +momento
+      +periodicidad
+      +alcance
+      +scoreControl
+      +eficaciaControl
+    }
+
+    class EvaluacionRiesgo {
+      +riesgoId
+      +coberturaEsperada
+      +coberturaObservada
+      +eficaciaFrenteAlRiesgo
+      +eficienciaFrenteAlRiesgo
+      +nivelExposicionObservado
+    }
+
+    class EvaluacionGlobal {
+      +eficienciaCuantitativa
+      +eficaciaCuantitativa
+      +eficienciaCualitativa
+      +eficaciaCualitativa
+    }
+
+    class Evidencia {
+      +esperada
+      +encontrada
+      +fuente
+      +suficiencia
+    }
+
+    CatalogoEvaluacion "1" *-- "*" Escenario : define
+    CatalogoEvaluacion "1" *-- "*" RiesgoCatalogo : contiene
+    CatalogoEvaluacion "1" *-- "*" ControlEsperado : contiene
+    CatalogoEvaluacion "1" *-- "*" ReferenciaTecnica : contiene
+
+    Escenario "1" --> "*" RiesgoCatalogo : activa
+    Escenario "1" --> "*" ControlEsperado : habilita
+
+    RiesgoCatalogo "1" --> "*" RiesgoControl : se relaciona con
+    ControlEsperado "1" --> "*" RiesgoControl : mitiga mediante
+
+    RiesgoCatalogo "*" --> "*" ReferenciaTecnica : sustentado por
+    ControlEsperado "*" --> "*" ReferenciaTecnica : sustentado por
+
+    EvaluacionArquitectura "*" --> "1" Escenario : evalua
+    EvaluacionArquitectura "1" *-- "*" RegistroMatriz : contiene
+    EvaluacionArquitectura "1" *-- "*" EvaluacionRiesgo : calcula
+    EvaluacionArquitectura "1" *-- "1" EvaluacionGlobal : produce
+
+    RegistroMatriz "*" --> "1" RiesgoControl : evalua relacion
+    RegistroMatriz "*" --> "1" RiesgoCatalogo : caracteriza
+    RegistroMatriz "*" --> "1" ControlEsperado : evalua
+    RegistroMatriz "1" *-- "1" EvaluacionControl : incluye
+    RegistroMatriz "1" *-- "*" Evidencia : sustenta
+
+    EvaluacionRiesgo "1" --> "*" RegistroMatriz : agrega
+    EvaluacionGlobal "1" --> "*" EvaluacionRiesgo : consolida
+~~~
+
+El `CatalogoEvaluacion` es el aporte predefinido de la tesis: define los `Escenario`, `RiesgoCatalogo`, `ControlEsperado` y `ReferenciaTecnica`. La entidad `RiesgoControl` resuelve la relación muchos-a-muchos entre riesgo y control: cada instancia lleva el `pesoMitigacion`, el `gradoMitigacion` y si el control es obligatorio para ese riesgo. La `EvaluacionArquitectura` representa una ejecución concreta del modelo. El `RegistroMatriz` es la unidad mínima de evaluación: evalúa una relación riesgo-control específica, diligencia las cinco dimensiones del control mediante `EvaluacionControl` y acumula la evidencia recopilada. La `EvaluacionRiesgo` agrega todos los registros de un mismo riesgo y produce la cobertura observada, la eficacia frente al riesgo, la eficiencia y el nivel de exposición observado. La `EvaluacionGlobal` consolida todas las `EvaluacionRiesgo` para producir las cuatro medidas del modelo: eficiencia cuantitativa, eficacia cuantitativa, eficiencia cualitativa y eficacia cualitativa del sistema.
+
+
+
+
+#### 5.1.2. Estructura del resultado de evaluación
+
+El modelo produce dos artefactos JSON diferenciados: el **catálogo maestro** y el **resultado de evaluación**. El catálogo es estable y predefinido por la tesis; el resultado es el artefacto diligenciado por el evaluador para una arquitectura y momento concretos.
+
+El resultado de evaluación tiene la siguiente estructura:
+
+~~~json
+{
+  "evaluacionArquitectura": {
+    "id": "EVA-2026-001",
+    "fecha": "2026-06-03",
+    "evaluador": "Fredy Rosero",
+    "ambiente": "Preproduccion",
+    "escenarioId": "SPA_BFF_IDP",
+    "catalogoId": "CAT-OAUTH-OIDC-001",
+    "versionCatalogo": "1.0.0"
+  },
+  "registrosMatriz": [
+    {
+      "id": "RM-001-1",
+      "riesgoControlId": "RC-001",
+      "riesgoId": "RE1-001",
+      "controlId": "CE1-001",
+      "activoAfectado": "authorization_code",
+      "lucroCesante": 50000000,
+      "amenaza": "Atacante obtiene el authorization_code durante el callback",
+      "vulnerabilidad": "PKCE ausente, PKCE mal configurado o aceptacion de code_challenge_method=plain",
+      "probabilidad": "Media",
+      "impacto": "Alto",
+      "nivelRiesgo": "Alto",
+      "costoAsignado": 4800000,
+      "evaluacionControl": {
+        "madurez": "Implementado",
+        "automatizacion": "Automatico",
+        "momento": "Preventivo",
+        "periodicidad": "Permanente",
+        "alcance": "Especifico",
+        "scoreControl": 0.85,
+        "eficaciaControl": 0.85
+      },
+      "aporteEficacia": 0.51,
+      "evidencias": [
+        {
+          "esperada": "Configuracion del cliente OIDC con PKCE S256",
+          "encontrada": "Captura de configuracion del IdP y logs del BFF",
+          "fuente": "Consola IdP, repositorio BFF, logs de callback",
+          "suficiencia": "Parcial"
+        }
+      ],
+      "observacion": "PKCE existe, pero falta evidencia de rechazo explicito de code_challenge_method=plain"
+    },
+    {
+      "id": "RM-001-2",
+      "riesgoControlId": "RC-002",
+      "riesgoId": "RE1-001",
+      "controlId": "CE1-003",
+      "activoAfectado": "SESSION_ID",
+      "lucroCesante": 50000000,
+      "amenaza": "Abuso de sesion posterior al callback",
+      "vulnerabilidad": "Cookie sin atributos de seguridad suficientes",
+      "probabilidad": "Media",
+      "impacto": "Alto",
+      "nivelRiesgo": "Alto",
+      "costoAsignado": 800000,
+      "evaluacionControl": {
+        "madurez": "Auditado",
+        "automatizacion": "Automatico",
+        "momento": "Preventivo",
+        "periodicidad": "Permanente",
+        "alcance": "General",
+        "scoreControl": 0.95,
+        "eficaciaControl": 0.95
+      },
+      "aporteEficacia": 0.19,
+      "evidencias": [
+        {
+          "esperada": "Set-Cookie con HttpOnly, Secure y SameSite",
+          "encontrada": "Captura HTTP de Set-Cookie en preproduccion",
+          "fuente": "Navegador DevTools y prueba tecnica",
+          "suficiencia": "Suficiente"
+        }
+      ],
+      "observacion": "Cookie protegida correctamente; validar tambien expiracion e invalidacion en logout"
+    },
+    {
+      "id": "RM-002-1",
+      "riesgoControlId": "RC-004",
+      "riesgoId": "RE1-002",
+      "controlId": "CE1-002",
+      "activoAfectado": "access_token, id_token, refresh_token",
+      "lucroCesante": 80000000,
+      "amenaza": "XSS o usuario malicioso lee tokens desde almacenamiento web",
+      "vulnerabilidad": "Tokens almacenados en localStorage, sessionStorage o memoria expuesta",
+      "probabilidad": "Media",
+      "impacto": "Alto",
+      "nivelRiesgo": "Alto",
+      "costoAsignado": 6000000,
+      "evaluacionControl": {
+        "madurez": "No implementado",
+        "automatizacion": "No aplica",
+        "momento": "Preventivo",
+        "periodicidad": "Permanente",
+        "alcance": "General",
+        "scoreControl": 0,
+        "eficaciaControl": 0
+      },
+      "aporteEficacia": 0,
+      "evidencias": [
+        {
+          "esperada": "Ausencia de tokens en navegador y almacenamiento server-side en BFF",
+          "encontrada": "Se encontraron tokens en sessionStorage durante prueba manual",
+          "fuente": "Navegador DevTools",
+          "suficiencia": "Suficiente"
+        }
+      ],
+      "observacion": "No se evidencia custodia server-side; el token queda expuesto al contexto del navegador"
+    },
+    {
+      "id": "RM-002-2",
+      "riesgoControlId": "RC-005",
+      "riesgoId": "RE1-002",
+      "controlId": "CE1-003",
+      "activoAfectado": "SESSION_ID",
+      "lucroCesante": 80000000,
+      "amenaza": "Abuso de sesion activa desde navegador",
+      "vulnerabilidad": "Cookie con atributos de seguridad incompletos",
+      "probabilidad": "Media",
+      "impacto": "Alto",
+      "nivelRiesgo": "Alto",
+      "costoAsignado": 800000,
+      "evaluacionControl": {
+        "madurez": "Auditado",
+        "automatizacion": "Automatico",
+        "momento": "Preventivo",
+        "periodicidad": "Permanente",
+        "alcance": "General",
+        "scoreControl": 0.95,
+        "eficaciaControl": 0.95
+      },
+      "aporteEficacia": 0.19,
+      "evidencias": [
+        {
+          "esperada": "Set-Cookie con HttpOnly, Secure y SameSite",
+          "encontrada": "Captura HTTP de Set-Cookie en preproduccion",
+          "fuente": "Navegador DevTools",
+          "suficiencia": "Suficiente"
+        }
+      ],
+      "observacion": "La cookie esta protegida, pero este control no compensa completamente la exposicion directa de tokens"
+    },
+    {
+      "id": "RM-002-3",
+      "riesgoControlId": "RC-006",
+      "riesgoId": "RE1-002",
+      "controlId": "CE1-004",
+      "activoAfectado": "SPA",
+      "lucroCesante": 80000000,
+      "amenaza": "Ejecucion de JavaScript no autorizado",
+      "vulnerabilidad": "Politica CSP parcial o permisiva",
+      "probabilidad": "Media",
+      "impacto": "Alto",
+      "nivelRiesgo": "Alto",
+      "costoAsignado": 600000,
+      "evaluacionControl": {
+        "madurez": "Implementado",
+        "automatizacion": "Automatico",
+        "momento": "Preventivo",
+        "periodicidad": "Permanente",
+        "alcance": "General",
+        "scoreControl": 0.8,
+        "eficaciaControl": 0.8
+      },
+      "aporteEficacia": 0.16,
+      "evidencias": [
+        {
+          "esperada": "Header Content-Security-Policy restrictivo",
+          "encontrada": "Existe CSP, pero permite algunos origenes externos amplios",
+          "fuente": "Headers HTTP y prueba tecnica",
+          "suficiencia": "Parcial"
+        }
+      ],
+      "observacion": "CSP ayuda como control compensatorio, pero no corrige el almacenamiento de tokens en navegador"
+    }
+  ],
+  "evaluacionesRiesgo": [
+    {
+      "riesgoId": "RE1-001",
+      "lucroCesante": 50000000,
+      "coberturaEsperada": 1,
+      "coberturaObservada": 0.7,
+      "eficaciaFrenteAlRiesgo": 0.7,
+      "costoAsignadoTotal": 5600000,
+      "beneficioMitigacionEstimado": 35000000,
+      "eficienciaFrenteAlRiesgo": 6.25,
+      "nivelExposicionObservado": "Medio"
+    },
+    {
+      "riesgoId": "RE1-002",
+      "lucroCesante": 80000000,
+      "coberturaEsperada": 1,
+      "coberturaObservada": 0.35,
+      "eficaciaFrenteAlRiesgo": 0.35,
+      "costoAsignadoTotal": 7400000,
+      "beneficioMitigacionEstimado": 28000000,
+      "eficienciaFrenteAlRiesgo": 3.78,
+      "nivelExposicionObservado": "Alto"
+    }
+  ],
+  "evaluacionGlobal": {
+    "registrosEvaluados": 5,
+    "riesgosEvaluados": 2,
+    "scorePromedioControl": 0.71,
+    "eficienciaCuantitativa": 5.02,
+    "eficaciaCuantitativa": 0.53,
+    "eficienciaCualitativa": "Alta",
+    "eficaciaCualitativa": "Media"
+  }
+}
+~~~
+
+Cada `RegistroMatriz` evalúa una relación riesgo-control concreta: referencia los IDs del catálogo (`riesgoId`, `controlId`, `riesgoControlId`), captura los datos del riesgo en ese activo específico, diligencia las cinco dimensiones del control mediante `evaluacionControl` y registra la evidencia recopilada. El campo `aporteEficacia` es el producto de `eficaciaControl × pesoMitigacion` del catálogo y representa la contribución proporcional de ese control a la cobertura del riesgo.
+
+Las `evaluacionesRiesgo` agregan todos los registros de un mismo riesgo: la `coberturaObservada` es la suma de `aporteEficacia` de sus registros, la `eficaciaFrenteAlRiesgo` refleja qué proporción del riesgo queda cubierta, y el `nivelExposicionObservado` traduce esa cobertura en una categoría cualitativa. La `eficienciaFrenteAlRiesgo` relaciona el beneficio de mitigación estimado con el costo asignado a los controles del riesgo.
+
+La `evaluacionGlobal` consolida todas las `evaluacionesRiesgo` y produce las cuatro medidas del modelo: `eficienciaCuantitativa`, `eficaciaCuantitativa`, `eficienciaCualitativa` y `eficaciaCualitativa`.
+
 ---
 
 ### 5.2. Fundamento del modelo de evaluación
