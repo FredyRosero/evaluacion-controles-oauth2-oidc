@@ -1,380 +1,575 @@
-const ARCHITECTURES = [
+const CATALOG_URL = 'catalogo/data/catalogo-maestro.json';
+const SCORE_WEIGHTS = {
+  madurez: 0.35,
+  automatizacion: 0.15,
+  momento: 0.15,
+  periodicidad: 0.15,
+  alcance: 0.2
+};
+
+const PROBABILITY_OPTIONS = [
+  { value: 'baja', label: 'Baja' },
+  { value: 'media', label: 'Media' },
+  { value: 'alta', label: 'Alta' }
+];
+const IMPACT_OPTIONS = [
+  { value: 'bajo', label: 'Bajo' },
+  { value: 'medio', label: 'Medio' },
+  { value: 'alto', label: 'Alto' },
+  { value: 'critico', label: 'Crítico' }
+];
+const ENVIRONMENT_OPTIONS = [
+  { value: 'Producción', label: 'Producción' },
+  { value: 'Preproducción', label: 'Preproducción' },
+  { value: 'Desarrollo', label: 'Desarrollo' },
+  { value: 'Otro', label: 'Otro' }
+];
+
+const RISK_LEVEL_MATRIX = {
+  baja: { bajo: 'Bajo', medio: 'Bajo', alto: 'Medio', critico: 'Alto' },
+  media: { bajo: 'Bajo', medio: 'Medio', alto: 'Alto', critico: 'Crítico' },
+  alta: { bajo: 'Medio', medio: 'Alto', alto: 'Crítico', critico: 'Crítico' }
+};
+const EXPOSURE_THRESHOLDS = [
+  { min: 0.75, label: 'Bajo' },
+  { min: 0.5, label: 'Medio' },
+  { min: 0.25, label: 'Alto' },
+  { min: 0, label: 'Crítico' }
+];
+const QUALITATIVE_THRESHOLDS = [
+  { min: 0.75, label: 'Alta' },
+  { min: 0.5, label: 'Media' },
+  { min: 0, label: 'Baja' }
+];
+const EFFICIENCY_RATIO_THRESHOLDS = [
+  { min: 1, label: 'Alta' },
+  { min: 0.5, label: 'Media' },
+  { min: 0, label: 'Baja' }
+];
+const CONTROL_DIMENSIONS = [
   {
-    id: 'arquitectura1',
-    name: 'Arquitectura 1: SPA estática con BFF e IdP corporativo usando OAuth 2.0/OIDC',
-    specificRisks: [
-      {
-        code: 'A1-R1',
-        name: 'Exposición de tokens en navegador y canal SPA-BFF',
-        controls: ['Uso obligatorio de BFF para tokens', 'Cookies HttpOnly/Secure/SameSite', 'PKCE en Authorization Code Flow']
-      },
-      {
-        code: 'A1-R2',
-        name: 'CSRF y secuestro de sesión en frontend',
-        controls: ['Protección CSRF en BFF', 'Rotación y expiración corta de sesión', 'Cabeceras de seguridad y validación de origen']
-      }
+    key: 'madurez',
+    field: 'maturity',
+    label: 'Madurez',
+    options: [
+      { value: 'declarado', label: 'Declarado' },
+      { value: 'diseniado', label: 'Diseñado' },
+      { value: 'implementado', label: 'Implementado' },
+      { value: 'auditado', label: 'Auditado' }
     ]
   },
   {
-    id: 'arquitectura2',
-    name: 'Arquitectura 2: Comunicación M2M donde el AS también actúa como RS',
-    specificRisks: [
-      {
-        code: 'A2-R1',
-        name: 'Sobrecarga de privilegios en clientes confidenciales',
-        controls: ['Scopes mínimos por cliente', 'Autenticación de cliente fuerte (mTLS o private_key_jwt)', 'Rotación periódica de credenciales']
-      },
-      {
-        code: 'A2-R2',
-        name: 'Fallas de segregación al compartir rol AS/RS',
-        controls: ['Separación lógica de responsabilidades', 'Auditoría de emisión y consumo de tokens', 'Validación estricta de aud/iss/exp']
-      }
+    key: 'automatizacion',
+    field: 'automation',
+    label: 'Automatización',
+    options: [
+      { value: 'manual', label: 'Manual' },
+      { value: 'semiautomatico', label: 'Semiautomático' },
+      { value: 'automatico', label: 'Automático' }
     ]
   },
   {
-    id: 'arquitectura3',
-    name: 'Arquitectura 3: API Gateway federado con AS corporativo y posible intercambio de tokens',
-    specificRisks: [
-      {
-        code: 'A3-R1',
-        name: 'Propagación insegura/intercambio incorrecto de tokens',
-        controls: ['Token exchange controlado por política', 'Downscoping obligatorio de privilegios', 'Trazabilidad end-to-end de identidad']
-      },
-      {
-        code: 'A3-R2',
-        name: 'Validación inconsistente de tokens en gateway y servicios',
-        controls: ['Validación centralizada en gateway', 'Sincronización de JWKS y políticas de cache', 'Revalidación contextual en microservicios críticos']
-      }
+    key: 'momento',
+    field: 'timing',
+    label: 'Momento',
+    options: [
+      { value: 'preventivo', label: 'Preventivo' },
+      { value: 'detectivo', label: 'Detectivo' },
+      { value: 'correctivo', label: 'Correctivo' }
+    ]
+  },
+  {
+    key: 'periodicidad',
+    field: 'periodicity',
+    label: 'Periodicidad',
+    options: [
+      { value: 'ocasional', label: 'Ocasional' },
+      { value: 'periodico', label: 'Periódico' },
+      { value: 'permanente', label: 'Permanente' }
+    ]
+  },
+  {
+    key: 'alcance',
+    field: 'scope',
+    label: 'Alcance funcional',
+    options: [
+      { value: 'especifico', label: 'Específico' },
+      { value: 'general', label: 'General' }
     ]
   }
 ];
-
-const GLOBAL_RISKS = [
-  {
-    code: 'G-R1',
-    name: 'Robo o fuga de tokens OAuth/OIDC',
-    controls: ['TLS de extremo a extremo', 'Expiración corta de access token', 'Rotación/revocación de tokens']
-  },
-  {
-    code: 'G-R2',
-    name: 'Escalamiento de privilegios por scopes excesivos',
-    controls: ['Modelo de mínimo privilegio', 'Revisión periódica de scopes', 'Autorización contextual por recurso']
-  },
-  {
-    code: 'G-R3',
-    name: 'Configuración insegura del Authorization Server/IdP',
-    controls: ['Hardening y baseline seguro', 'MFA para administradores', 'Monitoreo continuo y alertamiento']
-  }
+const EVIDENCE_OPTIONS = [
+  { value: 'sinEvidencia', label: 'Sin evidencia' },
+  { value: 'parcial', label: 'Parcial' },
+  { value: 'suficiente', label: 'Suficiente' },
+  { value: 'independienteOAditada', label: 'Independiente o auditada' }
 ];
 
-const MAPS = {
-  maturity: { Diseñada: 0, Declarada: 25, Implementada: 75, Auditada: 100 },
-  automation: { Manual: 0, 'Semi-automático': 50, Automático: 100 },
-  timing: { Preventivo: 100, Detectivo: 50, Correctivo: 0 },
-  periodicity: { Ocasional: 25, Periódico: 75, Permanente: 100 },
-  scope: { Específico: 25, General: 100 }
+const state = {
+  catalog: null,
+  lookups: null,
+  lastEvaluation: null
 };
-
-const WEIGHTS = {
-  maturity: 0.5,
-  automation: 0.2,
-  timing: 0.1,
-  periodicity: 0.1,
-  scope: 0.1
-};
-const THRESHOLD_NOT_EFFECTIVE = 40;
-const THRESHOLD_PARTIAL_EFFECTIVE = 70;
 
 const architectureSelect = document.getElementById('architecture');
+const environmentSelect = document.getElementById('environment');
 const riskContainer = document.getElementById('riskContainer');
+const scenarioSummary = document.getElementById('scenarioSummary');
+const loadStatus = document.getElementById('loadStatus');
+const calculateBtn = document.getElementById('calculateBtn');
+const exportBtn = document.getElementById('exportBtn');
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function optionsHtml(options, selectedValue) {
+  return options.map((option) => `<option value="${escapeHtml(option.value)}"${option.value === selectedValue ? ' selected' : ''}>${escapeHtml(option.label)}</option>`).join('');
+}
 
 function createOption(select, value, label) {
-  const opt = document.createElement('option');
-  opt.value = value;
-  opt.textContent = label;
-  select.appendChild(opt);
+  const option = document.createElement('option');
+  option.value = value;
+  option.textContent = label;
+  select.appendChild(option);
 }
 
-ARCHITECTURES.forEach((a) => createOption(architectureSelect, a.id, a.name));
-
-function dimensionSelect(name, options) {
-  const select = document.createElement('select');
-  select.name = name;
-  options.forEach((option) => createOption(select, option, option));
-  return select;
+function parseNum(value) {
+  const normalized = String(value ?? '').trim();
+  if (!normalized) return 0;
+  const parsed = Number(normalized);
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function buildControlCard(riskCode, controlName, index) {
-  const control = document.createElement('div');
-  control.className = 'control-card';
-  control.dataset.riskCode = riskCode;
-  control.dataset.controlName = controlName;
-  control.dataset.controlIndex = String(index);
-
-  const title = document.createElement('h4');
-  title.textContent = `Control: ${controlName}`;
-  control.appendChild(title);
-
-  const wrap = document.createElement('div');
-  wrap.className = 'inline';
-
-  const costInput = document.createElement('input');
-  costInput.type = 'number';
-  costInput.min = '0';
-  costInput.step = '0.01';
-  costInput.name = 'controlCost';
-  costInput.placeholder = 'Costo del control';
-
-  const evidenceInput = document.createElement('textarea');
-  evidenceInput.name = 'controlEvidence';
-  evidenceInput.placeholder = 'Estado y evidencia del control';
-
-  const maturity = dimensionSelect('maturity', Object.keys(MAPS.maturity));
-  const automation = dimensionSelect('automation', Object.keys(MAPS.automation));
-  const timing = dimensionSelect('timing', Object.keys(MAPS.timing));
-  const periodicity = dimensionSelect('periodicity', Object.keys(MAPS.periodicity));
-  const scope = dimensionSelect('scope', Object.keys(MAPS.scope));
-
-  [
-    ['Costo del control', costInput],
-    ['Madurez', maturity],
-    ['Automatización', automation],
-    ['Momento', timing],
-    ['Periodicidad', periodicity],
-    ['Alcance funcional', scope],
-    ['Evidencia', evidenceInput]
-  ].forEach(([labelText, element]) => {
-    const wrapper = document.createElement('label');
-    wrapper.textContent = labelText;
-    wrapper.appendChild(element);
-    wrap.appendChild(wrapper);
-  });
-
-  const scoreOut = document.createElement('p');
-  scoreOut.className = 'muted';
-  scoreOut.dataset.kind = 'controlScore';
-  scoreOut.textContent = 'Score del control: -';
-
-  control.appendChild(wrap);
-  control.appendChild(scoreOut);
-  return control;
+function formatPercent(value) {
+  return `${(value * 100).toFixed(2)}%`;
 }
 
-function buildRiskCard(risk, type) {
-  const card = document.createElement('div');
-  card.className = 'risk-card';
-  card.dataset.riskCode = risk.code;
+function formatRatio(value) {
+  return Number.isFinite(value) ? value.toFixed(2) : '∞';
+}
 
-  const h3 = document.createElement('h3');
-  h3.textContent = `${risk.code} - ${risk.name}`;
-  card.appendChild(h3);
+function formatCurrency(value) {
+  return new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: state.catalog?.catalogoEvaluacion?.monedaCosto || 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(Number.isFinite(value) ? value : 0);
+}
 
-  const kind = document.createElement('p');
-  kind.className = 'muted';
-  kind.textContent = `Tipo de riesgo: ${type === 'global' ? 'Global' : 'Específico de arquitectura'}`;
-  card.appendChild(kind);
+function levelClass(label) {
+  return String(label ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-');
+}
 
-  const section = document.createElement('div');
-  section.className = 'inline';
+function qualitativeLabel(value, thresholds = QUALITATIVE_THRESHOLDS) {
+  if (!Number.isFinite(value)) return thresholds[0].label;
+  return thresholds.find((threshold) => value >= threshold.min)?.label || thresholds[thresholds.length - 1].label;
+}
 
-  const asset = document.createElement('input');
-  asset.name = 'asset';
-  asset.placeholder = 'Activo en riesgo';
+function getRiskLevel(probability, impact) {
+  return RISK_LEVEL_MATRIX[probability]?.[impact] || 'Bajo';
+}
 
-  const threat = document.createElement('input');
-  threat.name = 'threat';
-  threat.placeholder = 'Amenaza';
+function getExposureLevel(efficacy) {
+  return EXPOSURE_THRESHOLDS.find((threshold) => efficacy >= threshold.min)?.label || 'Crítico';
+}
 
-  const likelihood = document.createElement('input');
-  likelihood.type = 'number';
-  likelihood.name = 'likelihood';
-  likelihood.min = '1';
-  likelihood.max = '5';
-  likelihood.step = '1';
-  likelihood.placeholder = 'Probabilidad (1-5)';
+function getReferenceText(referenceIds) {
+  return (referenceIds || []).map((id) => {
+    const reference = state.lookups.references.get(id);
+    return reference ? `${reference.nombre} (${reference.id})` : id;
+  }).join(' | ');
+}
 
-  const impact = document.createElement('input');
-  impact.type = 'number';
-  impact.name = 'impact';
-  impact.min = '1';
-  impact.max = '5';
-  impact.step = '1';
-  impact.placeholder = 'Impacto (1-5)';
+function buildLookups(catalog) {
+  const escenarios = new Map(catalog.escenarios.map((item) => [item.id, item]));
+  const riesgos = new Map(catalog.riesgosCatalogo.map((item) => [item.id, item]));
+  const controles = new Map(catalog.controlesEsperados.map((item) => [item.id, item]));
+  const relaciones = new Map(catalog.riesgoControles.map((item) => [item.id, item]));
+  const references = new Map(catalog.referenciasTecnicas.map((item) => [item.id, item]));
+  return { escenarios, riesgos, controles, relaciones, references };
+}
 
-  const businessLoss = document.createElement('input');
-  businessLoss.type = 'number';
-  businessLoss.name = 'businessLoss';
-  businessLoss.min = '0';
-  businessLoss.step = '0.01';
-  businessLoss.placeholder = 'Lucro cesante estimado del activo';
+function getActiveFilter() {
+  return state.catalog?.filtros?.[architectureSelect.value] || null;
+}
 
-  [
-    ['Activo en riesgo', asset],
-    ['Amenaza', threat],
-    ['Probabilidad', likelihood],
-    ['Impacto', impact],
-    ['Lucro cesante del activo', businessLoss]
-  ].forEach(([labelText, element]) => {
-    const wrapper = document.createElement('label');
-    wrapper.textContent = labelText;
-    wrapper.appendChild(element);
-    section.appendChild(wrapper);
+function getActiveRisks(filter) {
+  return (filter?.riesgosCatalogoIds || []).map((riskId) => state.lookups.riesgos.get(riskId)).filter(Boolean);
+}
+
+function getRiskRelations(filter, riskId) {
+  return (filter?.riesgoControlIds || []).map((relationId) => state.lookups.relaciones.get(relationId)).filter((relation) => relation?.riesgoId === riskId);
+}
+
+function buildControlCard(relation) {
+  const control = state.lookups.controles.get(relation.controlId);
+  const scoreMap = state.catalog.mapeoScoreInicial;
+  const referenceText = getReferenceText(control.referencias);
+
+  return `
+    <div class="control-card" data-relation-id="${escapeHtml(relation.id)}" data-control-id="${escapeHtml(control.id)}">
+      <div class="card-header">
+        <h4>${escapeHtml(control.id)} - ${escapeHtml(control.nombre)}</h4>
+        <span class="badge ${control.tipo === 'GLOBAL' ? 'badge-global' : 'badge-specific'}">${control.tipo === 'GLOBAL' ? 'Global' : 'Específico'}</span>
+      </div>
+      <p class="muted">Peso de mitigación: ${formatPercent(relation.pesoMitigacion)} · ${relation.obligatorio ? 'Control obligatorio' : 'Control complementario'}</p>
+      <div class="readonly-block">
+        <strong>Descripción del control:</strong><br />${escapeHtml(control.descripcion)}
+      </div>
+      <div class="readonly-block compact">
+        <strong>Referencia normativa:</strong><br />${escapeHtml(referenceText)}
+      </div>
+      <div class="inline">
+        <label>
+          Costo del control (sugerido)
+          <input type="number" min="0" step="0.01" name="controlCost" data-sync-control-field="controlCost" value="${escapeHtml(String(control.costoTotal.medio))}" />
+        </label>
+        ${CONTROL_DIMENSIONS.map((dimension) => `
+          <label>
+            ${escapeHtml(dimension.label)}
+            <select name="${escapeHtml(dimension.field)}" data-sync-control-field="${escapeHtml(dimension.field)}">
+              ${optionsHtml(dimension.options, dimension.options[0].value)}
+            </select>
+          </label>
+        `).join('')}
+        <label>
+          Factor de evidencia
+          <select name="evidenceFactor" data-sync-control-field="evidenceFactor">
+            ${optionsHtml(EVIDENCE_OPTIONS, 'sinEvidencia')}
+          </select>
+        </label>
+        <label>
+          Evidencia encontrada
+          <textarea name="evidenceFound" data-sync-control-field="evidenceFound" placeholder="Detalle de la evidencia observada"></textarea>
+        </label>
+        <label>
+          Fuente de evidencia
+          <input type="text" name="evidenceSource" data-sync-control-field="evidenceSource" placeholder="Ej. SIEM, repositorio, consola del IdP" />
+        </label>
+      </div>
+      <p class="muted" data-kind="controlScore">Score del control: ${formatPercent(0)}</p>
+      <p class="muted" data-kind="controlQualitative">Eficiencia: Baja · Eficacia: Baja · Efectividad: Baja</p>
+    </div>
+  `;
+}
+
+function buildRiskCard(risk) {
+  const filter = getActiveFilter();
+  const relations = getRiskRelations(filter, risk.id);
+
+  return `
+    <article class="risk-card" data-risk-id="${escapeHtml(risk.id)}">
+      <div class="card-header">
+        <h3>${escapeHtml(risk.id)} - ${escapeHtml(risk.nombre)}</h3>
+        <span class="badge ${risk.tipo === 'GLOBAL' ? 'badge-global' : 'badge-specific'}">${risk.tipo === 'GLOBAL' ? 'Global' : 'Específico'}</span>
+      </div>
+      <div class="readonly-block">
+        <strong>Descripción del riesgo:</strong><br />${escapeHtml(risk.descripcion)}
+      </div>
+      <div class="inline">
+        <label>
+          Activo en riesgo
+          <input type="text" name="asset" placeholder="Ej. access_token, API Gateway" />
+        </label>
+        <label>
+          Amenaza / causa
+          <input type="text" name="threat" placeholder="Condición que puede materializar el riesgo" />
+        </label>
+        <label>
+          Vulnerabilidad / condición habilitante
+          <input type="text" name="vulnerability" placeholder="Debilidad observada" />
+        </label>
+        <label>
+          Probabilidad
+          <select name="probability">
+            ${optionsHtml(PROBABILITY_OPTIONS, 'baja')}
+          </select>
+        </label>
+        <label>
+          Impacto
+          <select name="impact">
+            ${optionsHtml(IMPACT_OPTIONS, 'bajo')}
+          </select>
+        </label>
+        <label>
+          Nivel del riesgo identificado
+          <span class="status-tag level-bajo" data-kind="riskLevel">Bajo</span>
+        </label>
+        <label>
+          Lucro cesante estimado del activo
+          <input type="number" min="0" step="0.01" name="businessLoss" placeholder="Ej. 15000" />
+        </label>
+      </div>
+      <label>
+        Hallazgo / brecha / observación
+        <textarea name="finding" placeholder="Conclusión evaluativa del riesgo"></textarea>
+      </label>
+      <div class="controls-group">
+        ${relations.map((relation) => buildControlCard(relation)).join('')}
+      </div>
+    </article>
+  `;
+}
+
+function updateScenarioSummary() {
+  const filter = getActiveFilter();
+  if (!filter) {
+    scenarioSummary.textContent = 'Seleccione una arquitectura para cargar el catálogo.';
+    return;
+  }
+
+  const scenario = filter.escenario;
+  scenarioSummary.innerHTML = `
+    <strong>Escenario activo:</strong> ${escapeHtml(scenario.nombre)}<br />
+    ${escapeHtml(scenario.descripcion)}<br />
+    <span class="muted">Riesgos activos: ${filter.riesgosCatalogoIds.length} · Controles activos: ${filter.controlesEsperadosIds.length} · Relaciones: ${filter.riesgoControlIds.length}</span>
+  `;
+}
+
+function updateRiskLevelTag(riskCard) {
+  const probability = riskCard.querySelector('select[name="probability"]').value;
+  const impact = riskCard.querySelector('select[name="impact"]').value;
+  const level = getRiskLevel(probability, impact);
+  const tag = riskCard.querySelector('[data-kind="riskLevel"]');
+  tag.textContent = level;
+  tag.className = `status-tag level-${levelClass(level)}`;
+}
+
+function getControlEvaluationFromCard(controlCard) {
+  const scoreMap = state.catalog.mapeoScoreInicial;
+  const dimensionValues = {};
+  const dimensionLabels = {};
+
+  CONTROL_DIMENSIONS.forEach((dimension) => {
+    const select = controlCard.querySelector(`select[name="${dimension.field}"]`);
+    dimensionValues[dimension.key] = scoreMap[dimension.key][select.value];
+    dimensionLabels[dimension.key] = select.options[select.selectedIndex].text;
   });
 
-  card.appendChild(section);
+  const evidenceSelect = controlCard.querySelector('select[name="evidenceFactor"]');
+  const evidenceFactor = scoreMap.factorEvidencia[evidenceSelect.value];
+  const baseScore = (
+    SCORE_WEIGHTS.madurez * dimensionValues.madurez +
+    SCORE_WEIGHTS.automatizacion * dimensionValues.automatizacion +
+    SCORE_WEIGHTS.momento * dimensionValues.momento +
+    SCORE_WEIGHTS.periodicidad * dimensionValues.periodicidad +
+    SCORE_WEIGHTS.alcance * dimensionValues.alcance
+  );
+  const scoreControl = baseScore * evidenceFactor;
 
-  risk.controls.forEach((controlName, idx) => {
-    card.appendChild(buildControlCard(risk.code, controlName, idx));
+  return {
+    scoreControl,
+    baseScore,
+    evidenceFactor,
+    dimensions: dimensionValues,
+    dimensionLabels,
+    evidenceFactorKey: evidenceSelect.value,
+    evidenceFactorLabel: evidenceSelect.options[evidenceSelect.selectedIndex].text,
+    efficiencyQl: qualitativeLabel(baseScore),
+    efficacyQl: qualitativeLabel(evidenceFactor),
+    effectivenessQl: qualitativeLabel(scoreControl)
+  };
+}
+
+function updateControlScore(controlCard) {
+  const evaluation = getControlEvaluationFromCard(controlCard);
+  controlCard.querySelector('[data-kind="controlScore"]').textContent = `Score del control: ${formatPercent(evaluation.scoreControl)}`;
+  controlCard.querySelector('[data-kind="controlQualitative"]').textContent = `Eficiencia: ${evaluation.efficiencyQl} · Eficacia: ${evaluation.efficacyQl} · Efectividad: ${evaluation.effectivenessQl}`;
+}
+
+function refreshDerivedState() {
+  document.querySelectorAll('.risk-card').forEach((riskCard) => {
+    updateRiskLevelTag(riskCard);
+    riskCard.querySelectorAll('.control-card').forEach(updateControlScore);
   });
-
-  return card;
 }
 
 function renderRisks() {
-  riskContainer.innerHTML = '';
-  const selectedArchitecture = ARCHITECTURES.find((a) => a.id === architectureSelect.value);
-  const allRisks = [
-    ...GLOBAL_RISKS.map((risk) => ({ ...risk, type: 'global' })),
-    ...selectedArchitecture.specificRisks.map((risk) => ({ ...risk, type: 'specific' }))
-  ];
-  allRisks.forEach((risk) => riskContainer.appendChild(buildRiskCard(risk, risk.type)));
+  const filter = getActiveFilter();
+  updateScenarioSummary();
+  if (!filter) {
+    riskContainer.innerHTML = '';
+    return;
+  }
+
+  const risksHtml = getActiveRisks(filter).map((risk) => buildRiskCard(risk)).join('');
+  riskContainer.innerHTML = risksHtml;
+  refreshDerivedState();
 }
 
-architectureSelect.addEventListener('change', renderRisks);
-renderRisks();
-
-function parseNum(value) {
-  const n = Number(value);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function controlScore(dimensions) {
-  return (
-    dimensions.maturity * WEIGHTS.maturity +
-    dimensions.automation * WEIGHTS.automation +
-    dimensions.timing * WEIGHTS.timing +
-    dimensions.periodicity * WEIGHTS.periodicity +
-    dimensions.scope * WEIGHTS.scope
-  );
-}
-
-function classifyByThreshold(value) {
-  if (value < THRESHOLD_NOT_EFFECTIVE) return 'none';
-  if (value < THRESHOLD_PARTIAL_EFFECTIVE) return 'partial';
-  return 'effective';
-}
-
-function classifyEfficiency(value) {
-  const level = classifyByThreshold(value);
-  if (level === 'none') return 'No es eficiente';
-  if (level === 'partial') return 'Es parcialmente eficiente';
-  return 'Es eficiente';
-}
-
-function classifyEfficacy(value) {
-  const level = classifyByThreshold(value);
-  if (level === 'none') return 'No es eficaz';
-  if (level === 'partial') return 'Es parcialmente eficaz';
-  return 'Es eficaz';
+function syncControlField(sourceElement) {
+  const controlCard = sourceElement.closest('.control-card');
+  if (!controlCard) return;
+  const field = sourceElement.dataset.syncControlField;
+  if (!field) return;
+  const controlId = controlCard.dataset.controlId;
+  document.querySelectorAll(`.control-card[data-control-id="${controlId}"] [data-sync-control-field="${field}"]`).forEach((element) => {
+    if (element === sourceElement) return;
+    if (element.value !== sourceElement.value) {
+      element.value = sourceElement.value;
+    }
+  });
 }
 
 function collectEvaluation() {
-  const riskCards = Array.from(document.querySelectorAll('.risk-card'));
-  const risks = riskCards.map((card) => {
-    const riskCode = card.dataset.riskCode;
-    const asset = card.querySelector('input[name="asset"]').value.trim();
-    const threat = card.querySelector('input[name="threat"]').value.trim();
-    const likelihood = parseNum(card.querySelector('input[name="likelihood"]').value);
-    const impact = parseNum(card.querySelector('input[name="impact"]').value);
-    const businessLoss = parseNum(card.querySelector('input[name="businessLoss"]').value);
+  const filter = getActiveFilter();
+  const risks = Array.from(document.querySelectorAll('.risk-card')).map((riskCard) => {
+    const riskId = riskCard.dataset.riskId;
+    const riskMeta = state.lookups.riesgos.get(riskId);
+    const probabilitySelect = riskCard.querySelector('select[name="probability"]');
+    const impactSelect = riskCard.querySelector('select[name="impact"]');
+    const probability = probabilitySelect.value;
+    const impact = impactSelect.value;
+    const riskLevel = getRiskLevel(probability, impact);
 
-    const controls = Array.from(card.querySelectorAll('.control-card')).map((controlCard) => {
-      const maturity = controlCard.querySelector('select[name="maturity"]').value;
-      const automation = controlCard.querySelector('select[name="automation"]').value;
-      const timing = controlCard.querySelector('select[name="timing"]').value;
-      const periodicity = controlCard.querySelector('select[name="periodicity"]').value;
-      const scope = controlCard.querySelector('select[name="scope"]').value;
-      const dimensions = {
-        maturity: MAPS.maturity[maturity],
-        automation: MAPS.automation[automation],
-        timing: MAPS.timing[timing],
-        periodicity: MAPS.periodicity[periodicity],
-        scope: MAPS.scope[scope]
-      };
-      const score = controlScore(dimensions);
-      const cost = parseNum(controlCard.querySelector('input[name="controlCost"]').value);
-      const evidence = controlCard.querySelector('textarea[name="controlEvidence"]').value.trim();
-      const out = controlCard.querySelector('[data-kind="controlScore"]');
-      out.textContent = `Score del control: ${score.toFixed(2)}`;
+    const controls = Array.from(riskCard.querySelectorAll('.control-card')).map((controlCard) => {
+      const relation = state.lookups.relaciones.get(controlCard.dataset.relationId);
+      const controlMeta = state.lookups.controles.get(controlCard.dataset.controlId);
+      const controlEval = getControlEvaluationFromCard(controlCard);
+      const cost = parseNum(controlCard.querySelector('input[name="controlCost"]').value) || controlMeta.costoTotal.medio;
       return {
-        riskCode,
-        controlName: controlCard.dataset.controlName,
+        relationId: relation.id,
+        riskId,
+        controlId: controlMeta.id,
+        controlName: controlMeta.nombre,
+        controlDescription: controlMeta.descripcion,
+        references: controlMeta.referencias,
+        referenceText: getReferenceText(controlMeta.referencias),
         cost,
-        evidence,
-        maturity,
-        automation,
-        timing,
-        periodicity,
-        scope,
-        score,
-        dimensions
+        suggestedCost: controlMeta.costoTotal.medio,
+        maturity: controlEval.dimensionLabels.madurez,
+        automation: controlEval.dimensionLabels.automatizacion,
+        timing: controlEval.dimensionLabels.momento,
+        periodicity: controlEval.dimensionLabels.periodicidad,
+        scope: controlEval.dimensionLabels.alcance,
+        evidenceFactor: controlEval.evidenceFactorLabel,
+        evidenceFactorKey: controlEval.evidenceFactorKey,
+        evidenceFound: controlCard.querySelector('textarea[name="evidenceFound"]').value.trim(),
+        evidenceSource: controlCard.querySelector('input[name="evidenceSource"]').value.trim(),
+        scoreControl: controlEval.scoreControl,
+        baseScore: controlEval.baseScore,
+        aporteEficacia: controlEval.scoreControl * relation.pesoMitigacion,
+        pesoMitigacion: relation.pesoMitigacion,
+        obligatorio: relation.obligatorio,
+        efficiencyQl: controlEval.efficiencyQl,
+        efficacyQl: controlEval.efficacyQl,
+        effectivenessQl: controlEval.effectivenessQl,
+        assignedCost: 0
       };
     });
 
     return {
-      riskCode,
-      asset,
-      threat,
-      likelihood,
-      impact,
-      businessLoss,
-      riskLevel: likelihood * impact,
+      riskId,
+      riskName: riskMeta.nombre,
+      riskDescription: riskMeta.descripcion,
+      riskType: riskMeta.tipo,
+      asset: riskCard.querySelector('input[name="asset"]').value.trim(),
+      threat: riskCard.querySelector('input[name="threat"]').value.trim(),
+      vulnerability: riskCard.querySelector('input[name="vulnerability"]').value.trim(),
+      probability: probabilitySelect.options[probabilitySelect.selectedIndex].text,
+      impact: impactSelect.options[impactSelect.selectedIndex].text,
+      probabilityKey: probability,
+      impactKey: impact,
+      riskLevel,
+      businessLoss: parseNum(riskCard.querySelector('input[name="businessLoss"]').value),
+      finding: riskCard.querySelector('textarea[name="finding"]').value.trim(),
       controls
     };
   });
 
-  const allControls = risks.flatMap((r) => r.controls);
-  const weightedRatios = allControls.map((c) => {
-    const risk = risks.find((r) => r.riskCode === c.riskCode);
-    if (!risk || risk.businessLoss <= 0 || c.cost <= 0) return null;
-    const ratio = Math.min(100, (risk.businessLoss / c.cost) * 100);
-    return ratio * (c.score / 100);
-  }).filter((ratio) => ratio !== null);
-
-  const efficiencyQ = weightedRatios.length
-    ? weightedRatios.reduce((a, b) => a + b, 0) / weightedRatios.length
-    : 0;
-
-  const efficacyByRisk = risks.map((risk) => {
-    if (risk.controls.length === 0) return 0;
-    return Math.max(0, ...risk.controls.map((c) => c.score));
+  const totalWeightByControlId = new Map();
+  (filter?.riesgoControlIds || []).forEach((relationId) => {
+    const relation = state.lookups.relaciones.get(relationId);
+    totalWeightByControlId.set(relation.controlId, (totalWeightByControlId.get(relation.controlId) || 0) + relation.pesoMitigacion);
   });
 
-  const efficacyQ = efficacyByRisk.length
-    ? efficacyByRisk.reduce((a, b) => a + b, 0) / efficacyByRisk.length
-    : 0;
+  risks.forEach((risk) => {
+    risk.controls.forEach((control) => {
+      const totalWeight = totalWeightByControlId.get(control.controlId) || control.pesoMitigacion || 1;
+      control.assignedCost = totalWeight > 0 ? (control.cost * control.pesoMitigacion) / totalWeight : 0;
+    });
 
-  const efficiencyQl = classifyEfficiency(efficiencyQ);
-  const efficacyQl = classifyEfficacy(efficacyQ);
+    const totalWeight = risk.controls.reduce((sum, control) => sum + control.pesoMitigacion, 0);
+    const eficaciaFrenteAlRiesgo = totalWeight > 0
+      ? risk.controls.reduce((sum, control) => sum + (control.pesoMitigacion * control.scoreControl), 0) / totalWeight
+      : 0;
+    const costoAsignadoTotal = risk.controls.reduce((sum, control) => sum + control.assignedCost, 0);
+    const beneficioMitigacionEstimado = risk.businessLoss * eficaciaFrenteAlRiesgo;
+    const eficienciaFrenteAlRiesgo = costoAsignadoTotal > 0
+      ? beneficioMitigacionEstimado / costoAsignadoTotal
+      : (beneficioMitigacionEstimado > 0 ? Number.POSITIVE_INFINITY : 0);
+
+    Object.assign(risk, {
+      eficaciaFrenteAlRiesgo,
+      costoAsignadoTotal,
+      beneficioMitigacionEstimado,
+      eficienciaFrenteAlRiesgo,
+      nivelExposicionObservado: getExposureLevel(eficaciaFrenteAlRiesgo)
+    });
+  });
+
+  const riskCount = risks.length || 1;
+  const efficiencyValues = risks.map((risk) => risk.eficienciaFrenteAlRiesgo);
+  const eficienciaCuantitativa = efficiencyValues.some((value) => !Number.isFinite(value))
+    ? Number.POSITIVE_INFINITY
+    : efficiencyValues.reduce((sum, value) => sum + value, 0) / riskCount;
+  const eficaciaCuantitativa = risks.reduce((sum, risk) => sum + risk.eficaciaFrenteAlRiesgo, 0) / riskCount;
 
   return {
     context: {
       organization: document.getElementById('organization').value.trim(),
+      evaluator: document.getElementById('evaluator').value.trim(),
+      environment: environmentSelect.value,
       systemName: document.getElementById('systemName').value.trim(),
-      architecture: ARCHITECTURES.find((a) => a.id === architectureSelect.value)?.name || '',
+      architecture: state.lookups.escenarios.get(architectureSelect.value)?.nombre || '',
+      architectureId: architectureSelect.value,
       scopeNotes: document.getElementById('scopeNotes').value.trim(),
-      date: new Date().toISOString()
+      date: new Date().toISOString(),
+      catalogVersion: state.catalog.catalogoEvaluacion.version,
+      catalogId: state.catalog.catalogoEvaluacion.id
     },
-    metrics: { efficiencyQ, efficacyQ, efficiencyQl, efficacyQl },
+    metrics: {
+      eficienciaCuantitativa,
+      eficaciaCuantitativa,
+      eficienciaCualitativa: qualitativeLabel(eficienciaCuantitativa, EFFICIENCY_RATIO_THRESHOLDS),
+      eficaciaCualitativa: qualitativeLabel(eficaciaCuantitativa)
+    },
     risks
   };
 }
 
 function drawMetrics(metrics) {
-  document.getElementById('metricEfficiencyQ').textContent = `${metrics.efficiencyQ.toFixed(2)}%`;
-  document.getElementById('metricEfficacyQ').textContent = `${metrics.efficacyQ.toFixed(2)}%`;
-  document.getElementById('metricEfficiencyQl').textContent = metrics.efficiencyQl;
-  document.getElementById('metricEfficacyQl').textContent = metrics.efficacyQl;
+  document.getElementById('metricEfficiencyQ').textContent = formatRatio(metrics.eficienciaCuantitativa);
+  document.getElementById('metricEfficacyQ').textContent = formatPercent(metrics.eficaciaCuantitativa);
+  document.getElementById('metricEfficiencyQl').textContent = metrics.eficienciaCualitativa;
+  document.getElementById('metricEfficacyQl').textContent = metrics.eficaciaCualitativa;
+}
+
+function drawRiskResults(risks) {
+  const tbody = document.getElementById('riskResultsBody');
+  if (!risks.length) {
+    tbody.innerHTML = '<tr><td colspan="7">No hay riesgos cargados.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = risks.map((risk) => `
+    <tr>
+      <td>${escapeHtml(risk.riskId)} / ${escapeHtml(risk.riskName)}</td>
+      <td><span class="status-tag level-${levelClass(risk.riskLevel)}">${escapeHtml(risk.riskLevel)}</span></td>
+      <td>${formatPercent(risk.eficaciaFrenteAlRiesgo)}</td>
+      <td>${formatRatio(risk.eficienciaFrenteAlRiesgo)}</td>
+      <td>${formatCurrency(risk.costoAsignadoTotal)}</td>
+      <td>${formatCurrency(risk.beneficioMitigacionEstimado)}</td>
+      <td><span class="status-tag level-${levelClass(risk.nivelExposicionObservado)}">${escapeHtml(risk.nivelExposicionObservado)}</span></td>
+    </tr>
+  `).join('');
 }
 
 function xmlEscape(value) {
@@ -387,76 +582,123 @@ function xmlEscape(value) {
 }
 
 function rowsToWorksheetXml(rows) {
-  const rowXml = rows
-    .map((row) => {
-      const cells = row
-        .map((cell) => `<Cell><Data ss:Type="String">${xmlEscape(cell)}</Data></Cell>`)
-        .join('');
-      return `<Row>${cells}</Row>`;
-    })
-    .join('');
+  const rowXml = rows.map((row) => `<Row>${row.map((cell) => `<Cell><Data ss:Type="String">${xmlEscape(cell)}</Data></Cell>`).join('')}</Row>`).join('');
   return `<Table>${rowXml}</Table>`;
 }
 
 function exportToExcel(data) {
   const summaryRows = [
     ['Organización', data.context.organization],
+    ['Evaluador', data.context.evaluator],
+    ['Ambiente', data.context.environment],
     ['Sistema evaluado', data.context.systemName],
     ['Arquitectura', data.context.architecture],
     ['Notas de alcance', data.context.scopeNotes],
     ['Fecha', data.context.date],
-    ['Eficiencia cuantitativa global (%)', data.metrics.efficiencyQ],
-    ['Eficacia cuantitativa global (%)', data.metrics.efficacyQ],
-    ['Eficiencia cualitativa global', data.metrics.efficiencyQl],
-    ['Eficacia cualitativa global', data.metrics.efficacyQl]
+    ['Catálogo', data.context.catalogId],
+    ['Versión del catálogo', data.context.catalogVersion],
+    ['Eficiencia cuantitativa global (ratio)', formatRatio(data.metrics.eficienciaCuantitativa)],
+    ['Eficacia cuantitativa global', formatPercent(data.metrics.eficaciaCuantitativa)],
+    ['Eficiencia cualitativa global', data.metrics.eficienciaCualitativa],
+    ['Eficacia cualitativa global', data.metrics.eficaciaCualitativa]
   ];
 
-  const riskRows = [
-    ['Riesgo', 'Activo en riesgo', 'Amenaza', 'Probabilidad', 'Impacto', 'Nivel de riesgo', 'Lucro cesante']
-  ];
+  const riskRows = [[
+    'Riesgo ID',
+    'Nombre',
+    'Activo en riesgo',
+    'Amenaza / causa',
+    'Vulnerabilidad',
+    'Probabilidad',
+    'Impacto',
+    'Nivel de riesgo identificado',
+    'Lucro cesante',
+    'Hallazgo / brecha / observación'
+  ]];
 
   data.risks.forEach((risk) => {
     riskRows.push([
-      risk.riskCode,
+      risk.riskId,
+      risk.riskName,
       risk.asset,
       risk.threat,
-      risk.likelihood,
+      risk.vulnerability,
+      risk.probability,
       risk.impact,
       risk.riskLevel,
-      risk.businessLoss
+      risk.businessLoss,
+      risk.finding
     ]);
   });
 
-  const controlRows = [
-    [
-      'Riesgo',
-      'Control',
-      'Costo',
-      'Madurez',
-      'Automatización',
-      'Momento',
-      'Periodicidad',
-      'Alcance funcional',
-      'Score',
-      'Evidencia'
-    ]
-  ];
+  const controlRows = [[
+    'Riesgo ID',
+    'Control ID',
+    'Control',
+    'Costo ingresado',
+    'Costo asignado',
+    'Madurez',
+    'Automatización',
+    'Momento',
+    'Periodicidad',
+    'Alcance funcional',
+    'Factor de evidencia',
+    'Score del control',
+    'Evidencia encontrada',
+    'Fuente de evidencia',
+    'Referencia normativa',
+    'Eficiencia cualitativa',
+    'Eficacia cualitativa',
+    'Efectividad cualitativa'
+  ]];
 
   data.risks.forEach((risk) => {
     risk.controls.forEach((control) => {
       controlRows.push([
-        risk.riskCode,
+        risk.riskId,
+        control.controlId,
         control.controlName,
         control.cost,
+        control.assignedCost,
         control.maturity,
         control.automation,
         control.timing,
         control.periodicity,
         control.scope,
-        control.score,
-        control.evidence
+        control.evidenceFactor,
+        control.scoreControl,
+        control.evidenceFound,
+        control.evidenceSource,
+        control.referenceText,
+        control.efficiencyQl,
+        control.efficacyQl,
+        control.effectivenessQl
       ]);
     });
+  });
+
+  const riskResultRows = [[
+    'Riesgo ID',
+    'Nombre',
+    'Nivel de riesgo identificado',
+    'Eficacia frente al riesgo',
+    'Eficiencia frente al riesgo',
+    'Costo asignado total',
+    'Beneficio de mitigación estimado',
+    'Nivel de exposición observado'
+  ]];
+
+  data.risks.forEach((risk) => {
+    riskResultRows.push([
+      risk.riskId,
+      risk.riskName,
+      risk.riskLevel,
+      formatPercent(risk.eficaciaFrenteAlRiesgo),
+      formatRatio(risk.eficienciaFrenteAlRiesgo),
+      risk.costoAsignadoTotal,
+      risk.beneficioMitigacionEstimado,
+      risk.nivelExposicionObservado
+    ]);
   });
 
   const workbookXml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -468,6 +710,7 @@ function exportToExcel(data) {
   <Worksheet ss:Name="Resumen">${rowsToWorksheetXml(summaryRows)}</Worksheet>
   <Worksheet ss:Name="Riesgos">${rowsToWorksheetXml(riskRows)}</Worksheet>
   <Worksheet ss:Name="Controles">${rowsToWorksheetXml(controlRows)}</Worksheet>
+  <Worksheet ss:Name="Resultados riesgo">${rowsToWorksheetXml(riskResultRows)}</Worksheet>
 </Workbook>`;
 
   const blob = new Blob([workbookXml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
@@ -483,13 +726,90 @@ function exportToExcel(data) {
   URL.revokeObjectURL(url);
 }
 
+function setButtonsEnabled(enabled) {
+  calculateBtn.disabled = !enabled;
+  exportBtn.disabled = !enabled;
+}
+
+async function initializeApp() {
+  setButtonsEnabled(false);
+  loadStatus.textContent = 'Cargando catálogo maestro...';
+  environmentSelect.innerHTML = '';
+  ENVIRONMENT_OPTIONS.forEach((option) => createOption(environmentSelect, option.value, option.label));
+
+  try {
+    const response = await fetch(CATALOG_URL);
+    if (!response.ok) {
+      throw new Error(`No fue posible cargar ${CATALOG_URL} (${response.status} ${response.statusText})`);
+    }
+
+    state.catalog = await response.json();
+    state.lookups = buildLookups(state.catalog);
+    architectureSelect.innerHTML = '';
+    state.catalog.escenarios.forEach((scenario) => createOption(architectureSelect, scenario.id, scenario.nombre));
+    renderRisks();
+    loadStatus.textContent = `Catálogo ${state.catalog.catalogoEvaluacion.id} v${state.catalog.catalogoEvaluacion.version} cargado.`;
+    setButtonsEnabled(true);
+  } catch (error) {
+    console.error(error);
+    loadStatus.textContent = `Error cargando catálogo: ${error.message}`;
+    scenarioSummary.textContent = 'No se pudo inicializar la evaluación.';
+  }
+}
+
+architectureSelect.addEventListener('change', () => {
+  renderRisks();
+  state.lastEvaluation = null;
+  drawRiskResults([]);
+  drawMetrics({
+    eficienciaCuantitativa: 0,
+    eficaciaCuantitativa: 0,
+    eficienciaCualitativa: '-',
+    eficaciaCualitativa: '-'
+  });
+});
+
+riskContainer.addEventListener('change', (event) => {
+  if (event.target.matches('[data-sync-control-field]')) {
+    syncControlField(event.target);
+  }
+
+  const riskCard = event.target.closest('.risk-card');
+  if (riskCard && (event.target.name === 'probability' || event.target.name === 'impact')) {
+    updateRiskLevelTag(riskCard);
+  }
+
+  const controlCard = event.target.closest('.control-card');
+  if (controlCard) {
+    updateControlScore(controlCard);
+    const controlId = controlCard.dataset.controlId;
+    document.querySelectorAll(`.control-card[data-control-id="${controlId}"]`).forEach(updateControlScore);
+  }
+});
+
+riskContainer.addEventListener('input', (event) => {
+  if (event.target.matches('[data-sync-control-field]')) {
+    syncControlField(event.target);
+    const controlId = event.target.closest('.control-card')?.dataset.controlId;
+    if (controlId) {
+      document.querySelectorAll(`.control-card[data-control-id="${controlId}"]`).forEach(updateControlScore);
+    }
+  }
+});
+
 document.getElementById('calculateBtn').addEventListener('click', () => {
   const evaluation = collectEvaluation();
+  state.lastEvaluation = evaluation;
   drawMetrics(evaluation.metrics);
+  drawRiskResults(evaluation.risks);
 });
 
 document.getElementById('exportBtn').addEventListener('click', () => {
   const evaluation = collectEvaluation();
+  state.lastEvaluation = evaluation;
   drawMetrics(evaluation.metrics);
+  drawRiskResults(evaluation.risks);
   exportToExcel(evaluation);
 });
+
+initializeApp();
