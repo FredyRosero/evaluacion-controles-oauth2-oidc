@@ -1,7 +1,7 @@
 ---
 Titulo: Diseño de un modelo de evaluación de controles de seguridad para arquitecturas de identidad federada basadas en OAuth 2.0 y OpenID Connect
 Autor: Fredy Andres Rosero Cristancho
-Versión: 11
+Versión: 12
 ---
 
 ## 1. Introducción
@@ -74,7 +74,7 @@ Diseñar un modelo de evaluación de controles de seguridad para arquitecturas d
 
 4. Aplicar el modelo de evaluación sobre tres escenarios con OAuth 2.0/OIDC para demostrar su utilidad como artefacto de análisis de riesgos, controles y evidencias auditables.
 
-5. Condensar el modelo propuesto en un entregable web publicado en GitHub Pages, materializado como un formulario que cargue el catálogo predefinido de riesgos y controles del escenario seleccionado, procese las entradas de evaluación, calcule la calificación de los controles y genere un informe en Excel a partir de algoritmos JavaScript derivados de las fórmulas expuestas en la tesis.
+5. Condensar el modelo propuesto en un entregable web publicado en GitHub Pages, materializado como un formulario que cargue el catálogo maestro JSON de riesgos, controles, relaciones riesgo-control y referencias técnicas del escenario seleccionado, procese las entradas de evaluación, calcule la calificación de los controles y genere un informe en Excel a partir de algoritmos JavaScript derivados de las fórmulas expuestas en la tesis.
 
 ### 1.7. Alcance y limitaciones
 
@@ -230,7 +230,7 @@ El capítulo 6 aplica la matriz únicamente a los tres escenarios OAuth 2.0/OIDC
 
 El capítulo 7 presenta las conclusiones, limitaciones del trabajo y posibles líneas de trabajo futuro.
 
-Los anexos incluyen la matriz completa, los diagramas de escenarios y la referencia del entregable web en GitHub Pages, junto con la estructura del formulario, el catálogo precargado de riesgos por escenario y el formato del reporte Excel.
+Los anexos incluyen la matriz completa, los diagramas de escenarios y la referencia del entregable web en GitHub Pages, junto con la estructura del formulario, el catálogo maestro JSON de riesgos y controles, los filtros por escenario y el formato del reporte Excel.
 
 
 ---
@@ -2215,6 +2215,8 @@ El modelo permite relacionar:
 9. nivel de exposición observado;
 10. hallazgo, brecha u observación.
 
+
+
 #### 5.1.1. Diagrama de modelo de dominio
 
 El siguiente diagrama presenta el modelo de dominio conceptual que soporta la matriz de evaluación y el entregable web. El modelo distingue cinco niveles de agregación: el catálogo predefinido propuesto por la tesis, el escenario seleccionado, la evaluación concreta de una arquitectura, los registros por relación riesgo-control, y los resultados por riesgo y globales.
@@ -2349,12 +2351,244 @@ classDiagram
     EvaluacionGlobal "1" --> "*" EvaluacionRiesgo : consolida
 ~~~
 
-El `CatalogoEvaluacion` es el aporte predefinido de la tesis: define los `Escenario`, `RiesgoCatalogo`, `ControlEsperado` y `ReferenciaTecnica`. La entidad `RiesgoControl` resuelve la relación muchos-a-muchos entre riesgo y control: cada instancia lleva el `pesoMitigacion`, el `gradoMitigacion` y si el control es obligatorio para ese riesgo. La `EvaluacionArquitectura` representa una ejecución concreta del modelo. El `RegistroMatriz` es la unidad mínima de evaluación: evalúa una relación riesgo-control específica, diligencia las cinco dimensiones del control mediante `EvaluacionControl` y acumula la evidencia recopilada. La `EvaluacionRiesgo` agrega todos los registros de un mismo riesgo y produce la cobertura observada, la eficacia frente al riesgo, la eficiencia y el nivel de exposición observado. La `EvaluacionGlobal` consolida todas las `EvaluacionRiesgo` para producir las cuatro medidas del modelo: eficiencia cuantitativa, eficacia cuantitativa, eficiencia cualitativa y eficacia cualitativa del sistema.
+El `CatalogoEvaluacion` es el aporte predefinido de la tesis: define los escenarios, riesgos, controles y referencias técnicas. La entidad `RiesgoControl` resuelve la relación muchos-a-muchos entre riesgo y control. Cada instancia de esta entidad conserva el `pesoMitigacion`, el `gradoMitigacion`, la obligatoriedad y la justificación técnica de la relación. La `EvaluacionArquitectura` representa una aplicación concreta del modelo. El `RegistroMatriz` evalúa una relación riesgo-control específica y conserva la evidencia recopilada. La `EvaluacionRiesgo` agrega todos los registros de un mismo riesgo. La `EvaluacionGlobal` consolida las evaluaciones de riesgo para producir las medidas globales del sistema.
 
+#### 5.1.2. Catálogo maestro investigado de riesgos y controles
 
+Como parte del diseño del modelo se construyó un catálogo maestro de riesgos y controles para los tres escenarios OAuth 2.0/OIDC definidos en la tesis. Este catálogo no es una lista libre diligenciada por el usuario, sino un insumo predefinido, versionado y trazable que alimenta la matriz y el entregable web.
 
+El catálogo se fundamenta en fuentes técnicas especializadas de OAuth 2.0, OIDC, seguridad de APIs, gestión de riesgos y controles de seguridad. Entre las fuentes principales se incluyen RFC 6750, RFC 6819, RFC 7636, RFC 7662, RFC 9700, OpenID Connect Core, OWASP OAuth2 Cheat Sheet, OWASP API Security, OWASP Session Management Cheat Sheet, NIST SP 800-30, NIST SP 800-53 y documentación oficial de Microsoft Entra ID, Keycloak y Auth0.
 
-#### 5.1.2. Estructura del resultado de evaluación
+El catálogo investigado cubre:
+
+~~~json
+{
+  "coberturaMinimaCatalogo": {
+    "riesgosGlobales": 5,
+    "riesgosEspecificosPorEscenario": {
+      "SPA_BFF_IDP": 3,
+      "M2M_AS_RS": 3,
+      "API_GATEWAY_FEDERADO": 3
+    },
+    "controlesGlobales": 8,
+    "controlesEspecificosPorEscenario": {
+      "SPA_BFF_IDP": 4,
+      "M2M_AS_RS": 4,
+      "API_GATEWAY_FEDERADO": 4
+    },
+    "controlesTotales": 20,
+    "relacionesRiesgoControl": 48
+  }
+}
+~~~
+
+La estructura lógica del catálogo es:
+
+~~~text
+CatalogoEvaluacion
+  ├─ Escenarios
+  ├─ RiesgosCatalogo
+  │   ├─ Riesgos globales OAuth 2.0/OIDC
+  │   └─ Riesgos específicos por escenario
+  ├─ ControlesEsperados
+  │   ├─ Controles globales
+  │   └─ Controles específicos por escenario
+  ├─ RiesgoControl
+  │   └─ Relación muchos-a-muchos entre riesgo y control
+  └─ ReferenciasTecnicas
+~~~
+
+La entidad `RiesgoControl` es central porque permite representar que un riesgo puede ser mitigado por varios controles y que un control puede mitigar varios riesgos. Cada relación riesgo-control conserva atributos propios:
+
+~~~json
+{
+  "id": "RC-017",
+  "riesgoId": "RE1-001",
+  "controlId": "CE1-001",
+  "pesoMitigacion": 0.70,
+  "gradoMitigacion": "ALTO",
+  "obligatorio": true,
+  "justificacion": "PKCE con S256 mitiga la intercepcion del authorization_code y el canje por terceros.",
+  "referencias": ["RFC-7636", "RFC-9700"]
+}
+~~~
+
+Esta decisión evita contar dos veces el costo de un mismo control cuando dicho control ayuda a mitigar más de un riesgo. En la implementación, el costo de un control puede distribuirse entre los riesgos activos del escenario de acuerdo con el `pesoMitigacion` definido en la relación riesgo-control.
+
+##### Riesgos globales OAuth 2.0/OIDC
+
+Los riesgos globales aplican a cualquier arquitectura del modelo que use OAuth 2.0/OIDC:
+
+1. Exposición o replay de `access_token` bearer.
+2. Validación insuficiente de token.
+3. Scopes, recursos o audiencias sobreasignados.
+4. Gobierno débil de clientes, secretos y claves.
+5. Trazabilidad y monitoreo insuficientes.
+
+##### Riesgos específicos por escenario
+
+Para el escenario **SPA estática + BFF + IdP corporativo**, el catálogo incluye:
+
+1. Intercepción o sustitución del `authorization_code` y downgrade de PKCE.
+2. Exposición de tokens o material de sesión en el navegador.
+3. Callback OAuth/OIDC vulnerable por `state`, `nonce` o CSRF incorrectos.
+
+Para el escenario **M2M con Authorization Server como Resource Server**, el catálogo incluye:
+
+1. Abuso de cliente técnico privilegiado.
+2. Secreto, certificado o clave M2M expuestos o sin rotación.
+3. Segregación insuficiente cuando el Authorization Server actúa también como Resource Server.
+
+Para el escenario **API Gateway federado + Authorization Server corporativo**, el catálogo incluye:
+
+1. Confusión de audiencia entre Gateway y APIs internas.
+2. Confianza ciega del backend en el Gateway.
+3. Propagación de token sin downscoping o sin token exchange.
+
+##### Controles globales y específicos
+
+Los controles globales definidos por el catálogo son:
+
+1. Validación completa de token en Resource Server o Gateway.
+2. Scopes mínimos y restricción de `audience` o recurso.
+3. Política de vigencia y refresh tokens basada en riesgo.
+4. Gobierno de clientes OAuth.
+5. Gestión segura de secretos, claves y JWKS.
+6. Transporte seguro y no exposición de tokens en URI.
+7. Logging, correlación y monitoreo de autenticación y autorización.
+8. Tokens sender-constrained para casos de alto riesgo.
+
+Los controles específicos complementan esos controles globales según la arquitectura seleccionada. Por ejemplo, el escenario SPA+BFF+IdP incorpora PKCE con `S256`, validación de `state` y `nonce`, custodia server-side de tokens y cookie segura. El escenario M2M incorpora vault, clientes técnicos separados por propósito, autenticación fuerte del cliente y recertificación por `client_id`. El escenario API Gateway incorpora validación de audiencia por API destino, token exchange o downscoping, política uniforme de validación e introspección/JWKS y trazabilidad correlacionada Gateway-AS-RS.
+
+##### Archivos JSON del entregable web
+
+En el repositorio del entregable web, el catálogo puede materializarse como archivos JSON separados para facilitar mantenimiento y trazabilidad:
+
+~~~text
+data/
+├─ catalogo/
+│  ├─ catalogo.json
+│  ├─ escenarios.json
+│  ├─ riesgos.json
+│  ├─ controles.json
+│  ├─ riesgo-controles.json
+│  ├─ referencias.json
+│  └─ mapeo-score.json
+├─ filtros/
+│  ├─ spa-bff-idp.json
+│  ├─ m2m-as-rs.json
+│  └─ api-gateway-federado.json
+├─ evaluaciones/
+│  └─ ejemplo-spa-bff-idp.json
+└─ catalogo-maestro.json
+~~~
+
+Los archivos separados son la forma mantenible del catálogo. El archivo `catalogo-maestro.json` funciona como un bundle autocontenido para pruebas, demostración, revisión académica o carga rápida de la UI con un único `fetch()`.
+
+##### Filtros por escenario
+
+El catálogo maestro no se duplica por arquitectura. En su lugar, cada escenario tiene un filtro que referencia los IDs aplicables.
+
+~~~json
+{
+  "escenario": {
+    "id": "SPA_BFF_IDP",
+    "nombre": "SPA estatica + BFF + IdP corporativo"
+  },
+  "riesgosCatalogoIds": [
+    "RG-001",
+    "RG-002",
+    "RG-003",
+    "RG-004",
+    "RG-005",
+    "RE1-001",
+    "RE1-002",
+    "RE1-003"
+  ],
+  "controlesEsperadosIds": [
+    "CG-001",
+    "CG-002",
+    "CG-003",
+    "CG-004",
+    "CG-005",
+    "CG-006",
+    "CG-007",
+    "CG-008",
+    "CE1-001",
+    "CE1-002",
+    "CE1-003",
+    "CE1-004"
+  ]
+}
+~~~
+
+Con esta estructura, la UI realiza el siguiente flujo:
+
+~~~text
+1. El evaluador selecciona una arquitectura.
+2. La aplicación carga el filtro JSON del escenario.
+3. El filtro activa riesgos globales y específicos.
+4. El filtro activa controles globales y específicos.
+5. La aplicación cruza las relaciones riesgo-control.
+6. El evaluador diligencia evidencia, probabilidad, impacto y dimensiones del control.
+7. El sistema calcula score de control, eficacia por riesgo, eficiencia por riesgo y evaluación global.
+8. El sistema exporta el resultado en Excel o JSON.
+~~~
+
+##### Regla de costo compartido
+
+Cuando un mismo control mitiga varios riesgos, su costo no debe contarse completo en cada riesgo, porque eso inflaría artificialmente el costo total de mitigación. Por eso el modelo permite distribuir el costo del control entre los riesgos activos del escenario.
+
+La regla propuesta es:
+
+~~~text
+costoAsignado(r,c) =
+costoMedio(c) * pesoMitigacion(r,c)
+/
+suma(pesoMitigacion(x,c) para todos los riesgos activos x del escenario)
+~~~
+
+Donde:
+
+- `r` es el riesgo evaluado;
+- `c` es el control;
+- `pesoMitigacion(r,c)` es el peso del control frente a ese riesgo;
+- `costoMedio(c)` proviene del catálogo de controles;
+- los riesgos activos son los riesgos aplicables al escenario seleccionado.
+
+##### Regla de eficacia frente al riesgo
+
+La eficacia frente al riesgo se calcula agregando los aportes de los controles asociados a ese riesgo:
+
+~~~text
+eficaciaFrenteAlRiesgo(r) =
+suma( pesoMitigacion(r,c) * scoreControl(c) )
+/
+suma( pesoMitigacion(r,c) )
+~~~
+
+Esto evita una evaluación binaria. Si falta un control principal, pero existen controles compensatorios, la eficacia del riesgo no cae automáticamente a cero. Sin embargo, si un control obligatorio tiene score muy bajo, la eficacia debe quedar limitada para no maquillar el resultado.
+
+Regla correctiva propuesta:
+
+~~~text
+si existe un control obligatorio con scoreControl(c) < 0.40,
+entonces eficaciaFrenteAlRiesgo(r) = min(eficaciaFrenteAlRiesgo(r), 0.59)
+~~~
+
+##### Referencias técnicas del catálogo
+
+Las referencias técnicas del catálogo se agrupan así:
+
+1. **IETF / OpenID:** RFC 6750, RFC 6819, RFC 7636, RFC 7662, RFC 8693, RFC 8705, RFC 9068, RFC 9449, RFC 9700 y OpenID Connect Core.
+2. **OWASP:** OAuth2 Cheat Sheet, API Security Top 10, Session Management Cheat Sheet y CSRF Prevention Cheat Sheet.
+3. **NIST:** SP 800-30 para evaluación de riesgos y SP 800-53 para familias de controles.
+4. **Documentación oficial de proveedores:** Microsoft Entra ID, Auth0 y Keycloak.
+5. **Marco conceptual de aseguramiento:** Valencia Duque para relación riesgo-control-auditoría y evaluación de eficiencia/eficacia.
+
+No se incluyen PAR, JAR, JARM, FAPI o RAR como entidades propias del catálogo porque el alcance actual de la tesis se concentra en OAuth 2.0/OIDC general y en tres arquitecturas representativas. Si el modelo se adapta posteriormente a banca abierta o perfiles de alto aseguramiento, esos perfiles podrían agregarse como otra capa del catálogo.
+
+#### 5.1.3. Estructura del resultado de evaluación
 
 El modelo produce dos artefactos JSON diferenciados: el **catálogo maestro** y el **resultado de evaluación**. El catálogo es estable y predefinido por la tesis; el resultado es el artefacto diligenciado por el evaluador para una arquitectura y momento concretos.
 
@@ -2368,13 +2602,13 @@ El resultado de evaluación tiene la siguiente estructura:
     "evaluador": "Fredy Rosero",
     "ambiente": "Preproduccion",
     "escenarioId": "SPA_BFF_IDP",
-    "catalogoId": "CAT-OAUTH-OIDC-001",
+    "catalogoId": "CAT-OAUTH2-OIDC-2026-01",
     "versionCatalogo": "1.0.0"
   },
   "registrosMatriz": [
     {
       "id": "RM-001-1",
-      "riesgoControlId": "RC-001",
+      "riesgoControlId": "RC-017",
       "riesgoId": "RE1-001",
       "controlId": "CE1-001",
       "activoAfectado": "authorization_code",
@@ -2394,7 +2628,7 @@ El resultado de evaluación tiene la siguiente estructura:
         "scoreControl": 0.85,
         "eficaciaControl": 0.85
       },
-      "aporteEficacia": 0.51,
+      "aporteEficacia": 0.595,
       "evidencias": [
         {
           "esperada": "Configuracion del cliente OIDC con PKCE S256",
@@ -2404,138 +2638,6 @@ El resultado de evaluación tiene la siguiente estructura:
         }
       ],
       "observacion": "PKCE existe, pero falta evidencia de rechazo explicito de code_challenge_method=plain"
-    },
-    {
-      "id": "RM-001-2",
-      "riesgoControlId": "RC-002",
-      "riesgoId": "RE1-001",
-      "controlId": "CE1-003",
-      "activoAfectado": "SESSION_ID",
-      "lucroCesante": 50000000,
-      "amenaza": "Abuso de sesion posterior al callback",
-      "vulnerabilidad": "Cookie sin atributos de seguridad suficientes",
-      "probabilidad": "Media",
-      "impacto": "Alto",
-      "nivelRiesgo": "Alto",
-      "costoAsignado": 800000,
-      "evaluacionControl": {
-        "madurez": "Auditado",
-        "automatizacion": "Automatico",
-        "momento": "Preventivo",
-        "periodicidad": "Permanente",
-        "alcance": "General",
-        "scoreControl": 0.95,
-        "eficaciaControl": 0.95
-      },
-      "aporteEficacia": 0.19,
-      "evidencias": [
-        {
-          "esperada": "Set-Cookie con HttpOnly, Secure y SameSite",
-          "encontrada": "Captura HTTP de Set-Cookie en preproduccion",
-          "fuente": "Navegador DevTools y prueba tecnica",
-          "suficiencia": "Suficiente"
-        }
-      ],
-      "observacion": "Cookie protegida correctamente; validar tambien expiracion e invalidacion en logout"
-    },
-    {
-      "id": "RM-002-1",
-      "riesgoControlId": "RC-004",
-      "riesgoId": "RE1-002",
-      "controlId": "CE1-002",
-      "activoAfectado": "access_token, id_token, refresh_token",
-      "lucroCesante": 80000000,
-      "amenaza": "XSS o usuario malicioso lee tokens desde almacenamiento web",
-      "vulnerabilidad": "Tokens almacenados en localStorage, sessionStorage o memoria expuesta",
-      "probabilidad": "Media",
-      "impacto": "Alto",
-      "nivelRiesgo": "Alto",
-      "costoAsignado": 6000000,
-      "evaluacionControl": {
-        "madurez": "No implementado",
-        "automatizacion": "No aplica",
-        "momento": "Preventivo",
-        "periodicidad": "Permanente",
-        "alcance": "General",
-        "scoreControl": 0,
-        "eficaciaControl": 0
-      },
-      "aporteEficacia": 0,
-      "evidencias": [
-        {
-          "esperada": "Ausencia de tokens en navegador y almacenamiento server-side en BFF",
-          "encontrada": "Se encontraron tokens en sessionStorage durante prueba manual",
-          "fuente": "Navegador DevTools",
-          "suficiencia": "Suficiente"
-        }
-      ],
-      "observacion": "No se evidencia custodia server-side; el token queda expuesto al contexto del navegador"
-    },
-    {
-      "id": "RM-002-2",
-      "riesgoControlId": "RC-005",
-      "riesgoId": "RE1-002",
-      "controlId": "CE1-003",
-      "activoAfectado": "SESSION_ID",
-      "lucroCesante": 80000000,
-      "amenaza": "Abuso de sesion activa desde navegador",
-      "vulnerabilidad": "Cookie con atributos de seguridad incompletos",
-      "probabilidad": "Media",
-      "impacto": "Alto",
-      "nivelRiesgo": "Alto",
-      "costoAsignado": 800000,
-      "evaluacionControl": {
-        "madurez": "Auditado",
-        "automatizacion": "Automatico",
-        "momento": "Preventivo",
-        "periodicidad": "Permanente",
-        "alcance": "General",
-        "scoreControl": 0.95,
-        "eficaciaControl": 0.95
-      },
-      "aporteEficacia": 0.19,
-      "evidencias": [
-        {
-          "esperada": "Set-Cookie con HttpOnly, Secure y SameSite",
-          "encontrada": "Captura HTTP de Set-Cookie en preproduccion",
-          "fuente": "Navegador DevTools",
-          "suficiencia": "Suficiente"
-        }
-      ],
-      "observacion": "La cookie esta protegida, pero este control no compensa completamente la exposicion directa de tokens"
-    },
-    {
-      "id": "RM-002-3",
-      "riesgoControlId": "RC-006",
-      "riesgoId": "RE1-002",
-      "controlId": "CE1-004",
-      "activoAfectado": "SPA",
-      "lucroCesante": 80000000,
-      "amenaza": "Ejecucion de JavaScript no autorizado",
-      "vulnerabilidad": "Politica CSP parcial o permisiva",
-      "probabilidad": "Media",
-      "impacto": "Alto",
-      "nivelRiesgo": "Alto",
-      "costoAsignado": 600000,
-      "evaluacionControl": {
-        "madurez": "Implementado",
-        "automatizacion": "Automatico",
-        "momento": "Preventivo",
-        "periodicidad": "Permanente",
-        "alcance": "General",
-        "scoreControl": 0.8,
-        "eficaciaControl": 0.8
-      },
-      "aporteEficacia": 0.16,
-      "evidencias": [
-        {
-          "esperada": "Header Content-Security-Policy restrictivo",
-          "encontrada": "Existe CSP, pero permite algunos origenes externos amplios",
-          "fuente": "Headers HTTP y prueba tecnica",
-          "suficiencia": "Parcial"
-        }
-      ],
-      "observacion": "CSP ayuda como control compensatorio, pero no corrige el almacenamiento de tokens en navegador"
     }
   ],
   "evaluacionesRiesgo": [
@@ -2543,42 +2645,32 @@ El resultado de evaluación tiene la siguiente estructura:
       "riesgoId": "RE1-001",
       "lucroCesante": 50000000,
       "coberturaEsperada": 1,
-      "coberturaObservada": 0.7,
-      "eficaciaFrenteAlRiesgo": 0.7,
+      "coberturaObservada": 0.70,
+      "eficaciaFrenteAlRiesgo": 0.70,
       "costoAsignadoTotal": 5600000,
       "beneficioMitigacionEstimado": 35000000,
       "eficienciaFrenteAlRiesgo": 6.25,
       "nivelExposicionObservado": "Medio"
-    },
-    {
-      "riesgoId": "RE1-002",
-      "lucroCesante": 80000000,
-      "coberturaEsperada": 1,
-      "coberturaObservada": 0.35,
-      "eficaciaFrenteAlRiesgo": 0.35,
-      "costoAsignadoTotal": 7400000,
-      "beneficioMitigacionEstimado": 28000000,
-      "eficienciaFrenteAlRiesgo": 3.78,
-      "nivelExposicionObservado": "Alto"
     }
   ],
   "evaluacionGlobal": {
-    "registrosEvaluados": 5,
-    "riesgosEvaluados": 2,
-    "scorePromedioControl": 0.71,
-    "eficienciaCuantitativa": 5.02,
-    "eficaciaCuantitativa": 0.53,
+    "registrosEvaluados": 1,
+    "riesgosEvaluados": 1,
+    "scorePromedioControl": 0.85,
+    "eficienciaCuantitativa": 6.25,
+    "eficaciaCuantitativa": 0.70,
     "eficienciaCualitativa": "Alta",
     "eficaciaCualitativa": "Media"
   }
 }
 ~~~
 
-Cada `RegistroMatriz` evalúa una relación riesgo-control concreta: referencia los IDs del catálogo (`riesgoId`, `controlId`, `riesgoControlId`), captura los datos del riesgo en ese activo específico, diligencia las cinco dimensiones del control mediante `evaluacionControl` y registra la evidencia recopilada. El campo `aporteEficacia` es el producto de `eficaciaControl × pesoMitigacion` del catálogo y representa la contribución proporcional de ese control a la cobertura del riesgo.
+Cada `RegistroMatriz` evalúa una relación riesgo-control concreta: referencia los IDs del catálogo (`riesgoId`, `controlId`, `riesgoControlId`), captura los datos del riesgo en ese activo específico, diligencia las cinco dimensiones del control mediante `evaluacionControl` y registra la evidencia recopilada. El campo `aporteEficacia` es el producto de `scoreControl × pesoMitigacion` del catálogo y representa la contribución proporcional de ese control a la cobertura del riesgo.
 
-Las `evaluacionesRiesgo` agregan todos los registros de un mismo riesgo: la `coberturaObservada` es la suma de `aporteEficacia` de sus registros, la `eficaciaFrenteAlRiesgo` refleja qué proporción del riesgo queda cubierta, y el `nivelExposicionObservado` traduce esa cobertura en una categoría cualitativa. La `eficienciaFrenteAlRiesgo` relaciona el beneficio de mitigación estimado con el costo asignado a los controles del riesgo.
+Las `evaluacionesRiesgo` agregan todos los registros de un mismo riesgo: la `coberturaObservada` es la suma de los aportes de eficacia de sus registros, la `eficaciaFrenteAlRiesgo` refleja qué proporción del riesgo queda cubierta, y el `nivelExposicionObservado` traduce esa cobertura en una categoría cualitativa. La `eficienciaFrenteAlRiesgo` relaciona el beneficio de mitigación estimado con el costo asignado a los controles del riesgo.
 
 La `evaluacionGlobal` consolida todas las `evaluacionesRiesgo` y produce las cuatro medidas del modelo: `eficienciaCuantitativa`, `eficaciaCuantitativa`, `eficienciaCualitativa` y `eficaciaCualitativa`.
+
 
 ---
 
@@ -3438,7 +3530,12 @@ En el entregable web, esta plantilla se materializa como un catálogo precargado
 9.21. NIST SP 800-53 Rev. 5.  
 9.22. NIST Cybersecurity Framework 2.0.  
 9.23. ISO/IEC 27001 / 27002.  
-9.24. Otras fuentes académicas y técnicas
+9.24. Otras fuentes académicas y técnicas.  
+9.25. Microsoft Learn — Tokens de acceso de la Plataforma de identidad de Microsoft.  
+9.26. Auth0 — Token Best Practices.  
+9.27. Keycloak — Securing applications and services with OpenID Connect.  
+9.28. Keycloak — Configuring and using token exchange.  
+9.29. Keycloak — Server Administration Guide.
 
 ---
 
@@ -3449,5 +3546,8 @@ En el entregable web, esta plantilla se materializa como un catálogo precargado
 10.3. Diagramas de escenarios  
 10.4. Checklist resumido  
 10.5. Tabla de trazabilidad riesgo–control–evidencia
-10.6. Referencia del repositorio GitHub, del sitio en GitHub Pages y formato del reporte Excel
+10.6. Referencia del repositorio GitHub, del sitio en GitHub Pages y formato del reporte Excel  
+10.7. Catálogo maestro JSON de riesgos, controles, relaciones riesgo-control y referencias técnicas  
+10.8. Filtros JSON por escenario  
+10.9. Mapeo de score y reglas de cálculo para la UI
 
