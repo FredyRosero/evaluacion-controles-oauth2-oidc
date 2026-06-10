@@ -493,7 +493,7 @@ function collectEvaluation() {
   risks.forEach((risk) => {
     risk.controls.forEach((control) => {
       const totalWeight = totalWeightByControlId.get(control.controlId) || control.pesoMitigacion || 1;
-      control.assignedCost = totalWeight > 0 ? (control.cost * control.pesoMitigacion) / totalWeight : control.cost;
+      control.assignedCost = totalWeight > 0 ? (control.cost * control.pesoMitigacion) / totalWeight : 0;
     });
 
     const totalWeight = risk.controls.reduce((sum, control) => sum + control.pesoMitigacion, 0);
@@ -740,7 +740,7 @@ async function initializeApp() {
   try {
     const response = await fetch(CATALOG_URL);
     if (!response.ok) {
-      throw new Error(`No fue posible cargar ${CATALOG_URL}`);
+      throw new Error(`No fue posible cargar ${CATALOG_URL} (${response.status} ${response.statusText})`);
     }
 
     state.catalog = await response.json();

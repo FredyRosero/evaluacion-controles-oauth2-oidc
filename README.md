@@ -4,7 +4,7 @@ Formulario web estático para evaluar riesgos y controles de seguridad en escena
 
 ## Uso local
 
-1. Servir el repositorio con un servidor HTTP simple para permitir la carga del catálogo, por ejemplo: `python3 -m http.server 8000`.
+1. Servir el repositorio con un servidor HTTP simple para permitir la carga del catálogo, por ejemplo: `python3 -m http.server 8000` o `npx http-server`.
 2. Abrir `http://localhost:8000/index.html` en el navegador.
 3. Seleccionar la arquitectura y completar contexto, riesgos y controles.
 4. Presionar **Calcular resultados** para ver métricas globales y resultados por riesgo.
