@@ -1,0 +1,60 @@
+{
+  "escenario": {
+    "id": "SPA_BFF_IDP",
+    "nombre": "SPA estática + BFF + IdP corporativo",
+    "descripcion": "El navegador usa sesión/cookie con el BFF; el BFF ejecuta OIDC Authorization Code + PKCE con el IdP y consume APIs protegidas."
+  },
+  "escenarioId": "SPA_BFF_IDP",
+  "riesgosCatalogoIds": [
+    "RG-001",
+    "RG-002",
+    "RG-003",
+    "RG-004",
+    "RG-005",
+    "RE1-001",
+    "RE1-002",
+    "RE1-003"
+  ],
+  "controlesEsperadosIds": [
+    "CG-001",
+    "CG-002",
+    "CG-003",
+    "CG-004",
+    "CG-005",
+    "CG-006",
+    "CG-007",
+    "CG-008",
+    "CE1-001",
+    "CE1-002",
+    "CE1-003",
+    "CE1-004"
+  ],
+  "riesgoControlIds": [
+    "RC-001",
+    "RC-002",
+    "RC-003",
+    "RC-004",
+    "RC-005",
+    "RC-006",
+    "RC-007",
+    "RC-008",
+    "RC-009",
+    "RC-010",
+    "RC-011",
+    "RC-012",
+    "RC-013",
+    "RC-014",
+    "RC-015",
+    "RC-016",
+    "RC-017",
+    "RC-018",
+    "RC-019",
+    "RC-020",
+    "RC-021",
+    "RC-022",
+    "RC-023",
+    "RC-024",
+    "RC-025",
+    "RC-026"
+  ]
+}

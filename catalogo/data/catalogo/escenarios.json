@@ -1,0 +1,17 @@
+[
+  {
+    "id": "SPA_BFF_IDP",
+    "nombre": "SPA estática + BFF + IdP corporativo",
+    "descripcion": "El navegador usa sesión/cookie con el BFF; el BFF ejecuta OIDC Authorization Code + PKCE con el IdP y consume APIs protegidas."
+  },
+  {
+    "id": "M2M_AS_RS",
+    "nombre": "M2M con Authorization Server como Resource Server",
+    "descripcion": "Un cliente técnico obtiene access_token con client_credentials y consume APIs protegidas del propio Authorization Server o de su plano administrativo."
+  },
+  {
+    "id": "API_GATEWAY_FEDERADO",
+    "nombre": "API Gateway federado + Authorization Server corporativo",
+    "descripcion": "El gateway valida bearer tokens y puede propagar o intercambiar tokens hacia APIs internas con audiencias y scopes diferenciados."
+  }
+]

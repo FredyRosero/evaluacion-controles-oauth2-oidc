@@ -1,0 +1,101 @@
+{
+  "evaluacionArquitectura": {
+    "id": "EVA-2026-001",
+    "fecha": "2026-06-04",
+    "evaluador": "Evaluador de ejemplo",
+    "ambiente": "Preproduccion",
+    "escenarioId": "SPA_BFF_IDP",
+    "catalogoId": "CAT-OAUTH2-OIDC-2026-01",
+    "versionCatalogo": "1.0.0"
+  },
+  "registrosMatriz": [
+    {
+      "id": "RM-RE1-001-CE1-001",
+      "riesgoControlId": "RC-017",
+      "riesgoId": "RE1-001",
+      "controlId": "CE1-001",
+      "activoAfectado": "authorization_code",
+      "lucroCesante": 50000000,
+      "amenaza": "Atacante obtiene o sustituye el authorization_code durante el callback.",
+      "vulnerabilidad": "PKCE ausente, PKCE mal configurado o aceptación de code_challenge_method=plain.",
+      "probabilidad": "Media",
+      "impacto": "Alto",
+      "nivelRiesgo": "Alto",
+      "costoAsignado": 1650,
+      "evaluacionControl": {
+        "madurez": "implementado",
+        "automatizacion": "automatico",
+        "momento": "preventivo",
+        "periodicidad": "permanente",
+        "alcance": "especifico",
+        "factorEvidencia": "parcial",
+        "scoreControl": 0.399
+      },
+      "aporteEficacia": 0.2793,
+      "evidencias": [
+        {
+          "esperada": "Configuración del cliente OIDC con PKCE S256 y rechazo de plain.",
+          "encontrada": "Captura de configuración PKCE; falta prueba negativa contra plain.",
+          "fuente": "Consola IdP, repositorio BFF, logs de callback",
+          "suficiencia": "parcial"
+        }
+      ],
+      "observacion": "PKCE existe, pero falta evidencia de rechazo explícito de code_challenge_method=plain."
+    },
+    {
+      "id": "RM-RE1-001-CE1-002",
+      "riesgoControlId": "RC-018",
+      "riesgoId": "RE1-001",
+      "controlId": "CE1-002",
+      "activoAfectado": "state, nonce, sesión de autenticación",
+      "lucroCesante": 50000000,
+      "amenaza": "Inyección o sustitución de callback OAuth/OIDC.",
+      "vulnerabilidad": "state o nonce no ligados a la sesión iniciada por el cliente.",
+      "probabilidad": "Media",
+      "impacto": "Alto",
+      "nivelRiesgo": "Alto",
+      "costoAsignado": 950,
+      "evaluacionControl": {
+        "madurez": "auditado",
+        "automatizacion": "automatico",
+        "momento": "preventivo",
+        "periodicidad": "permanente",
+        "alcance": "especifico",
+        "factorEvidencia": "suficiente",
+        "scoreControl": 0.94
+      },
+      "aporteEficacia": 0.141,
+      "evidencias": [
+        {
+          "esperada": "state y nonce únicos, impredecibles y ligados a sesión.",
+          "encontrada": "Pruebas de callback y validación de nonce exitosas.",
+          "fuente": "Prueba técnica y logs",
+          "suficiencia": "suficiente"
+        }
+      ],
+      "observacion": "Control evidenciado."
+    }
+  ],
+  "evaluacionesRiesgo": [
+    {
+      "riesgoId": "RE1-001",
+      "coberturaEsperada": 1,
+      "coberturaObservada": 0.4203,
+      "eficaciaFrenteAlRiesgo": 0.4203,
+      "costoAsignadoTotal": 2600,
+      "lucroCesante": 50000000,
+      "beneficioMitigacionEstimado": 21015000,
+      "eficienciaFrenteAlRiesgo": 8082.69,
+      "nivelExposicionObservado": "Alto"
+    }
+  ],
+  "evaluacionGlobal": {
+    "registrosEvaluados": 2,
+    "riesgosEvaluados": 1,
+    "scorePromedioControl": 0.6695,
+    "eficaciaCuantitativa": 0.4203,
+    "eficienciaCuantitativa": 8082.69,
+    "eficaciaCualitativa": "Media baja",
+    "eficienciaCualitativa": "Alta por costo incremental bajo; requiere validación financiera"
+  }
+}

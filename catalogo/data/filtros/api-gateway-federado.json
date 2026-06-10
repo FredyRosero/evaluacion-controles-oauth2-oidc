@@ -1,0 +1,60 @@
+{
+  "escenario": {
+    "id": "API_GATEWAY_FEDERADO",
+    "nombre": "API Gateway federado + Authorization Server corporativo",
+    "descripcion": "El gateway valida bearer tokens y puede propagar o intercambiar tokens hacia APIs internas con audiencias y scopes diferenciados."
+  },
+  "escenarioId": "API_GATEWAY_FEDERADO",
+  "riesgosCatalogoIds": [
+    "RG-001",
+    "RG-002",
+    "RG-003",
+    "RG-004",
+    "RG-005",
+    "RE3-001",
+    "RE3-002",
+    "RE3-003"
+  ],
+  "controlesEsperadosIds": [
+    "CG-001",
+    "CG-002",
+    "CG-003",
+    "CG-004",
+    "CG-005",
+    "CG-006",
+    "CG-007",
+    "CG-008",
+    "CE3-001",
+    "CE3-002",
+    "CE3-003",
+    "CE3-004"
+  ],
+  "riesgoControlIds": [
+    "RC-001",
+    "RC-002",
+    "RC-003",
+    "RC-004",
+    "RC-005",
+    "RC-006",
+    "RC-007",
+    "RC-008",
+    "RC-009",
+    "RC-010",
+    "RC-011",
+    "RC-012",
+    "RC-013",
+    "RC-014",
+    "RC-015",
+    "RC-016",
+    "RC-039",
+    "RC-040",
+    "RC-041",
+    "RC-042",
+    "RC-043",
+    "RC-044",
+    "RC-045",
+    "RC-046",
+    "RC-047",
+    "RC-048"
+  ]
+}

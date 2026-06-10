@@ -1,0 +1,211 @@
+[
+  {
+    "id": "RG-001",
+    "tipo": "GLOBAL",
+    "escenarioIds": [
+      "SPA_BFF_IDP",
+      "M2M_AS_RS",
+      "API_GATEWAY_FEDERADO"
+    ],
+    "nombre": "Exposición o replay de access token bearer",
+    "descripcion": "El access_token puede filtrarse en tránsito, almacenamiento, logs, proxies o componentes comprometidos y ser reutilizado por terceros.",
+    "referencias": [
+      "RFC-6750",
+      "RFC-6819",
+      "RFC-9700",
+      "OWASP-OAUTH2"
+    ]
+  },
+  {
+    "id": "RG-002",
+    "tipo": "GLOBAL",
+    "escenarioIds": [
+      "SPA_BFF_IDP",
+      "M2M_AS_RS",
+      "API_GATEWAY_FEDERADO"
+    ],
+    "nombre": "Validación insuficiente de token",
+    "descripcion": "El Resource Server o el Gateway acepta tokens sin validar completamente firma o introspección, issuer, audience, expiración y scopes/acciones.",
+    "referencias": [
+      "RFC-7662",
+      "RFC-9700",
+      "MS-ENTRA-ACCESS-TOKENS-ES",
+      "KEYCLOAK-OIDC-LAYERS"
+    ]
+  },
+  {
+    "id": "RG-003",
+    "tipo": "GLOBAL",
+    "escenarioIds": [
+      "SPA_BFF_IDP",
+      "M2M_AS_RS",
+      "API_GATEWAY_FEDERADO"
+    ],
+    "nombre": "Scopes, recursos o audiencias sobreasignados",
+    "descripcion": "Los tokens contienen permisos o audiencias más amplias de lo necesario y permiten uso fuera del contexto previsto.",
+    "referencias": [
+      "RFC-6819",
+      "RFC-9700",
+      "OWASP-OAUTH2"
+    ]
+  },
+  {
+    "id": "RG-004",
+    "tipo": "GLOBAL",
+    "escenarioIds": [
+      "SPA_BFF_IDP",
+      "M2M_AS_RS",
+      "API_GATEWAY_FEDERADO"
+    ],
+    "nombre": "Gobierno débil de clientes, secretos y claves",
+    "descripcion": "Los clientes OAuth carecen de responsable, segregación por ambiente, almacenamiento seguro de secretos o rotación de claves y certificados.",
+    "referencias": [
+      "RFC-6819",
+      "NIST-800-53",
+      "AUTH0-TOKEN-BEST",
+      "KEYCLOAK-ADMIN-TIMEOUTS"
+    ]
+  },
+  {
+    "id": "RG-005",
+    "tipo": "GLOBAL",
+    "escenarioIds": [
+      "SPA_BFF_IDP",
+      "M2M_AS_RS",
+      "API_GATEWAY_FEDERADO"
+    ],
+    "nombre": "Trazabilidad y monitoreo insuficientes",
+    "descripcion": "La organización no puede correlacionar autenticación, emisión/uso de tokens y decisiones de autorización para detectar abuso o investigar incidentes.",
+    "referencias": [
+      "OWASP-API-2023",
+      "NIST-800-53",
+      "RFC-7662"
+    ]
+  },
+  {
+    "id": "RE1-001",
+    "tipo": "ESPECIFICO",
+    "escenarioIds": [
+      "SPA_BFF_IDP"
+    ],
+    "nombre": "Intercepción o sustitución del authorization_code y downgrade PKCE",
+    "descripcion": "Un tercero obtiene o sustituye el authorization_code, o fuerza PKCE mal configurado, para canjearlo por tokens.",
+    "referencias": [
+      "RFC-7636",
+      "RFC-9700",
+      "OWASP-OAUTH2"
+    ]
+  },
+  {
+    "id": "RE1-002",
+    "tipo": "ESPECIFICO",
+    "escenarioIds": [
+      "SPA_BFF_IDP"
+    ],
+    "nombre": "Exposición de tokens o material de sesión en el navegador",
+    "descripcion": "La SPA o el User Agent expone access_token, refresh_token o material de sesión a XSS, extensiones, almacenamiento web o herramientas del lado cliente.",
+    "referencias": [
+      "OIDC-CORE",
+      "OWASP-OAUTH2",
+      "OWASP-SESSION"
+    ]
+  },
+  {
+    "id": "RE1-003",
+    "tipo": "ESPECIFICO",
+    "escenarioIds": [
+      "SPA_BFF_IDP"
+    ],
+    "nombre": "Callback OAuth/OIDC vulnerable a CSRF, state o nonce incorrectos",
+    "descripcion": "El flujo de retorno al cliente no queda ligado a la sesión del usuario o no valida nonce, facilitando login mix-up, token/code injection o replay.",
+    "referencias": [
+      "RFC-6819",
+      "OIDC-CORE",
+      "OWASP-OAUTH2"
+    ]
+  },
+  {
+    "id": "RE2-001",
+    "tipo": "ESPECIFICO",
+    "escenarioIds": [
+      "M2M_AS_RS"
+    ],
+    "nombre": "Abuso de cliente técnico privilegiado",
+    "descripcion": "Un cliente M2M con client_credentials o capacidades administrativas opera con más permisos de los necesarios o fuera de su propósito.",
+    "referencias": [
+      "RFC-6819",
+      "RFC-9700",
+      "OWASP-API-2023"
+    ]
+  },
+  {
+    "id": "RE2-002",
+    "tipo": "ESPECIFICO",
+    "escenarioIds": [
+      "M2M_AS_RS"
+    ],
+    "nombre": "Secreto, certificado o clave M2M expuestos o sin rotación",
+    "descripcion": "La credencial del cliente técnico está hardcodeada, distribuida inseguramente o carece de rotación y revocación.",
+    "referencias": [
+      "RFC-6819",
+      "AUTH0-TOKEN-BEST",
+      "NIST-800-53"
+    ]
+  },
+  {
+    "id": "RE2-003",
+    "tipo": "ESPECIFICO",
+    "escenarioIds": [
+      "M2M_AS_RS"
+    ],
+    "nombre": "Segregación insuficiente cuando el AS actúa también como RS",
+    "descripcion": "La misma plataforma expone APIs protegidas y emite tokens sin suficiente separación de funciones, autorización fina ni control de acceso al endpoint administrativo.",
+    "referencias": [
+      "RFC-6819",
+      "RFC-7662",
+      "KEYCLOAK-OIDC-LAYERS"
+    ]
+  },
+  {
+    "id": "RE3-001",
+    "tipo": "ESPECIFICO",
+    "escenarioIds": [
+      "API_GATEWAY_FEDERADO"
+    ],
+    "nombre": "Confusión de audiencia entre gateway y APIs internas",
+    "descripcion": "Un token válido para un recurso es reutilizado sobre otro backend por validar mal la audiencia o por compartir tokens multipropósito.",
+    "referencias": [
+      "RFC-9700",
+      "RFC-6819",
+      "KEYCLOAK-TOKEN-EXCHANGE"
+    ]
+  },
+  {
+    "id": "RE3-002",
+    "tipo": "ESPECIFICO",
+    "escenarioIds": [
+      "API_GATEWAY_FEDERADO"
+    ],
+    "nombre": "Confianza ciega del backend en el gateway",
+    "descripcion": "Los Resource Servers internos no revalidan condiciones mínimas del token o no aplican autorización de negocio/función/objeto.",
+    "referencias": [
+      "RFC-9700",
+      "MS-ENTRA-ACCESS-TOKENS-ES",
+      "OWASP-API-2023"
+    ]
+  },
+  {
+    "id": "RE3-003",
+    "tipo": "ESPECIFICO",
+    "escenarioIds": [
+      "API_GATEWAY_FEDERADO"
+    ],
+    "nombre": "Propagación de token sin downscoping o sin token exchange",
+    "descripcion": "El token de entrada se reenvía a varios backends con permisos excesivos, sin reducción de scopes ni separación por recurso destino.",
+    "referencias": [
+      "RFC-9700",
+      "KEYCLOAK-TOKEN-EXCHANGE",
+      "RFC-7662"
+    ]
+  }
+]

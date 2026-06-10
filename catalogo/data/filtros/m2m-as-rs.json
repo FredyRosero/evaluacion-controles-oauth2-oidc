@@ -1,0 +1,62 @@
+{
+  "escenario": {
+    "id": "M2M_AS_RS",
+    "nombre": "M2M con Authorization Server como Resource Server",
+    "descripcion": "Un cliente técnico obtiene access_token con client_credentials y consume APIs protegidas del propio Authorization Server o de su plano administrativo."
+  },
+  "escenarioId": "M2M_AS_RS",
+  "riesgosCatalogoIds": [
+    "RG-001",
+    "RG-002",
+    "RG-003",
+    "RG-004",
+    "RG-005",
+    "RE2-001",
+    "RE2-002",
+    "RE2-003"
+  ],
+  "controlesEsperadosIds": [
+    "CG-001",
+    "CG-002",
+    "CG-003",
+    "CG-004",
+    "CG-005",
+    "CG-006",
+    "CG-007",
+    "CG-008",
+    "CE2-001",
+    "CE2-002",
+    "CE2-003",
+    "CE2-004"
+  ],
+  "riesgoControlIds": [
+    "RC-001",
+    "RC-002",
+    "RC-003",
+    "RC-004",
+    "RC-005",
+    "RC-006",
+    "RC-007",
+    "RC-008",
+    "RC-009",
+    "RC-010",
+    "RC-011",
+    "RC-012",
+    "RC-013",
+    "RC-014",
+    "RC-015",
+    "RC-016",
+    "RC-027",
+    "RC-028",
+    "RC-029",
+    "RC-030",
+    "RC-031",
+    "RC-032",
+    "RC-033",
+    "RC-034",
+    "RC-035",
+    "RC-036",
+    "RC-037",
+    "RC-038"
+  ]
+}

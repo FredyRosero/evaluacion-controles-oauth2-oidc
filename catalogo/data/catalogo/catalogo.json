@@ -1,0 +1,9 @@
+{
+  "id": "CAT-OAUTH2-OIDC-2026-01",
+  "version": "1.0.0",
+  "idioma": "es",
+  "fechaBase": "2026-06-04",
+  "alcance": "Catálogo maestro de riesgos y controles para SPA_BFF_IDP, M2M_AS_RS y API_GATEWAY_FEDERADO",
+  "supuestoCosto": "Rangos estimados de esfuerzo incremental de análisis, configuración, pruebas y despliegue; no incluyen licenciamiento de IdP, gateway o SIEM",
+  "monedaCosto": "USD"
+}

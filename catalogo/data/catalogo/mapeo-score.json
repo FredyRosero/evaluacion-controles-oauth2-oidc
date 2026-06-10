@@ -1,0 +1,36 @@
+{
+  "madurez": {
+    "declarado": 0.25,
+    "diseniado": 0.5,
+    "implementado": 0.75,
+    "auditado": 1.0
+  },
+  "automatizacion": {
+    "manual": 0.4,
+    "semiautomatico": 0.7,
+    "automatico": 1.0
+  },
+  "momento": {
+    "correctivo": 0.4,
+    "detectivo": 0.7,
+    "preventivo": 1.0
+  },
+  "periodicidad": {
+    "ocasional": 0.4,
+    "periodico": 0.7,
+    "permanente": 1.0
+  },
+  "alcance": {
+    "especifico": 0.7,
+    "general": 1.0
+  },
+  "factorEvidencia": {
+    "sinEvidencia": 0.0,
+    "parcial": 0.5,
+    "suficiente": 0.8,
+    "independienteOAditada": 1.0
+  },
+  "formulaScoreControl": "(0.35*madurez + 0.15*automatizacion + 0.15*momento + 0.15*periodicidad + 0.20*alcance) * factorEvidencia",
+  "formulaEficaciaFrenteAlRiesgo": "sum(pesoMitigacion * scoreControl) / sum(pesoMitigacion)",
+  "formulaCostoAsignado": "costoMedio(control) * pesoMitigacion(r,c) / sum(pesoMitigacion(x,c) para riesgos activos x del escenario)"
+}

@@ -1,0 +1,114 @@
+[
+  {
+    "id": "RFC-6819",
+    "tipo": "RFC",
+    "nombre": "OAuth 2.0 Threat Model and Security Considerations",
+    "seccion": "3.6; 4.1; 4.4.1.8; 4.6.4; 4.6.7; 5.1.5.5-5.1.5.9",
+    "url": "https://datatracker.ietf.org/doc/html/rfc6819"
+  },
+  {
+    "id": "RFC-7636",
+    "tipo": "RFC",
+    "nombre": "Proof Key for Code Exchange by OAuth Public Clients",
+    "seccion": "Abstract; 1; 4; 7.2",
+    "url": "https://datatracker.ietf.org/doc/html/rfc7636"
+  },
+  {
+    "id": "RFC-9700",
+    "tipo": "RFC",
+    "nombre": "Best Current Practice for OAuth 2.0 Security",
+    "seccion": "2.1.2; 2.2.2; 4.9; 4.10; 4.14",
+    "url": "https://datatracker.ietf.org/doc/html/rfc9700"
+  },
+  {
+    "id": "RFC-7662",
+    "tipo": "RFC",
+    "nombre": "OAuth 2.0 Token Introspection",
+    "seccion": "2; 2.1; 2.2; 4",
+    "url": "https://datatracker.ietf.org/doc/html/rfc7662"
+  },
+  {
+    "id": "RFC-6750",
+    "tipo": "RFC",
+    "nombre": "The OAuth 2.0 Authorization Framework: Bearer Token Usage",
+    "seccion": "1; 2.1; 2.3; 5",
+    "url": "https://datatracker.ietf.org/doc/html/rfc6750"
+  },
+  {
+    "id": "OIDC-CORE",
+    "tipo": "OIDC",
+    "nombre": "OpenID Connect Core 1.0 incorporating errata set 2",
+    "seccion": "3.1; 3.1.3.7; 15.5.2; 16.10",
+    "url": "https://openid.net/specs/openid-connect-core-1_0.html"
+  },
+  {
+    "id": "OWASP-OAUTH2",
+    "tipo": "OWASP",
+    "nombre": "OAuth2 Cheat Sheet",
+    "seccion": "OAuth 2.0 Essential Basics; PKCE; Implicit Grant; Token Replay Prevention; Access Token Privilege Restriction",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/OAuth2_Cheat_Sheet.html"
+  },
+  {
+    "id": "OWASP-API-2023",
+    "tipo": "OWASP",
+    "nombre": "OWASP Top 10 API Security Risks – 2023",
+    "seccion": "API1; API2; API3; API5",
+    "url": "https://owasp.org/API-Security/editions/2023/en/0x11-t10/"
+  },
+  {
+    "id": "OWASP-SESSION",
+    "tipo": "OWASP",
+    "nombre": "Session Management Cheat Sheet",
+    "seccion": "Secure Attribute; HttpOnly Attribute; SameSite Attribute",
+    "url": "https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html"
+  },
+  {
+    "id": "NIST-800-30",
+    "tipo": "NIST",
+    "nombre": "SP 800-30 Rev. 1 Guide for Conducting Risk Assessments",
+    "seccion": "Abstract; risk assessment, residual risk, security controls, threat vulnerability",
+    "url": "https://csrc.nist.gov/pubs/sp/800/30/r1/final"
+  },
+  {
+    "id": "NIST-800-53",
+    "tipo": "NIST",
+    "nombre": "SP 800-53 Rev. 5 Security and Privacy Controls for Information Systems and Organizations",
+    "seccion": "Control families: AC, AU, CA, CM, IA, SC, SI",
+    "url": "https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final"
+  },
+  {
+    "id": "MS-ENTRA-ACCESS-TOKENS-ES",
+    "tipo": "DocOficial",
+    "nombre": "Tokens de acceso de la Plataforma de identidad de Microsoft",
+    "seccion": "Validar tokens; aud; duración; clientes no validan access tokens",
+    "url": "https://learn.microsoft.com/es-es/entra/identity-platform/access-tokens"
+  },
+  {
+    "id": "AUTH0-TOKEN-BEST",
+    "tipo": "DocOficial",
+    "nombre": "Auth0 Token Best Practices",
+    "seccion": "Keep it secret; minimal claims; expiration; HTTPS; storage/reuse",
+    "url": "https://auth0.com/docs/secure/tokens/token-best-practices"
+  },
+  {
+    "id": "KEYCLOAK-OIDC-LAYERS",
+    "tipo": "DocOficial",
+    "nombre": "Keycloak Securing applications and services with OpenID Connect",
+    "seccion": "token endpoint; introspection endpoint",
+    "url": "https://www.keycloak.org/securing-apps/oidc-layers"
+  },
+  {
+    "id": "KEYCLOAK-TOKEN-EXCHANGE",
+    "tipo": "DocOficial",
+    "nombre": "Keycloak Configuring and using token exchange",
+    "seccion": "Scopes and audiences; audience filtering examples",
+    "url": "https://www.keycloak.org/securing-apps/token-exchange"
+  },
+  {
+    "id": "KEYCLOAK-ADMIN-TIMEOUTS",
+    "tipo": "DocOficial",
+    "nombre": "Keycloak Server Administration Guide",
+    "seccion": "Tokens tab; Access Token Lifespan; Revoke Refresh Token; Client Session Idle; audience checking",
+    "url": "https://www.keycloak.org/docs/latest/server_admin/"
+  }
+]
