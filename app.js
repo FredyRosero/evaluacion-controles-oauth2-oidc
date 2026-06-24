@@ -1,10 +1,10 @@
 ﻿const CATALOG_URL = 'catalogo/data/catalogo-maestro.json';
 const SCORE_WEIGHTS = {
-  madurez: 0.35,
-  automatizacion: 0.15,
-  momento: 0.15,
-  periodicidad: 0.15,
-  alcance: 0.2
+  madurez: 0.4,
+  automatizacion: 0.2,
+  momento: 0.1,
+  periodicidad: 0.2,
+  alcance: 0.1
 };
 
 const PROBABILITY_OPTIONS = [
@@ -462,11 +462,16 @@ function updateControlScore(controlCard) {
   const evaluation = getControlEvaluationFromCard(controlCard);
   const weight = Number(controlCard.dataset.weight || 0);
   const weightedContribution = weight * evaluation.scoreControl;
+  const weightMadurez = formatMathNumber(SCORE_WEIGHTS.madurez, 2);
+  const weightAutomatizacion = formatMathNumber(SCORE_WEIGHTS.automatizacion, 2);
+  const weightMomento = formatMathNumber(SCORE_WEIGHTS.momento, 2);
+  const weightPeriodicidad = formatMathNumber(SCORE_WEIGHTS.periodicidad, 2);
+  const weightAlcance = formatMathNumber(SCORE_WEIGHTS.alcance, 2);
   controlCard.querySelector('[data-kind="controlScore"]').textContent = `Score del control: ${formatPercent(evaluation.scoreControl)}`;
   controlCard.querySelector('[data-kind="controlQualitative"]').textContent = `Eficiencia: ${evaluation.efficiencyQl} · Eficacia: ${evaluation.efficacyQl} · Efectividad: ${evaluation.effectivenessQl}`;
 
   const latex = `$$\\begin{aligned}
-S_{base(raw)} &= 0.35(${formatMathNumber(evaluation.dimensions.madurez, 2)}) + 0.15(${formatMathNumber(evaluation.dimensions.automatizacion, 2)}) + 0.15(${formatMathNumber(evaluation.dimensions.momento, 2)}) + 0.15(${formatMathNumber(evaluation.dimensions.periodicidad, 2)}) + 0.20(${formatMathNumber(evaluation.dimensions.alcance, 2)}) = ${formatMathNumber(evaluation.baseScoreRaw)} \\\\
+S_{base(raw)} &= ${weightMadurez}(${formatMathNumber(evaluation.dimensions.madurez, 2)}) + ${weightAutomatizacion}(${formatMathNumber(evaluation.dimensions.automatizacion, 2)}) + ${weightMomento}(${formatMathNumber(evaluation.dimensions.momento, 2)}) + ${weightPeriodicidad}(${formatMathNumber(evaluation.dimensions.periodicidad, 2)}) + ${weightAlcance}(${formatMathNumber(evaluation.dimensions.alcance, 2)}) = ${formatMathNumber(evaluation.baseScoreRaw)} \\\\
 S_{base} &= \\operatorname{norm}(S_{base(raw)}) = ${formatMathNumber(evaluation.baseScore)} \\\\
 F_{ev} &= \\operatorname{norm}(${formatMathNumber(evaluation.evidenceFactorRaw)}) = ${formatMathNumber(evaluation.evidenceFactor)} \\\\
 S_{control} &= S_{base} \\times F_{ev} = ${formatMathNumber(evaluation.baseScore)} \\times ${formatMathNumber(evaluation.evidenceFactor)} = ${formatMathNumber(evaluation.scoreControl)} \\\\
