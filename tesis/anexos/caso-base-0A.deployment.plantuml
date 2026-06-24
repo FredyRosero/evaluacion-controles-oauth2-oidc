@@ -1,0 +1,43 @@
+@startuml caso-base-0A.deployment
+title Caso base 0A - Monolito con autenticación y sesión local
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+actor "Usuario" as User
+
+node "Navegador" as Browser {
+  artifact "HTML / CSS / JS" as UI
+  artifact "Cookie SESSION_ID" as Cookie
+}
+
+node "Servidor de aplicación" as AppServer {
+  component "Monolito web" as Monolith
+  component "Login local" as Login
+  component "Autorización local" as Authz
+  component "Módulos de negocio" as Business
+}
+
+database "Base de datos" as DB {
+  artifact "Usuarios" as Users
+  artifact "Sesiones" as Sessions
+  artifact "Datos de negocio" as Data
+}
+
+User --> Browser
+Browser --> Monolith : HTTPS + SESSION_ID
+Monolith --> Login
+Monolith --> Authz
+Monolith --> Business
+
+Login --> Users : validar credenciales
+Monolith --> Sessions : crear / validar sesión
+Business --> Data : operaciones de negocio
+
+note right of Monolith
+No hay OAuth2.
+No hay IdP externo.
+No hay access_token.
+end note
+
+@enduml

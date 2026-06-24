@@ -1,0 +1,25 @@
+@startuml caso_base_0B_sequence
+title Caso base 0B - SPA + BFF con login propio
+
+actor Usuario
+participant "SPA" as SPA
+participant "BFF" as BFF
+database "BD identidad local" as IdentityDB
+participant "Servicio interno" as Service
+
+Usuario -> SPA : Abre aplicación
+SPA -> BFF : POST /login\nusuario + contraseña
+BFF -> IdentityDB : Validar credenciales
+IdentityDB --> BFF : Usuario válido
+BFF -> IdentityDB : Crear sesión
+BFF --> SPA : Set-Cookie: SESSION_ID\nHttpOnly; Secure; SameSite
+
+Usuario -> SPA : Solicita operación
+SPA -> BFF : GET /api/recurso + Cookie
+BFF -> IdentityDB : Validar SESSION_ID
+IdentityDB --> BFF : Sesión válida
+BFF -> Service : Ejecutar operación interna
+Service --> BFF : Resultado
+BFF --> SPA : JSON de respuesta
+
+@enduml

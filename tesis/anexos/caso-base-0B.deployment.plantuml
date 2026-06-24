@@ -1,0 +1,51 @@
+@startuml caso-base-0B.deployment
+title Caso base 0B - SPA estática + BFF con gestión propia de usuarios
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+actor "Usuario" as User
+
+node "Navegador" as Browser {
+  component "SPA estática" as SPA
+  artifact "Cookie SESSION_ID" as Cookie
+}
+
+cloud "CDN / Hosting estático" as CDN {
+  artifact "index.html / JS / CSS" as StaticFiles
+}
+
+node "Zona backend" as Backend {
+  component "BFF" as BFF
+  component "Servicio de negocio" as Service
+}
+
+database "BD identidad local" as IdentityDB {
+  artifact "Usuarios propios" as Users
+  artifact "Sesiones" as Sessions
+}
+
+database "BD negocio" as BusinessDB
+
+User --> Browser
+Browser --> CDN : GET SPA
+CDN --> Browser : Archivos estáticos
+
+Browser --> BFF : HTTPS + Cookie SESSION_ID
+BFF --> Users : validar credenciales
+BFF --> Sessions : crear / validar sesión
+BFF --> Service : llamada interna
+Service --> BusinessDB : consultar / modificar datos
+
+note right of BFF
+El BFF autentica usuarios propios.
+No hay Authorization Server.
+No hay OAuth2/OIDC.
+end note
+
+note right of SPA
+La SPA usa cookie de sesión.
+No maneja access_token.
+end note
+
+@enduml

@@ -1,7 +1,7 @@
 ---
 Titulo: Diseño de un modelo de evaluación de controles de seguridad para arquitecturas de identidad federada basadas en OAuth 2.0 y OpenID Connect
 Autor: Fredy Andres Rosero Cristancho
-Versión: 16
+Versión: 18
 ---
 
 ## 1. Introducción
@@ -172,7 +172,7 @@ El capítulo 6 aplica la matriz mediante seis corridas demostrativas: un caso bu
 
 El capítulo 7 presenta las conclusiones, limitaciones del trabajo y posibles líneas de trabajo futuro.
 
-Los anexos incluyen la matriz completa, los diagramas de escenarios y la referencia del entregable web en GitHub Pages, junto con la estructura del formulario, el catálogo maestro JSON de riesgos y controles, los filtros por escenario y el formato del reporte Excel.
+Los anexos se gestionan como archivos enlazados del repositorio y no como contenido embebido en el cuerpo del documento. Incluyen la matriz completa, diagramas, checklist, trazabilidad riesgo-control-evidencia, catálogo maestro JSON, filtros por escenario, mapeo de score, datos de prediligenciamiento, referencia del sitio en GitHub Pages y formato del reporte Excel.
 
 ---
 
@@ -1297,19 +1297,236 @@ Este marco conceptual se apoya principalmente en las siguientes fuentes técnica
 
 ## 3. Marco de aseguramiento, riesgo, control y auditoría
 
-3.1. Aseguramiento de tecnologías de información  
-3.2. Riesgos de tecnologías de información  
-3.3. Controles de tecnologías de información  
-3.4. Auditoría de tecnologías de información basada en riesgos  
-3.5. Relación riesgo–control–auditoría  
-3.6. Uso del enfoque de Valencia Duque en esta tesis  
-3.7. Complemento con estándares internacionales  
-    3.7.1. ISO/IEC 27001 / 27002  
-    3.7.2. NIST  
-    3.7.3. OWASP  
-    3.7.4. RFCs de OAuth 2.0/OIDC
+Este capítulo define el marco conceptual de aseguramiento que soporta el modelo de evaluación propuesto. Su propósito es explicar por qué la tesis no se limita a revisar configuraciones OAuth 2.0/OIDC, sino que estructura una evaluación basada en riesgos, controles y evidencias auditables.
+
+El punto central es que una arquitectura puede usar protocolos y productos reconocidos sin estar adecuadamente asegurada. El aseguramiento no depende solo de la existencia nominal de un Authorization Server, un API Gateway, un flujo OIDC o un conjunto de tokens. Depende de la relación entre:
+
+1. los riesgos relevantes del escenario;
+2. los controles esperados para esos riesgos;
+3. el estado real del diseño e implementación del control;
+4. la evidencia disponible para comprobar su operación;
+5. la conclusión sobre exposición observada.
 
 ---
+
+### 3.1. Aseguramiento de tecnologías de información
+
+El aseguramiento de tecnologías de información busca aportar confianza razonable sobre la forma en que los sistemas, procesos, datos, controles y responsabilidades de TI contribuyen al cumplimiento de objetivos organizacionales, de seguridad y de cumplimiento.
+
+En esta tesis, el aseguramiento se entiende como una evaluación estructurada que permite responder preguntas como:
+
+1. ¿Qué puede fallar en la arquitectura evaluada?
+2. ¿Qué controles deberían existir frente a ese riesgo?
+3. ¿El control está diseñado, declarado, implementado o auditado?
+4. ¿La evidencia encontrada permite sustentar esa calificación?
+5. ¿Qué nivel de exposición permanece después de evaluar los controles?
+
+La expresión “confianza razonable” es relevante porque ningún sistema es completamente seguro. El objetivo no es demostrar seguridad absoluta, sino contar con una base trazable para juzgar si los controles son suficientes y verificables frente a los riesgos identificados.
+
+En arquitecturas OAuth 2.0/OIDC, el aseguramiento exige observar tanto componentes técnicos como decisiones de gobierno:
+
+- clientes OAuth registrados;
+- flujos permitidos;
+- redirect URIs;
+- scopes y audiencias;
+- secretos, certificados y claves;
+- validación de tokens;
+- trazabilidad de autenticación y autorización;
+- evidencia de configuración y operación.
+
+---
+
+### 3.2. Riesgo de tecnologías de información
+
+Un riesgo de tecnologías de información puede entenderse como la posibilidad de que una amenaza explote una vulnerabilidad o condición habilitante y produzca un impacto sobre un activo.
+
+Para efectos de esta tesis, cada riesgo se caracteriza mediante:
+
+- **activo afectado:** componente, dato, token, secreto, API, sesión o registro comprometible;
+- **amenaza o causa:** evento, actor o condición que puede materializar el riesgo;
+- **vulnerabilidad o condición habilitante:** debilidad técnica, operativa o documental que permite el evento;
+- **probabilidad:** posibilidad estimada de ocurrencia;
+- **impacto:** consecuencia esperada sobre confidencialidad, integridad, disponibilidad, trazabilidad, cumplimiento o negocio;
+- **impacto económico estimado:** valor usado para calcular eficiencia del tratamiento.
+
+En OAuth 2.0/OIDC, el riesgo no siempre está en el protocolo. Muchas veces surge de su implementación:
+
+- tokens aceptados fuera de audiencia;
+- PKCE ausente o degradado;
+- clientes técnicos con privilegios excesivos;
+- secretos en repositorios o pipelines;
+- Resource Servers que confían ciegamente en el Gateway;
+- trazabilidad insuficiente de decisiones de autorización.
+
+Por eso el modelo no pregunta únicamente “¿se usa OAuth 2.0?”, sino “¿qué riesgos específicos aparecen en esta arquitectura y qué controles los mitigan?”.
+
+---
+
+### 3.3. Controles de tecnologías de información
+
+Un control es una medida técnica, organizacional o procedimental diseñada para reducir probabilidad, impacto o exposición frente a un riesgo.
+
+En esta tesis se distinguen tres niveles de control:
+
+1. **Control esperado:** control definido en el catálogo como mitigación aplicable a un riesgo.
+2. **Control observado:** estado real del control durante la evaluación.
+3. **Control evidenciado:** control cuya existencia u operación puede sustentarse mediante evidencia verificable.
+
+Esta distinción evita confundir una afirmación con una prueba. Por ejemplo, decir que “la API valida tokens” no es suficiente. La matriz debe poder registrar evidencia de:
+
+- validación de firma o introspección;
+- validación de `issuer`;
+- validación de `audience`;
+- validación de expiración;
+- validación de scopes;
+- decisión de autorización;
+- logs de aceptación o rechazo.
+
+Los controles pueden ser globales o específicos:
+
+- **Globales:** aplican a cualquier arquitectura OAuth 2.0/OIDC, como gobierno de clientes, validación completa de tokens o logging.
+- **Específicos:** aplican a un escenario particular, como PKCE en SPA+BFF+IdP, vault y rotación en M2M, o token exchange en API Gateway federado.
+
+---
+
+### 3.4. Auditoría basada en riesgos
+
+La auditoría basada en riesgos prioriza la evaluación de controles según la exposición que representan los activos, procesos y arquitecturas revisadas. En lugar de aplicar una lista genérica de verificación sin contexto, parte de los riesgos relevantes y evalúa los controles más importantes para mitigarlos.
+
+En esta tesis, la lógica de auditoría basada en riesgos se traduce así:
+
+```mermaid
+flowchart TD
+    A[Seleccionar escenario OAuth2/OIDC] --> B[Activar riesgos aplicables]
+    B --> C[Identificar activo, amenaza y vulnerabilidad]
+    C --> D[Relacionar controles esperados]
+    D --> E[Levantar evidencia]
+    E --> F[Calificar dimensiones del control]
+    F --> G[Calcular score del control]
+    G --> H[Calcular eficacia frente al riesgo]
+    H --> I[Calcular eficiencia y exposición observada]
+```
+
+La evidencia puede provenir de varias fuentes:
+
+- configuración del Authorization Server;
+- configuración del API Gateway;
+- configuración del Resource Server;
+- consola del proveedor de identidad;
+- archivos de configuración;
+- logs;
+- trazas;
+- pruebas técnicas;
+- revisión puntual de código;
+- documentación de arquitectura;
+- pipelines;
+- inventario de clientes o secretos.
+
+Esta evidencia permite distinguir entre controles diseñados, declarados, implementados y auditados.
+
+---
+
+### 3.5. Relación riesgo-control-evidencia
+
+El modelo propuesto se apoya en una relación muchos-a-muchos entre riesgos y controles. Un riesgo puede requerir varios controles, y un mismo control puede mitigar varios riesgos.
+
+La relación se representa mediante `RiesgoControl`, que contiene:
+
+- identificador del riesgo;
+- identificador del control;
+- peso de mitigación \(w_i\);
+- grado de mitigación;
+- obligatoriedad;
+- justificación técnica;
+- referencias.
+
+La evidencia aparece como soporte del estado observado del control. Sin evidencia, el modelo penaliza el score final del control mediante el factor de evidencia \(F_{ev}\).
+
+La relación conceptual es:
+
+```mermaid
+flowchart LR
+    A[Riesgo] --> B[Relación riesgo-control]
+    C[Control esperado] --> B
+    B --> D[Peso de mitigación]
+    B --> E[Evaluación del control]
+    F[Evidencia encontrada] --> E
+    E --> G[Score del control]
+    D --> H[Eficacia frente al riesgo]
+    G --> H
+```
+
+Esta estructura permite responder una pregunta clave:
+
+> ¿Cuánto aporta realmente un control evidenciado frente a un riesgo específico?
+
+---
+
+### 3.6. Uso del enfoque de Valencia Duque en esta tesis
+
+La tesis toma como referencia el enfoque de aseguramiento y auditoría de TI orientado a riesgos de Valencia Duque, especialmente la idea de evaluar controles desde su relación con el riesgo y no solo desde su existencia formal.
+
+En este trabajo, esa perspectiva se adapta al dominio de OAuth 2.0/OIDC mediante tres decisiones metodológicas:
+
+1. **Separar riesgo, control y evidencia.**  
+   Un riesgo no queda mitigado solo porque exista un control en el catálogo. Debe evaluarse si el control está implementado y evidenciado.
+
+2. **Distinguir score del control y eficacia frente al riesgo.**  
+   El score del control mide su estado observado. La eficacia frente al riesgo mide su aporte ponderado dentro de un conjunto de controles asociados al riesgo.
+
+3. **Incorporar eficiencia como relación beneficio-costo.**  
+   La eficiencia no se mide solo por diseño técnico, sino como relación entre beneficio de mitigación estimado y costo asignado.
+
+La tesis no pretende reproducir literalmente un marco de auditoría completo. Su aporte consiste en adaptar el enfoque de aseguramiento orientado a riesgos a tres escenarios concretos de identidad federada.
+
+---
+
+### 3.7. Complemento con estándares y fuentes técnicas
+
+El modelo combina aseguramiento orientado a riesgos con fuentes técnicas especializadas. Esta combinación evita dos extremos:
+
+- una matriz genérica de riesgos sin precisión técnica;
+- una lista técnica de buenas prácticas sin estructura de riesgo, control y evidencia.
+
+#### 3.7.1. ISO/IEC 27001 e ISO/IEC 27002
+
+ISO/IEC 27001 e ISO/IEC 27002 aportan el lenguaje general de sistema de gestión de seguridad de la información y controles de seguridad. En esta tesis se usan como referencia para comprender que los controles deben tener propósito, responsable, evidencia y relación con riesgos.
+
+El modelo no busca certificar una organización en ISO/IEC 27001. Usa ese enfoque para ordenar controles relacionados con acceso, gestión de identidades, registros, configuración, criptografía, continuidad y gobierno.
+
+#### 3.7.2. NIST
+
+NIST aporta una estructura útil para caracterizar riesgos mediante amenaza, vulnerabilidad, probabilidad e impacto. También aporta familias de controles relacionadas con acceso, auditoría, identificación, autenticación, configuración, monitoreo y protección de sistemas.
+
+En la tesis, NIST se usa para reforzar la lógica de evaluación de riesgo y la necesidad de evidencia, no para copiar un catálogo completo de controles.
+
+#### 3.7.3. OWASP
+
+OWASP aporta guías prácticas sobre seguridad de aplicaciones, APIs, sesiones y OAuth 2.0. Su utilidad principal está en traducir riesgos técnicos de implementación a controles verificables.
+
+Ejemplos de controles influenciados por OWASP:
+
+- uso de Authorization Code + PKCE;
+- protección de cookies;
+- reducción de exposición de tokens;
+- validación de `state` y `nonce`;
+- protección contra CSRF y XSS;
+- revisión de configuración de APIs.
+
+#### 3.7.4. RFCs de OAuth 2.0/OIDC
+
+Los RFCs y especificaciones OIDC son la base técnica para definir controles esperados. En particular:
+
+- RFC 6749 define roles, flujos y conceptos base de OAuth 2.0.
+- RFC 6750 define el uso de bearer tokens.
+- RFC 7636 define PKCE.
+- RFC 7662 define token introspection.
+- RFC 8693 define token exchange.
+- RFC 9700 consolida mejores prácticas de seguridad para OAuth 2.0.
+- OpenID Connect Core define el `id_token`, `nonce`, claims y validaciones asociadas al login federado.
+
+Estas fuentes permiten que el catálogo tenga trazabilidad técnica y no dependa solo de criterio subjetivo.
+
 
 ## 4. Casos arquitectónicos de contraste y escenarios de evaluación
 
@@ -1697,21 +1914,26 @@ Un portal de pagos de una entidad financiera publica una SPA estática para que 
 #### 4.5.3. Diagrama de despliegue
 
 ```plantuml
-@startuml
-title Escenario 1 - SPA + BFF + IdP corporativo
+@startuml escenario_1_deployment
+title Escenario 1 - SPA estática + BFF + IdP corporativo (OAuth 2.0/OIDC)
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+actor "Usuario" as User
 
 node "Navegador" as Browser {
-  artifact "SPA estática" as SPA
+  component "SPA estática" as SPA
   artifact "Cookie SESSION_ID" as Cookie
 }
 
-cloud "CDN / hosting estático" as CDN {
-  artifact "Archivos SPA" as StaticFiles
+cloud "CDN / Hosting estático" as CDN {
+  artifact "index.html / JS / CSS" as StaticFiles
 }
 
 node "Zona aplicación" as AppZone {
-  component "BFF\nCliente OAuth 2.0/OIDC" as BFF
-  database "Store de sesión / tokens" as SessionStore
+  component "BFF\nCliente OAuth2/OIDC" as BFF
+  database "Store de sesión y tokens" as SessionStore
 }
 
 node "Plataforma IAM corporativa" as IAM {
@@ -1721,16 +1943,44 @@ node "Plataforma IAM corporativa" as IAM {
 }
 
 node "Zona APIs" as APIZone {
-  component "API protegida" as API
+  component "Resource Server\nAPI protegida" as API
 }
 
+node "Observabilidad" as OBS {
+  component "Logs / SIEM" as SIEM
+}
+
+User --> Browser
 Browser --> CDN : GET SPA
-Browser --> BFF : HTTPS + Cookie
-BFF --> AS : Authorization Code + PKCE
-AS --> Directory : autentica usuario
-BFF --> SessionStore : guarda sesión/tokens
-BFF --> API : Bearer access_token
-API --> JWKS : valida firma, si aplica
+CDN --> Browser : Archivos estáticos
+
+Browser --> BFF : HTTPS + SESSION_ID
+BFF --> AS : Auth Code + PKCE\nstate + nonce
+AS --> Directory : autenticar usuario
+BFF --> AS : POST /token\ncode + code_verifier
+BFF --> SessionStore : custodiar tokens server-side
+BFF --> API : Authorization: Bearer access_token
+API --> JWKS : validar firma / claves
+
+AS --> SIEM : log autenticación y emisión
+BFF --> SIEM : log sesión y consumo API
+API --> SIEM : log autorización backend
+
+note right of SPA
+La SPA no guarda tokens.
+Solo usa cookie contra el BFF.
+end note
+
+note right of BFF
+El BFF ejecuta OAuth2/OIDC.
+Custodia tokens del lado servidor.
+end note
+
+note right of API
+Validar issuer, audience,
+expiración y scopes.
+end note
+
 @enduml
 ```
 
@@ -1738,35 +1988,49 @@ API --> JWKS : valida firma, si aplica
 
 ```plantuml
 @startuml
-title Escenario 1 - Authorization Code + PKCE en BFF
+title Escenario 1 - Authorization Code + PKCE con BFF
 
 actor Usuario
 participant "SPA" as SPA
 participant "BFF" as BFF
 participant "Authorization Server / IdP" as AS
 participant "API protegida" as API
+participant "SIEM" as SIEM
 
 Usuario -> SPA : Abre portal
 SPA -> BFF : GET /session
-BFF --> SPA : 401 / requiere login
+BFF --> SPA : 401 Requiere login
+
 SPA -> BFF : GET /login
-BFF -> BFF : Genera state, nonce, code_verifier, code_challenge
-BFF --> SPA : 302 redirect al IdP
-SPA -> AS : Authorization request + code_challenge + state + nonce
-AS -> Usuario : Autenticación / MFA
+BFF -> BFF : Genera state, nonce,\ncode_verifier y code_challenge
+BFF --> SPA : 302 Redirect al IdP
+
+SPA -> AS : GET /authorize\nclient_id, redirect_uri,\nstate, nonce, code_challenge
+AS -> Usuario : Autenticacion / MFA
 Usuario --> AS : Credenciales / factor
-AS --> SPA : 302 callback con authorization_code + state
+AS --> SPA : 302 callback\ncode + state
+
 SPA -> BFF : GET /callback?code=...&state=...
-BFF -> BFF : Valida state
-BFF -> AS : Token request + authorization_code + code_verifier
-AS --> BFF : access_token + id_token + refresh_token, si aplica
-BFF -> BFF : Valida id_token, nonce, issuer, audience, exp
-BFF --> SPA : Set-Cookie: SESSION_ID; HttpOnly; Secure; SameSite
-SPA -> BFF : GET /api/saldos + Cookie
-BFF -> API : GET /saldos + Bearer access_token
+BFF -> BFF : Validar state
+BFF -> AS : POST /token\ncode + code_verifier
+AS --> BFF : access_token + id_token\nrefresh_token si aplica
+
+BFF -> BFF : Validar id_token\nissuer, audience, exp, nonce
+BFF -> BFF : Crear sesion server-side
+BFF --> SPA : Set-Cookie: SESSION_ID\nHttpOnly; Secure; SameSite
+
+SPA -> BFF : GET /api/recurso + Cookie
+BFF -> API : GET /recurso\nAuthorization: Bearer access_token
+API -> API : Validar issuer, audience,\nexp y scopes
 API --> BFF : Respuesta
 BFF --> SPA : JSON filtrado para UI
+
+AS -> SIEM : Log autenticacion / token
+API -> SIEM : Log autorizacion API
+BFF -> SIEM : Log correlado de sesion
+
 @enduml
+
 ```
 
 #### 4.5.5. Activos y controles relevantes
@@ -1829,35 +2093,58 @@ Un proceso de gobierno IAM necesita revisar clientes OAuth registrados, scopes a
 #### 4.6.3. Diagrama de despliegue
 
 ```plantuml
-@startuml
-title Escenario 2 - M2M con AS actuando como RS
+@startuml escenario_2_deployment
+title Escenario 2 - M2M con Authorization Server como Resource Server
 
-node "Plataforma de automatización" as WorkerNode {
-  component "Servicio IAM Governance" as Worker
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+' Anclas de layout para estabilizar el render en web
+Automation -[hidden]right-> Vault
+Vault -[hidden]right-> IAM
+IAM -[hidden]right-> Obs
+
+node "Plataforma de automatizacion" as Automation {
+  component "Servicio tecnico\nIAM Governance / Batch" as Client
   artifact "client_id" as ClientId
 }
 
 node "Gestor de secretos" as Vault {
-  artifact "client_secret / certificado" as Secret
+  artifact "client_secret /\ncertificado /\nprivate key" as Secret
 }
 
 node "Plataforma IAM" as IAM {
   component "Authorization Server" as AS
-  component "Resource Server interno\n(Admin API / Introspection / Config API)" as RS
-  database "Configuración IAM" as IAMDB
+  component "Resource Server interno\nAdmin API / Config API" as RS
+  database "BD configuracion IAM" as IAMDB
 }
 
 node "Observabilidad" as Obs {
   component "Logs / SIEM" as SIEM
 }
 
-Worker --> Vault : obtiene secreto
-Worker --> AS : token request client_credentials
-AS --> Worker : access_token
-Worker --> RS : Bearer access_token
-RS --> IAMDB : consulta/modifica recurso protegido
-AS --> SIEM : log emisión token
-RS --> SIEM : log acceso API
+Client --> Vault : obtener credencial
+Client --> AS : POST /token\ngrant_type=client_credentials
+AS --> Client : access_token M2M
+
+Client --> RS : Authorization: Bearer\naccess_token
+RS --> AS : validar token\nlocal o introspection
+RS --> IAMDB : consultar / modificar\nconfiguracion
+
+AS --> SIEM : log emision token
+RS --> SIEM : log consumo API
+Client --> SIEM : log operacion tecnica
+
+note right of IAM
+AS y RS son roles logicos distintos,
+aunque convivan en la misma plataforma.
+end note
+
+note bottom of Client
+No hay usuario humano.
+El sujeto evaluado es el cliente tecnico.
+end note
+
 @enduml
 ```
 
@@ -1865,26 +2152,32 @@ RS --> SIEM : log acceso API
 
 ```plantuml
 @startuml
-title Escenario 2 - Client Credentials contra recurso del AS
+title Escenario 2 - Client Credentials contra API del propio AS
 
-participant "Servicio IAM Governance" as Client
+participant "Servicio tecnico" as Client
 participant "Vault" as Vault
 participant "Authorization Server" as AS
 participant "Admin API / Resource Server" as RS
-database "Config IAM" as DB
+database "BD configuracion IAM" as DB
+participant "SIEM" as SIEM
 
-Client -> Vault : Solicitar secreto/certificado
-Vault --> Client : Credencial técnica
-Client -> AS : POST /token\ngrant_type=client_credentials\nclient_id + secret/cert
-AS -> AS : Autentica cliente técnico
-AS -> AS : Evalúa scopes permitidos
-AS --> Client : access_token(scope=iam.read)
+Client -> Vault : Solicitar secreto o certificado
+Vault --> Client : Credencial tecnica
+
+Client -> AS : POST /token\ngrant_type=client_credentials\nclient_id + credencial
+AS -> AS : Autenticar cliente tecnico
+AS -> AS : Evaluar scopes permitidos
+AS --> Client : access_token\nscope=iam.read
+
+AS -> SIEM : Registrar emision de token
+
 Client -> RS : GET /admin/clients\nAuthorization: Bearer access_token
-RS -> AS : Validación local o introspection, si aplica
-AS --> RS : token válido / claims / scopes
+RS -> RS : Validar issuer, audience,\nexpiracion y scopes
 RS -> DB : Consultar clientes OAuth
-DB --> RS : Lista de clientes
+DB --> RS : Resultado
+RS -> SIEM : Registrar acceso administrativo
 RS --> Client : Respuesta
+
 @enduml
 ```
 
@@ -1950,45 +2243,64 @@ Un portal de originación de crédito recibe una solicitud del cliente. La SPA o
 #### 4.7.3. Diagrama de despliegue
 
 ```plantuml
-@startuml
-title Escenario 3 - API Gateway federado + AS corporativo
+@startuml escenario_3_deployment
+title Escenario 3 - API Gateway federado + Authorization Server corporativo
+
+skinparam shadowing false
+skinparam componentStyle rectangle
 
 node "Canal digital" as Channel {
-  component "SPA / Mobile / BFF" as Client
+  component "SPA / Mobile / BFF / Partner" as Client
 }
 
-node "DMZ / Zona de exposición" as Edge {
+node "Zona de exposicion" as Edge {
   component "API Gateway" as Gateway
 }
 
 node "Plataforma IAM corporativa" as IAM {
   component "Authorization Server" as AS
-  artifact "JWKS / Introspection / Token Exchange" as TokenServices
+  artifact "JWKS" as JWKS
+  component "Introspection Endpoint" as Introspection
+  component "Token Exchange Endpoint" as TokenExchange
 }
 
-node "Zona interna" as Internal {
+node "Zona interna de APIs" as Internal {
+  component "API Clientes" as Customers
   component "API Cupos" as Limits
   component "API Cartera" as Portfolio
   component "API Listas restrictivas" as Watchlists
-  component "API Clientes" as Customers
 }
 
 node "Observabilidad" as Obs {
   component "Logs / SIEM / APM" as SIEM
 }
 
-Client --> Gateway : HTTPS + access_token
-Gateway --> AS : valida JWT / introspection
-Gateway --> AS : token exchange, si aplica
-Gateway --> Limits : token propagado o token intercambiado
-Gateway --> Portfolio : token propagado o token intercambiado
-Gateway --> Watchlists : token propagado o token intercambiado
-Gateway --> Customers : token propagado o token intercambiado
-Gateway --> SIEM : logs de acceso y decisión
-Limits --> SIEM
-Portfolio --> SIEM
-Watchlists --> SIEM
-Customers --> SIEM
+Client --> Gateway : HTTPS + Bearer token
+Gateway --> JWKS : validar firma JWT
+Gateway --> Introspection : introspection si token opaco
+Gateway --> TokenExchange : token exchange si cambia audiencia
+
+Gateway --> Customers : token propagado\no token intercambiado
+Gateway --> Limits : token propagado\no token intercambiado
+Gateway --> Portfolio : token propagado\no token intercambiado
+Gateway --> Watchlists : token propagado\no token intercambiado
+
+Gateway --> SIEM : log decision gateway
+Customers --> SIEM : log backend
+Limits --> SIEM : log backend
+Portfolio --> SIEM : log backend
+Watchlists --> SIEM : log backend
+
+note right of Gateway
+El Gateway no debe ser
+el unico punto de confianza.
+end note
+
+note bottom of Internal
+APIs criticas deberian validar
+audience, scopes y autorizacion propia.
+end note
+
 @enduml
 ```
 
@@ -1996,36 +2308,46 @@ Customers --> SIEM
 
 ```plantuml
 @startuml
-title Escenario 3 - Gateway, validación y token exchange
+title Escenario 3 - Gateway, validacion y token exchange
 
-participant "Cliente / BFF" as Client
+participant "Cliente / Canal / BFF" as Client
 participant "API Gateway" as GW
 participant "Authorization Server" as AS
 participant "API Cupos" as Limits
 participant "API Cartera" as Portfolio
 participant "SIEM" as SIEM
 
-Client -> GW : GET /originacion/resumen\nAuthorization: Bearer token_usuario
+Client -> GW : GET /originacion/resumen\nAuthorization: Bearer token_entrada
+
 GW -> AS : Validar token\nJWKS o introspection
-AS --> GW : token válido + claims + scopes
-GW -> GW : Verifica issuer, audience, exp, scopes
-alt Propagación directa
-  GW -> Limits : Bearer token_usuario
-  Limits -> Limits : Valida audience/scopes localmente
-  GW -> Portfolio : Bearer token_usuario
-  Portfolio -> Portfolio : Valida audience/scopes localmente
-else Token exchange
-  GW -> AS : Token exchange\nsubject_token=token_usuario\naudience=api-cupos
+AS --> GW : Token valido\nclaims, scopes, aud, sub
+
+GW -> GW : Validar issuer, audience,\nexpiracion y scopes
+
+alt Propagacion directa del token
+  GW -> Limits : Bearer token_entrada
+  Limits -> Limits : Revalidar audience,\nscopes y autorizacion
+  Limits --> GW : Datos de cupos
+
+  GW -> Portfolio : Bearer token_entrada
+  Portfolio -> Portfolio : Revalidar audience,\nscopes y autorizacion
+  Portfolio --> GW : Datos de cartera
+
+else Token exchange / downscoping
+  GW -> AS : Token exchange\nsubject_token=token_entrada\naudience=api-cupos
   AS --> GW : token_cupos
   GW -> Limits : Bearer token_cupos
-  GW -> AS : Token exchange\nsubject_token=token_usuario\naudience=api-cartera
+  Limits --> GW : Datos de cupos
+
+  GW -> AS : Token exchange\nsubject_token=token_entrada\naudience=api-cartera
   AS --> GW : token_cartera
   GW -> Portfolio : Bearer token_cartera
+  Portfolio --> GW : Datos de cartera
 end
-Limits --> GW : Respuesta cupos
-Portfolio --> GW : Respuesta cartera
-GW -> SIEM : Log sujeto, cliente, audiencia, decisión
+
+GW -> SIEM : Log correlado\nsub, client_id, aud, backend, decision
 GW --> Client : Respuesta compuesta
+
 @enduml
 ```
 
@@ -3024,9 +3346,9 @@ El formulario web no solo calcula resultados, sino que también muestra ecuacion
 La notación se organiza en cuatro niveles:
 
 1. **Nivel de dimensión del control:** madurez, automatización, momento, periodicidad, alcance funcional y evidencia.
-2. **Nivel de control:** cálculo de \(S*{base(raw)}\), \(S*{base}\), \(F*{ev}\) y \(S*{control}\).
+2. **Nivel de control:** cálculo de \(S_{base(raw)}\), \(S_{base}\), \(F_{ev}\) y \(S_{control}\).
 3. **Nivel riesgo-control:** cálculo del aporte ponderado \(Aporte_i\) mediante el peso \(w_i\).
-4. **Nivel de riesgo y evaluación global:** cálculo de \(E*r\), \(\eta_r\), \(E*{global}\) y \(\eta\_{global}\).
+4. **Nivel de riesgo y evaluación global:** cálculo de \(E_r\), \(\eta_r\), \(E_{global}\) y \(\eta_{global}\).
 
 ##### Variables principales
 
@@ -3037,11 +3359,11 @@ Para un control \(c\), se usan las siguientes variables:
 - \(T_c\): valor numérico del **momento** del control.
 - \(P_c\): valor numérico de la **periodicidad** del control.
 - \(L_c\): valor numérico del **alcance funcional** del control.
-- \(f\_{ev}(c)\): valor bruto asociado a la suficiencia de evidencia.
-- \(F\_{ev}(c)\): factor de evidencia normalizado.
-- \(S\_{base(raw)}(c)\): score base antes de normalización.
-- \(S\_{base}(c)\): score base normalizado.
-- \(S\_{control}(c)\): score final del control.
+- \(f_{ev}(c)\): valor bruto asociado a la suficiencia de evidencia.
+- \(F_{ev}(c)\): factor de evidencia normalizado.
+- \(S_{base(raw)}(c)\): score base antes de normalización.
+- \(S_{base}(c)\): score base normalizado.
+- \(S_{control}(c)\): score final del control.
 - \(w_i\): peso de mitigación de la relación entre el riesgo y el control \(i\).
 - \(Aporte_i\): contribución ponderada del control \(i\) frente a un riesgo específico.
 
@@ -3179,13 +3501,13 @@ Esta separación es importante porque permite diferenciar entre el **diseño ope
 
 ##### Factor de evidencia
 
-La evidencia se representa mediante \(F\_{ev}\). El formulario toma el valor asociado a la suficiencia de evidencia y lo normaliza:
+La evidencia se representa mediante \(F_{ev}\). El formulario toma el valor asociado a la suficiencia de evidencia y lo normaliza:
 
 $$
 F_{ev}(c)=\operatorname{norm}\left(f_{ev}(c)\right)
 $$
 
-Donde \(f\_{ev}(c)\) puede tomar valores como 0, 0.5, 0.85 o 1, según la evidencia sea inexistente, parcial, suficiente o independiente/auditada.
+Donde \(f_{ev}(c)\) puede tomar valores como 0, 0.5, 0.85 o 1, según la evidencia sea inexistente, parcial, suficiente o independiente/auditada.
 
 El factor de evidencia funciona como un ajuste multiplicativo. Esto evita que un control con buen diseño declarado, pero sin evidencia verificable, obtenga un aporte alto dentro de la matriz. En otras palabras, el modelo distingue entre:
 
@@ -3202,7 +3524,7 @@ $$
 S_{control}(c)=S_{base}(c)\times F_{ev}(c)
 $$
 
-El resultado \(S*{control}(c)\) está en escala de 0 a 1 y la UI lo muestra como porcentaje. Por ejemplo, \(S*{control}=0.85\) se presenta como 85%.
+El resultado \(S_{control}(c)\) está en escala de 0 a 1 y la UI lo muestra como porcentaje. Por ejemplo, \(S_{control}=0.85\) se presenta como 85%.
 
 ##### Ejemplo de cálculo del score de un control bueno
 
@@ -3367,7 +3689,7 @@ Donde:
 - \(E_r\) es la eficacia frente al riesgo \(r\).
 - \(n_r\) es el número de controles asociados al riesgo \(r\).
 - \(w_i\) es el peso de mitigación de la relación riesgo-control.
-- \(S\_{control}(c_i)\) es el score final normalizado del control \(c_i\).
+- \(S_{control}(c_i)\) es el score final normalizado del control \(c_i\).
 
 Ejemplo:
 
@@ -3394,9 +3716,9 @@ $$
 
 Donde:
 
-- \(C\_{asig}(r,c)\) es el costo asignado del control \(c\) al riesgo \(r\).
+- \(C_{asig}(r,c)\) es el costo asignado del control \(c\) al riesgo \(r\).
 - \(C(c)\) es el costo ingresado o sugerido del control.
-- \(w\_{r,c}\) es el peso de mitigación del control \(c\) frente al riesgo \(r\).
+- \(w_{r,c}\) es el peso de mitigación del control \(c\) frente al riesgo \(r\).
 - \(R_c\) es el conjunto de riesgos activos del escenario que usan el control \(c\).
 
 El costo total asignado al riesgo es:
@@ -3506,7 +3828,7 @@ $$
 
 ##### Relación entre la tesis y el formulario
 
-La tesis define las variables, fórmulas, ponderadores y reglas de interpretación. El formulario las operacionaliza en JavaScript y las renderiza mediante MathJax. Por eso los símbolos \(S*{base(raw)}\), \(S*{base}\), \(F*{ev}\), \(S*{control}\), \(w*i\), \(Aporte_i\), \(E_r\), \(\eta_r\), \(E*{global}\) y \(\eta\_{global}\) deben mantenerse estables entre la tesis, el código y el informe exportado.
+La tesis define las variables, fórmulas, ponderadores y reglas de interpretación. El formulario las operacionaliza en JavaScript y las renderiza mediante MathJax. Por eso los símbolos \(S_{base(raw)}\), \(S_{base}\), \(F_{ev}\), \(S_{control}\), \(w_i\), \(Aporte_i\), \(E_r\), \(\eta_r\), \(E_{global}\) y \(\eta_{global}\) deben mantenerse estables entre la tesis, el código y el informe exportado.
 
 #### 5.1.7. Estructura del resultado de evaluación
 
@@ -4775,68 +5097,415 @@ La comparación bueno/malo por escenario también permite validar el valor del c
 
 ## 7. Análisis de resultados
 
-7.1. Riesgos más relevantes identificados  
-7.2. Controles críticos por escenario  
-7.3. Evidencias auditables más importantes  
-7.4. Diferencias entre autenticación, autorización y federación desde el riesgo  
-7.5. Hallazgos sobre el uso seguro de OAuth 2.0/OIDC  
-7.6. Valor de la matriz como artefacto de evaluación
+Este capítulo analiza los resultados obtenidos al aplicar la matriz a las seis corridas demostrativas del capítulo 6. La lectura de resultados se concentra en validar si el modelo permite diferenciar entre arquitecturas con controles fuertes y arquitecturas con controles débiles, manteniendo constante el catálogo de riesgos y controles.
+
+La comparación demuestra que la matriz no funciona como una lista binaria de cumplimiento. El resultado cambia según la madurez, automatización, momento, periodicidad, alcance y evidencia de los controles observados.
 
 ---
+
+### 7.1. Riesgos más relevantes identificados
+
+Los riesgos más relevantes no son iguales en todos los escenarios. Cada arquitectura desplaza la exposición hacia activos y fronteras distintas.
+
+En **SPA+BFF+IdP**, los riesgos más sensibles se concentran en:
+
+- interceptación o sustitución del `authorization_code`;
+- exposición de tokens o material de sesión en el navegador;
+- validación débil de `state` y `nonce`;
+- configuración insegura de cookie o callback;
+- custodia incorrecta de tokens fuera del BFF.
+
+En **M2M AS=RS**, los riesgos más sensibles se concentran en:
+
+- abuso de cliente técnico privilegiado;
+- secretos o certificados expuestos;
+- scopes administrativos excesivos;
+- falta de rotación;
+- ausencia de responsable del cliente técnico;
+- concentración lógica entre emisión de tokens y APIs administrativas.
+
+En **API Gateway federado**, los riesgos más sensibles se concentran en:
+
+- confusión de audiencia;
+- propagación excesiva del token original;
+- backends que confían ciegamente en el Gateway;
+- ausencia de token exchange o downscoping;
+- validación inconsistente entre Gateway y Resource Servers;
+- trazabilidad fragmentada extremo a extremo.
+
+La matriz permite observar que la seguridad de OAuth 2.0/OIDC depende de la arquitectura. Un mismo control transversal, como validación de tokens o logging, puede tener diferente importancia según el escenario.
+
+---
+
+### 7.2. Controles críticos por escenario
+
+El análisis de los seis casos permite identificar controles críticos por arquitectura.
+
+#### 7.2.1. SPA+BFF+IdP
+
+Los controles críticos son:
+
+- Authorization Code + PKCE con `S256`;
+- rechazo de `plain` cuando no esté justificado;
+- validación de `state`;
+- validación de `nonce`;
+- redirect URI exacta;
+- tokens custodiados server-side;
+- cookie `HttpOnly`, `Secure` y `SameSite`;
+- evidencia de que la SPA no conserva tokens.
+
+En este escenario, PKCE es nuclear para mitigar interceptación del código de autorización, pero no es suficiente por sí solo. Debe complementarse con controles de sesión, callback, cookies, CSP y custodia server-side.
+
+#### 7.2.2. M2M AS=RS
+
+Los controles críticos son:
+
+- cliente técnico con dueño y propósito definido;
+- scopes mínimos;
+- separación por ambiente;
+- secretos o certificados en vault;
+- rotación de credenciales;
+- autenticación robusta del cliente;
+- monitoreo por `client_id`;
+- recertificación periódica de permisos.
+
+En este escenario, el riesgo no está en un usuario humano, sino en identidades no humanas. La trazabilidad por `client_id` se vuelve indispensable para atribuir operaciones.
+
+#### 7.2.3. API Gateway federado
+
+Los controles críticos son:
+
+- validación de `issuer`;
+- validación de `audience`;
+- validación de expiración;
+- validación de scopes;
+- revalidación mínima en backends críticos;
+- token exchange cuando cambia la audiencia;
+- reducción de scopes o downscoping;
+- correlación de logs entre Gateway, Authorization Server y Resource Servers.
+
+En este escenario, el Gateway no debería ser el único punto de confianza. La matriz penaliza diseños donde los backends aceptan contexto propagado sin validación mínima.
+
+---
+
+### 7.3. Evidencias auditables más importantes
+
+La evidencia es el elemento que transforma una declaración en una evaluación sustentada. Los demos malos muestran que controles declarados, sin evidencia, no aportan mitigación demostrable.
+
+Las evidencias más relevantes son:
+
+- configuración del cliente OAuth/OIDC;
+- configuración de PKCE y redirect URI;
+- logs de callback, login y emisión de tokens;
+- configuración de cookies;
+- evidencia de tokens fuera del navegador;
+- inventario de clientes técnicos;
+- configuración de scopes y audiencias;
+- evidencia de vault y rotación de secretos;
+- configuración del Gateway;
+- reglas de introspection o JWKS;
+- pruebas de rechazo de tokens inválidos;
+- trazas y logs correlados entre componentes.
+
+La evidencia debe ser suficiente para comprobar operación, no solo intención. Por ejemplo, una política que exige rotación de secretos no prueba que la rotación se haya ejecutado. Se requiere evidencia de ejecución o configuración vigente.
+
+---
+
+### 7.4. Diferencias entre autenticación, autorización y federación desde el riesgo
+
+El análisis confirma que autenticación, autorización y federación generan riesgos distintos.
+
+La **autenticación** responde quién es el sujeto. En OIDC, esto se representa mediante el `id_token` y claims asociados. Sus riesgos se relacionan con replay, sustitución, `nonce`, emisor, audiencia y validez del evento de autenticación.
+
+La **autorización** responde qué puede hacer el sujeto o cliente. En OAuth 2.0, esto se representa mediante `access_token`, scopes, audiencias y políticas del Resource Server. Sus riesgos se relacionan con scopes excesivos, audiencia incorrecta, tokens expirados o validación incompleta.
+
+La **federación** introduce relaciones de confianza entre componentes. Sus riesgos se relacionan con qué emisor se acepta, qué claims se consumen, qué componente valida y qué evidencia queda disponible para auditoría.
+
+Esta diferencia es crítica: una arquitectura puede autenticar correctamente al usuario y, aun así, autorizar mal el acceso a una API.
+
+---
+
+### 7.5. Hallazgos sobre el uso seguro de OAuth 2.0/OIDC
+
+El experimento deja varios hallazgos:
+
+1. **OAuth 2.0/OIDC no es un control único.**  
+   Es una base técnica que requiere controles complementarios de configuración, validación, evidencia y operación.
+
+2. **El patrón BFF reduce exposición de tokens en navegador, pero no elimina riesgos de sesión.**  
+   La cookie, CSRF, XSS, sesión server-side y trazabilidad siguen siendo controles críticos.
+
+3. **La identidad no humana requiere gobierno propio.**  
+   Los clientes M2M no deben tratarse como integraciones secundarias. Pueden tener privilegios altos y baja visibilidad si no se gobiernan.
+
+4. **El Gateway no debe concentrar toda la confianza.**  
+   En arquitecturas federadas, los Resource Servers críticos deben validar al menos audiencia, scopes y autorización de negocio.
+
+5. **La evidencia cambia el resultado.**  
+   Un control declarado sin evidencia suficiente no debe aportar el mismo valor que un control auditado.
+
+6. **La eficiencia económica no debe leerse aislada.**  
+   Un caso malo puede mostrar eficiencia aparente alta si el costo declarado del control es bajo frente al impacto estimado. Por eso la eficacia y el nivel de exposición observado son indispensables.
+
+---
+
+### 7.6. Valor de la matriz como artefacto de evaluación
+
+La matriz aporta valor porque permite:
+
+- cargar riesgos y controles predefinidos por arquitectura;
+- evitar que cada evaluador invente su propio checklist;
+- relacionar cada riesgo con controles y pesos de mitigación;
+- diferenciar controles globales y específicos;
+- registrar evidencia;
+- calcular score de control;
+- calcular eficacia por riesgo;
+- calcular eficiencia por riesgo;
+- generar resultados comparables entre escenarios.
+
+El valor principal no está en producir un número final, sino en obligar a documentar la cadena completa:
+
+```mermaid
+flowchart LR
+    A[Riesgo] --> B[Control esperado]
+    B --> C[Evidencia]
+    C --> D[Score]
+    D --> E[Eficacia frente al riesgo]
+    E --> F[Exposición observada]
+```
+
+Esta cadena hace que la evaluación sea trazable, revisable y justificable ante un tercero.
+
 
 ## 8. Conclusiones y trabajo futuro
 
-8.1. Conclusiones frente al objetivo general  
-8.2. Conclusiones frente a los objetivos específicos  
-8.3. Aporte de la tesis  
-8.4. Limitaciones del trabajo  
-8.5. Trabajo futuro
+### 8.1. Conclusiones frente al objetivo general
+
+El objetivo general de esta tesis fue diseñar un modelo de evaluación de controles de seguridad para arquitecturas de identidad federada basadas en OAuth 2.0 y OpenID Connect desde un enfoque de aseguramiento orientado a riesgos.
+
+Este objetivo se cumple mediante la construcción de un modelo que integra:
+
+- escenarios arquitectónicos representativos;
+- catálogo maestro de riesgos y controles;
+- relaciones riesgo-control con pesos de mitigación;
+- dimensiones de evaluación de controles;
+- evidencia auditable;
+- fórmulas de score, eficacia y eficiencia;
+- entregable web para aplicar la evaluación.
+
+La tesis demuestra que OAuth 2.0/OIDC no debe evaluarse como una etiqueta tecnológica, sino como una arquitectura de confianza compuesta por clientes, Authorization Server, Resource Servers, tokens, sesiones, scopes, audiencias, secretos, trazabilidad y evidencia.
 
 ---
+
+### 8.2. Conclusiones frente a los objetivos específicos
+
+#### Objetivo específico 1
+
+Se caracterizaron conceptos fundamentales como identidad digital, autenticación, autorización, federación, tokens, clientes, Authorization Server, Resource Server, PKCE, introspection, token exchange, BFF, cookies y API Gateway.
+
+La principal conclusión es que la seguridad de identidad federada depende de comprender qué componente autentica, qué componente autoriza, quién emite el token, quién lo valida y qué evidencia queda disponible.
+
+#### Objetivo específico 2
+
+Se identificaron riesgos globales y específicos asociados a OAuth 2.0/OIDC. Los riesgos globales incluyen exposición de tokens, validación insuficiente, scopes excesivos, gobierno débil de clientes y trazabilidad insuficiente. Los riesgos específicos dependen de la arquitectura: SPA+BFF+IdP, M2M AS=RS y API Gateway federado.
+
+La principal conclusión es que el riesgo no es uniforme. Cambia según el flujo, el tipo de cliente, el rol del componente y la frontera de confianza.
+
+#### Objetivo específico 3
+
+Se definieron criterios de evaluación para analizar controles mediante dimensiones de madurez, automatización, momento, periodicidad, alcance funcional y evidencia. También se definieron ponderadores, pesos de mitigación, costo asignado, eficacia y eficiencia.
+
+La principal conclusión es que un control no debe evaluarse solo por existir. Debe evaluarse por su estado, evidencia y contribución al riesgo específico.
+
+#### Objetivo específico 4
+
+Se aplicó el modelo a tres escenarios OAuth 2.0/OIDC mediante seis corridas demostrativas: una buena y una mala por cada escenario.
+
+La principal conclusión es que el modelo diferencia adecuadamente entre controles fuertes y controles débiles. Manteniendo el mismo catálogo, la eficacia cambia cuando cambian la evidencia y el estado de los controles.
+
+#### Objetivo específico 5
+
+Se condensó el modelo en un entregable web basado en catálogo JSON, formulario de evaluación, cálculo local de resultados y exportación de informe.
+
+La principal conclusión es que el entregable web operacionaliza la tesis y permite reproducir los cálculos definidos en el documento, evitando que el modelo quede como un artefacto puramente teórico.
+
+---
+
+### 8.3. Aporte de la tesis
+
+El aporte principal de esta tesis es un modelo aplicado para evaluar controles de seguridad en arquitecturas OAuth 2.0/OIDC desde la relación entre riesgo, control, evidencia y resultado.
+
+El aporte se materializa en cuatro artefactos:
+
+1. **Marco arquitectónico:** dos casos base y tres escenarios evaluables.
+2. **Catálogo maestro:** riesgos, controles, relaciones, pesos y referencias.
+3. **Matriz de evaluación:** campos, dimensiones, fórmulas y reglas de cálculo.
+4. **Entregable web:** formulario, prediligenciamiento demo y exportación de resultados.
+
+El modelo permite pasar de afirmaciones generales como “usamos OAuth 2.0” a preguntas auditables como:
+
+- ¿qué riesgos aplica esta arquitectura?
+- ¿qué controles deberían existir?
+- ¿qué evidencia sustenta el estado del control?
+- ¿qué tan eficaz es el conjunto de controles frente al riesgo?
+- ¿qué exposición permanece?
+
+---
+
+### 8.4. Limitaciones del trabajo
+
+La tesis tiene las siguientes limitaciones:
+
+1. **No cubre todos los flujos OAuth 2.0/OIDC.**  
+   Se concentra en Authorization Code + PKCE, Client Credentials, introspection, validación bearer y token exchange.
+
+2. **No reemplaza una auditoría formal.**  
+   El modelo produce una evaluación académica y semicuantitativa. Requiere juicio profesional para aplicarse en entornos reales.
+
+3. **Los costos son estimaciones.**  
+   El cálculo de eficiencia depende del costo asignado y del impacto económico estimado. Estos valores pueden variar por organización.
+
+4. **Los pesos de mitigación son parametrizables.**  
+   Aunque se justifican metodológicamente, pueden ajustarse según criticidad, apetito de riesgo y contexto.
+
+5. **La evidencia depende de disponibilidad.**  
+   Si la organización no conserva logs, configuraciones o pruebas, el modelo puede penalizar controles aunque existan parcialmente.
+
+6. **El entregable web no automatiza una auditoría completa.**  
+   La UI guía la evaluación, pero no inspecciona automáticamente todos los sistemas ni valida técnicamente todos los controles.
+
+---
+
+### 8.5. Trabajo futuro
+
+Como trabajo futuro se proponen las siguientes líneas:
+
+1. **Validación con expertos.**  
+   Aplicar el modelo con arquitectos de seguridad, auditores, responsables IAM y equipos de desarrollo para ajustar pesos, campos y evidencias.
+
+2. **Expansión de escenarios.**  
+   Incluir aplicaciones móviles, device authorization grant, CIBA, OAuth 2.1, FAPI, mTLS sender-constrained tokens y DPoP.
+
+3. **Automatización de evidencias.**  
+   Integrar conectores con proveedores como Keycloak, Microsoft Entra ID, Auth0, Okta o API Gateways para extraer configuración y logs.
+
+4. **Mejora del cálculo de riesgo residual.**  
+   Incorporar modelos más refinados para combinar probabilidad, impacto, eficacia y exposición residual.
+
+5. **Generación de reportes ejecutivos.**  
+   Complementar el Excel con reportes PDF o dashboards que permitan priorizar riesgos y controles.
+
+6. **Control de versionamiento del catálogo.**  
+   Publicar versiones del catálogo y permitir comparación entre evaluaciones históricas.
+
+7. **Pruebas técnicas automatizadas.**  
+   Incorporar validadores de redirect URI, PKCE, JWKS, claims, scopes, expiración, audience e issuer.
+
+8. **Extensión a Zero Trust e identidad de cargas de trabajo.**  
+   Relacionar el modelo con patrones de identidad no humana, workload identity, service mesh y autorización continua.
+
 
 ## 9. Referencias
 
-9.1. Valencia Duque — _Aseguramiento y auditoría de tecnologías de información orientados a riesgos: un enfoque basado en estándares internacionales_.  
-9.2. RFC 6749 — OAuth 2.0 Authorization Framework.  
-9.3. RFC 6750 — OAuth 2.0 Bearer Token Usage.  
-9.4. OpenID Connect Core 1.0.  
-9.5. RFC 7515 — JSON Web Signature.  
-9.6. RFC 7516 — JSON Web Encryption.  
-9.7. RFC 7517 — JSON Web Key.  
-9.8. RFC 7519 — JSON Web Token.  
-9.9. RFC 7636 — Proof Key for Code Exchange.  
-9.10. RFC 7662 — OAuth 2.0 Token Introspection.  
-9.11. RFC 8693 — OAuth 2.0 Token Exchange.  
-9.12. RFC 8705 — OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens.  
-9.13. RFC 9068 — JWT Profile for OAuth 2.0 Access Tokens.  
-9.14. RFC 9449 — OAuth 2.0 Demonstrating Proof of Possession.  
-9.15. RFC 9700 — OAuth 2.0 Security Best Current Practice.  
-9.16. OWASP OAuth 2.0 Cheat Sheet.  
-9.17. OWASP ASVS — OAuth and OIDC.  
-9.18. OWASP Session Management Cheat Sheet.  
-9.19. OWASP Cross-Site Request Forgery Prevention Cheat Sheet.  
-9.20. NIST SP 800-30 Rev. 1.  
-9.21. NIST SP 800-53 Rev. 5.  
-9.22. NIST Cybersecurity Framework 2.0.  
-9.23. ISO/IEC 27001 / 27002.  
-9.24. Otras fuentes académicas y técnicas.  
-9.25. Microsoft Learn — Tokens de acceso de la Plataforma de identidad de Microsoft.  
-9.26. Auth0 — Token Best Practices.  
-9.27. Keycloak — Securing applications and services with OpenID Connect.  
-9.28. Keycloak — Configuring and using token exchange.  
-9.29. Keycloak — Server Administration Guide.
+Valencia Duque, F. J. _Aseguramiento y auditoría de tecnologías de información orientados a riesgos: un enfoque basado en estándares internacionales_.
 
----
+Hardt, D. (2012). _The OAuth 2.0 Authorization Framework_ (RFC 6749). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc6749
+
+Jones, M., & Hardt, D. (2012). _The OAuth 2.0 Authorization Framework: Bearer Token Usage_ (RFC 6750). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc6750
+
+Sakimura, N., Bradley, J., Jones, M., de Medeiros, B., & Mortimore, C. (2014). _OpenID Connect Core 1.0_. OpenID Foundation. https://openid.net/specs/openid-connect-core-1_0.html
+
+Jones, M., Bradley, J., & Sakimura, N. (2015). _JSON Web Signature (JWS)_ (RFC 7515). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc7515
+
+Jones, M., & Hildebrand, J. (2015). _JSON Web Encryption (JWE)_ (RFC 7516). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc7516
+
+Jones, M. (2015). _JSON Web Key (JWK)_ (RFC 7517). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc7517
+
+Jones, M., Bradley, J., & Sakimura, N. (2015). _JSON Web Token (JWT)_ (RFC 7519). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc7519
+
+Sakimura, N., Bradley, J., & Jones, M. (2015). _Proof Key for Code Exchange by OAuth Public Clients_ (RFC 7636). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc7636
+
+Richer, J. (2015). _OAuth 2.0 Token Introspection_ (RFC 7662). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc7662
+
+Jones, M., Nadalin, A., Campbell, B., Bradley, J., & Mortimore, C. (2020). _OAuth 2.0 Token Exchange_ (RFC 8693). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc8693
+
+Campbell, B., Bradley, J., Sakimura, N., & Lodderstedt, T. (2020). _OAuth 2.0 Mutual-TLS Client Authentication and Certificate-Bound Access Tokens_ (RFC 8705). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc8705
+
+Bertocci, V. (2021). _JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens_ (RFC 9068). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc9068
+
+Fett, D., Campbell, B., Bradley, J., Lodderstedt, T., Jones, M., & Waite, D. (2023). _OAuth 2.0 Demonstrating Proof of Possession_ (RFC 9449). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc9449
+
+Lodderstedt, T., Bradley, J., Labunets, A., Fett, D., & Campbell, B. (2024). _Best Current Practice for OAuth 2.0 Security_ (RFC 9700). Internet Engineering Task Force. https://www.rfc-editor.org/rfc/rfc9700
+
+OWASP Foundation. _OAuth 2.0 Cheat Sheet_. https://cheatsheetseries.owasp.org/cheatsheets/OAuth2_Cheat_Sheet.html
+
+OWASP Foundation. _Session Management Cheat Sheet_. https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
+
+OWASP Foundation. _Cross-Site Request Forgery Prevention Cheat Sheet_. https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
+
+OWASP Foundation. _Application Security Verification Standard_. https://owasp.org/www-project-application-security-verification-standard/
+
+National Institute of Standards and Technology. (2012). _Guide for Conducting Risk Assessments_ (NIST SP 800-30 Rev. 1). https://csrc.nist.gov/publications/detail/sp/800-30/rev-1/final
+
+National Institute of Standards and Technology. (2020). _Security and Privacy Controls for Information Systems and Organizations_ (NIST SP 800-53 Rev. 5). https://csrc.nist.gov/publications/detail/sp/800-53/rev-5/final
+
+National Institute of Standards and Technology. (2024). _The NIST Cybersecurity Framework 2.0_. https://www.nist.gov/cyberframework
+
+International Organization for Standardization. (2022). _ISO/IEC 27001:2022 Information security, cybersecurity and privacy protection — Information security management systems — Requirements_. https://www.iso.org/standard/27001
+
+International Organization for Standardization. (2022). _ISO/IEC 27002:2022 Information security, cybersecurity and privacy protection — Information security controls_. https://www.iso.org/standard/75652.html
+
+Microsoft. _Access tokens in the Microsoft identity platform_. Microsoft Learn. https://learn.microsoft.com/en-us/entra/identity-platform/access-tokens
+
+Auth0. _Token Best Practices_. https://auth0.com/docs/secure/tokens/token-best-practices
+
+Keycloak. _Securing applications and services guide_. https://www.keycloak.org/docs/latest/securing_apps/
+
+Keycloak. _Server Administration Guide_. https://www.keycloak.org/docs/latest/server_admin/
+
+Keycloak. _Token exchange_. https://www.keycloak.org/securing-apps/token-exchange
+
 
 ## 10. Anexos
 
-10.1. Matriz completa de evaluación  
-10.2. Glosario de términos  
-10.3. Diagramas de escenarios  
-10.4. Checklist resumido  
-10.5. Tabla de trazabilidad riesgo–control–evidencia
-10.6. Referencia del repositorio GitHub, del sitio en GitHub Pages y formato del reporte Excel  
-10.7. Catálogo maestro JSON de riesgos, controles, relaciones riesgo-control y referencias técnicas  
-10.8. Filtros JSON por escenario  
-10.9. Mapeo de score y reglas de cálculo para la UI
-10.10. Datos de prediligenciamiento de seis escenarios demostrativos
+Los anexos de esta tesis se referencian como archivos externos del repositorio. No se embeben en el cuerpo del documento para evitar duplicar contenido extenso, mantener control de versiones y permitir que la UI consuma los mismos artefactos que se citan en la tesis.
+
+### 10.1. Artefactos de datos del modelo
+
+- [Catálogo maestro JSON](./anexos/catalogo-maestro.json)
+- [Datos de prediligenciamiento](./anexos/demo-prediligenciamiento.json)
+- [Ejemplo de resultado de evaluación](./anexos/demo-resultado.json)
+- [Modelo de dominio (Mermaid)](./anexos/dmd.mermaid)
+
+### 10.2. Diagramas de escenarios OAuth 2.0/OIDC
+
+- [Escenario 1 - Despliegue (PlantUML)](./anexos/escenario-1.deployment.plantuml)
+- [Escenario 1 - Despliegue (PNG)](./anexos/escenario-1.deployment.png)
+- [Escenario 1 - Secuencia (PlantUML)](./anexos/escenario-1.sequence.plantuml)
+- [Escenario 1 - Secuencia (PNG)](./anexos/escenario-1.sequence.png)
+- [Escenario 2 - Despliegue (PlantUML)](./anexos/escenario-2.deployment.plantuml)
+- [Escenario 2 - Despliegue (PNG)](./anexos/escenario-2.deployment.png)
+- [Escenario 2 - Secuencia (PlantUML)](./anexos/escenario-2.sequence.plantuml)
+- [Escenario 2 - Secuencia (PNG)](./anexos/escenario-2.sequence.png)
+- [Escenario 3 - Despliegue (PlantUML)](./anexos/escenario-3.deployment.plantuml)
+- [Escenario 3 - Despliegue (PNG)](./anexos/escenario-3.deployment.png)
+- [Escenario 3 - Secuencia (PlantUML)](./anexos/escenario-3.sequence.plantuml)
+- [Escenario 3 - Secuencia (PNG)](./anexos/escenario-3.sequence.png)
+
+### 10.3. Diagramas de casos base (contraste conceptual)
+
+- [Caso base 0A - Despliegue (PlantUML)](./anexos/caso-base-0A.deployment.plantuml)
+- [Caso base 0A - Despliegue (PNG)](./anexos/caso-base-0A.deployment.png)
+- [Caso base 0A - Secuencia (PlantUML)](./anexos/caso-base-0A.secuence.plantuml)
+- [Caso base 0A - Secuencia (PNG)](./anexos/caso-base-0A.secuence.png)
+- [Caso base 0B - Despliegue (PlantUML)](./anexos/caso-base-0B.deployment.plantuml)
+- [Caso base 0B - Despliegue (PNG)](./anexos/caso-base-0B.deployment.png)
+- [Caso base 0B - Secuencia (PlantUML)](./anexos/caso-base-0B.secuence.plantuml)
+- [Caso base 0B - Secuencia (PNG)](./anexos/caso-base-0B.secuence.png)
+
+### 10.4. Referencia del entregable web
+
+- [Repositorio del proyecto](./README.md)
+- [Sitio publicado en GitHub Pages](./docs/index.html)
+
+Los enlaces anteriores apuntan a rutas relativas reales de la versión actual del proyecto (`./anexos/*`). Si la estructura de carpetas cambia, esta sección debe actualizarse en la misma revisión del repositorio.

@@ -1,0 +1,1598 @@
+{
+  "catalogoEvaluacion": {
+    "id": "CAT-OAUTH2-OIDC-2026-01",
+    "version": "1.1.0",
+    "idioma": "es",
+    "fechaBase": "2026-06-04",
+    "alcance": "Catálogo maestro de riesgos y controles para SPA_BFF_IDP, M2M_AS_RS y API_GATEWAY_FEDERADO",
+    "supuestoCosto": "Rangos estimados de esfuerzo incremental de análisis, configuración, pruebas y despliegue; no incluyen licenciamiento de IdP, gateway o SIEM",
+    "monedaCosto": "USD"
+  },
+  "escenarios": [
+    {
+      "id": "SPA_BFF_IDP",
+      "nombre": "SPA estática + BFF + IdP corporativo",
+      "descripcion": "El navegador usa sesión/cookie con el BFF; el BFF ejecuta OIDC Authorization Code + PKCE con el IdP y consume APIs protegidas."
+    },
+    {
+      "id": "M2M_AS_RS",
+      "nombre": "M2M con Authorization Server como Resource Server",
+      "descripcion": "Un cliente técnico obtiene access_token con client_credentials y consume APIs protegidas del propio Authorization Server o de su plano administrativo."
+    },
+    {
+      "id": "API_GATEWAY_FEDERADO",
+      "nombre": "API Gateway federado + Authorization Server corporativo",
+      "descripcion": "El gateway valida bearer tokens y puede propagar o intercambiar tokens hacia APIs internas con audiencias y scopes diferenciados."
+    }
+  ],
+  "riesgosCatalogo": [
+    {
+      "id": "RG-001",
+      "tipo": "GLOBAL",
+      "escenarioIds": [
+        "SPA_BFF_IDP",
+        "M2M_AS_RS",
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Exposición o replay de access token bearer",
+      "descripcion": "El access_token puede filtrarse en tránsito, almacenamiento, logs, proxies o componentes comprometidos y ser reutilizado por terceros.",
+      "referencias": [
+        "RFC-6750",
+        "RFC-6819",
+        "RFC-9700",
+        "OWASP-OAUTH2"
+      ]
+    },
+    {
+      "id": "RG-002",
+      "tipo": "GLOBAL",
+      "escenarioIds": [
+        "SPA_BFF_IDP",
+        "M2M_AS_RS",
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Validación insuficiente de token",
+      "descripcion": "El Resource Server o el Gateway acepta tokens sin validar completamente firma o introspección, issuer, audience, expiración y scopes/acciones.",
+      "referencias": [
+        "RFC-7662",
+        "RFC-9700",
+        "MS-ENTRA-ACCESS-TOKENS-ES",
+        "KEYCLOAK-OIDC-LAYERS"
+      ]
+    },
+    {
+      "id": "RG-003",
+      "tipo": "GLOBAL",
+      "escenarioIds": [
+        "SPA_BFF_IDP",
+        "M2M_AS_RS",
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Scopes, recursos o audiencias sobreasignados",
+      "descripcion": "Los tokens contienen permisos o audiencias más amplias de lo necesario y permiten uso fuera del contexto previsto.",
+      "referencias": [
+        "RFC-6819",
+        "RFC-9700",
+        "OWASP-OAUTH2"
+      ]
+    },
+    {
+      "id": "RG-004",
+      "tipo": "GLOBAL",
+      "escenarioIds": [
+        "SPA_BFF_IDP",
+        "M2M_AS_RS",
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Gobierno débil de clientes, secretos y claves",
+      "descripcion": "Los clientes OAuth carecen de responsable, segregación por ambiente, almacenamiento seguro de secretos o rotación de claves y certificados.",
+      "referencias": [
+        "RFC-6819",
+        "NIST-800-53",
+        "AUTH0-TOKEN-BEST",
+        "KEYCLOAK-ADMIN-TIMEOUTS"
+      ]
+    },
+    {
+      "id": "RG-005",
+      "tipo": "GLOBAL",
+      "escenarioIds": [
+        "SPA_BFF_IDP",
+        "M2M_AS_RS",
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Trazabilidad y monitoreo insuficientes",
+      "descripcion": "La organización no puede correlacionar autenticación, emisión/uso de tokens y decisiones de autorización para detectar abuso o investigar incidentes.",
+      "referencias": [
+        "OWASP-API-2023",
+        "NIST-800-53",
+        "RFC-7662"
+      ]
+    },
+    {
+      "id": "RE1-001",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "SPA_BFF_IDP"
+      ],
+      "nombre": "Intercepción o sustitución del authorization_code y downgrade PKCE",
+      "descripcion": "Un tercero obtiene o sustituye el authorization_code, o fuerza PKCE mal configurado, para canjearlo por tokens.",
+      "referencias": [
+        "RFC-7636",
+        "RFC-9700",
+        "OWASP-OAUTH2"
+      ]
+    },
+    {
+      "id": "RE1-002",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "SPA_BFF_IDP"
+      ],
+      "nombre": "Exposición de tokens o material de sesión en el navegador",
+      "descripcion": "La SPA o el User Agent expone access_token, refresh_token o material de sesión a XSS, extensiones, almacenamiento web o herramientas del lado cliente.",
+      "referencias": [
+        "OIDC-CORE",
+        "OWASP-OAUTH2",
+        "OWASP-SESSION"
+      ]
+    },
+    {
+      "id": "RE1-003",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "SPA_BFF_IDP"
+      ],
+      "nombre": "Callback OAuth/OIDC vulnerable a CSRF, state o nonce incorrectos",
+      "descripcion": "El flujo de retorno al cliente no queda ligado a la sesión del usuario o no valida nonce, facilitando login mix-up, token/code injection o replay.",
+      "referencias": [
+        "RFC-6819",
+        "OIDC-CORE",
+        "OWASP-OAUTH2"
+      ]
+    },
+    {
+      "id": "RE2-001",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "M2M_AS_RS"
+      ],
+      "nombre": "Abuso de cliente técnico privilegiado",
+      "descripcion": "Un cliente M2M con client_credentials o capacidades administrativas opera con más permisos de los necesarios o fuera de su propósito.",
+      "referencias": [
+        "RFC-6819",
+        "RFC-9700",
+        "OWASP-API-2023"
+      ]
+    },
+    {
+      "id": "RE2-002",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "M2M_AS_RS"
+      ],
+      "nombre": "Secreto, certificado o clave M2M expuestos o sin rotación",
+      "descripcion": "La credencial del cliente técnico está hardcodeada, distribuida inseguramente o carece de rotación y revocación.",
+      "referencias": [
+        "RFC-6819",
+        "AUTH0-TOKEN-BEST",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "RE2-003",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "M2M_AS_RS"
+      ],
+      "nombre": "Segregación insuficiente cuando el AS actúa también como RS",
+      "descripcion": "La misma plataforma expone APIs protegidas y emite tokens sin suficiente separación de funciones, autorización fina ni control de acceso al endpoint administrativo.",
+      "referencias": [
+        "RFC-6819",
+        "RFC-7662",
+        "KEYCLOAK-OIDC-LAYERS"
+      ]
+    },
+    {
+      "id": "RE3-001",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Confusión de audiencia entre gateway y APIs internas",
+      "descripcion": "Un token válido para un recurso es reutilizado sobre otro backend por validar mal la audiencia o por compartir tokens multipropósito.",
+      "referencias": [
+        "RFC-9700",
+        "RFC-6819",
+        "KEYCLOAK-TOKEN-EXCHANGE"
+      ]
+    },
+    {
+      "id": "RE3-002",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Confianza ciega del backend en el gateway",
+      "descripcion": "Los Resource Servers internos no revalidan condiciones mínimas del token o no aplican autorización de negocio/función/objeto.",
+      "referencias": [
+        "RFC-9700",
+        "MS-ENTRA-ACCESS-TOKENS-ES",
+        "OWASP-API-2023"
+      ]
+    },
+    {
+      "id": "RE3-003",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Propagación de token sin downscoping o sin token exchange",
+      "descripcion": "El token de entrada se reenvía a varios backends con permisos excesivos, sin reducción de scopes ni separación por recurso destino.",
+      "referencias": [
+        "RFC-9700",
+        "KEYCLOAK-TOKEN-EXCHANGE",
+        "RFC-7662"
+      ]
+    }
+  ],
+  "controlesEsperados": [
+    {
+      "id": "CG-001",
+      "tipo": "GLOBAL",
+      "escenarioIds": [
+        "SPA_BFF_IDP",
+        "M2M_AS_RS",
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Validación completa de token en Resource Server o Gateway",
+      "descripcion": "Validar firma o introspección, issuer, audience, expiración, estado activo y scopes/acciones antes de autorizar la solicitud.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 1000,
+        "max": 4000,
+        "medio": 2500
+      },
+      "referencias": [
+        "RFC-7662",
+        "RFC-9700",
+        "MS-ENTRA-ACCESS-TOKENS-ES",
+        "KEYCLOAK-OIDC-LAYERS"
+      ]
+    },
+    {
+      "id": "CG-002",
+      "tipo": "GLOBAL",
+      "escenarioIds": [
+        "SPA_BFF_IDP",
+        "M2M_AS_RS",
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Scopes mínimos y restricción de audience/recurso",
+      "descripcion": "Emitir tokens solo para el recurso previsto y con el mínimo conjunto de permisos; rechazar audiencias incorrectas.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 800,
+        "max": 3000,
+        "medio": 1900
+      },
+      "referencias": [
+        "RFC-6819",
+        "RFC-9700",
+        "OWASP-OAUTH2",
+        "KEYCLOAK-TOKEN-EXCHANGE"
+      ]
+    },
+    {
+      "id": "CG-003",
+      "tipo": "GLOBAL",
+      "escenarioIds": [
+        "SPA_BFF_IDP",
+        "M2M_AS_RS",
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Política de vigencia y refresh tokens basada en riesgo",
+      "descripcion": "Usar access tokens de vida corta y emitir refresh tokens según evaluación de riesgo; aplicar rotación o sender-constraining cuando corresponda.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 700,
+        "max": 2500,
+        "medio": 1600
+      },
+      "referencias": [
+        "RFC-9700",
+        "RFC-6819",
+        "KEYCLOAK-ADMIN-TIMEOUTS"
+      ]
+    },
+    {
+      "id": "CG-004",
+      "tipo": "GLOBAL",
+      "escenarioIds": [
+        "SPA_BFF_IDP",
+        "M2M_AS_RS",
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Gobierno de clientes OAuth",
+      "descripcion": "Mantener inventario, responsable, segregación por ambiente y propósito, recertificación y baja de clientes inactivos.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 500,
+        "max": 2000,
+        "medio": 1250
+      },
+      "referencias": [
+        "RFC-6819",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "CG-005",
+      "tipo": "GLOBAL",
+      "escenarioIds": [
+        "SPA_BFF_IDP",
+        "M2M_AS_RS",
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Gestión segura de secretos, claves y JWKS",
+      "descripcion": "Guardar secretos/certificados en almacenes seguros, rotarlos y refrescar material criptográfico y JWKS de forma controlada.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 900,
+        "max": 3500,
+        "medio": 2200
+      },
+      "referencias": [
+        "RFC-6819",
+        "AUTH0-TOKEN-BEST",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "CG-006",
+      "tipo": "GLOBAL",
+      "escenarioIds": [
+        "SPA_BFF_IDP",
+        "M2M_AS_RS",
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Transporte seguro y no exponer tokens en URI",
+      "descripcion": "Usar HTTPS/TLS, Authorization header Bearer y evitar query parameters, referers, logs y proxies que filtren tokens.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 500,
+        "max": 1800,
+        "medio": 1150
+      },
+      "referencias": [
+        "RFC-6750",
+        "RFC-6819",
+        "AUTH0-TOKEN-BEST"
+      ]
+    },
+    {
+      "id": "CG-007",
+      "tipo": "GLOBAL",
+      "escenarioIds": [
+        "SPA_BFF_IDP",
+        "M2M_AS_RS",
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Logging, correlación y monitoreo de autenticación y autorización",
+      "descripcion": "Registrar emisión y uso de tokens, client_id, sub, aud, decisiones de acceso y eventos anómalos, con correlación entre componentes.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 1200,
+        "max": 5000,
+        "medio": 3100
+      },
+      "referencias": [
+        "OWASP-API-2023",
+        "NIST-800-53",
+        "RFC-7662"
+      ]
+    },
+    {
+      "id": "CG-008",
+      "tipo": "GLOBAL",
+      "escenarioIds": [
+        "SPA_BFF_IDP",
+        "M2M_AS_RS",
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Tokens sender-constrained para casos de alto riesgo",
+      "descripcion": "Aplicar mecanismos de prueba de posesión o binding del token al emisor cuando el impacto por replay sea elevado.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 2000,
+        "max": 8000,
+        "medio": 5000
+      },
+      "referencias": [
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "CE1-001",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "SPA_BFF_IDP"
+      ],
+      "nombre": "Authorization Code + PKCE con S256 y rechazo de plain",
+      "descripcion": "El cliente usa PKCE con code_challenge_method=S256 y el servidor rechaza o no habilita plain en nuevas implementaciones.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 800,
+        "max": 2500,
+        "medio": 1650
+      },
+      "referencias": [
+        "RFC-7636",
+        "RFC-9700",
+        "OWASP-OAUTH2"
+      ]
+    },
+    {
+      "id": "CE1-002",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "SPA_BFF_IDP"
+      ],
+      "nombre": "State y nonce ligados a la sesión del cliente",
+      "descripcion": "El callback OAuth/OIDC solo se acepta si state y nonce corresponden a la transacción y sesión iniciadas por el cliente.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 400,
+        "max": 1500,
+        "medio": 950
+      },
+      "referencias": [
+        "RFC-6819",
+        "OIDC-CORE",
+        "OWASP-OAUTH2"
+      ]
+    },
+    {
+      "id": "CE1-003",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "SPA_BFF_IDP"
+      ],
+      "nombre": "Tokens no expuestos al User Agent y custodia server-side",
+      "descripcion": "El componente server-side del cliente conserva tokens y el navegador solo opera con sesión/cookie o contexto equivalente.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 1500,
+        "max": 6000,
+        "medio": 3750
+      },
+      "referencias": [
+        "OIDC-CORE",
+        "OWASP-OAUTH2",
+        "OWASP-SESSION"
+      ]
+    },
+    {
+      "id": "CE1-004",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "SPA_BFF_IDP"
+      ],
+      "nombre": "Cookie de sesión segura y defensas anti-CSRF",
+      "descripcion": "Configurar la cookie con Secure, HttpOnly y SameSite; complementar con ligadura transaccional y defensas CSRF apropiadas.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 700,
+        "max": 2200,
+        "medio": 1450
+      },
+      "referencias": [
+        "OWASP-SESSION",
+        "RFC-6819"
+      ]
+    },
+    {
+      "id": "CE2-001",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "M2M_AS_RS"
+      ],
+      "nombre": "Cliente M2M confidencial con secreto/certificado en vault",
+      "descripcion": "El cliente service-to-service usa credenciales resguardadas fuera del código fuente y fuera del plano de ejecución no confiable.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 1000,
+        "max": 4000,
+        "medio": 2500
+      },
+      "referencias": [
+        "RFC-6819",
+        "AUTH0-TOKEN-BEST",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "CE2-002",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "M2M_AS_RS"
+      ],
+      "nombre": "Cliente técnico por ambiente y propósito con scopes mínimos",
+      "descripcion": "Separar clientes por caso de uso y entorno; reducir permisos administrativos y evitar compartir identidades técnicas.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 400,
+        "max": 1500,
+        "medio": 950
+      },
+      "referencias": [
+        "RFC-6819",
+        "RFC-9700",
+        "OWASP-API-2023"
+      ]
+    },
+    {
+      "id": "CE2-003",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "M2M_AS_RS"
+      ],
+      "nombre": "Autenticación fuerte del cliente M2M en alto riesgo",
+      "descripcion": "Para operaciones privilegiadas, usar mecanismos fuertes de autenticación del cliente y binding del token cuando el riesgo lo justifique.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 1500,
+        "max": 7000,
+        "medio": 4250
+      },
+      "referencias": [
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "CE2-004",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "M2M_AS_RS"
+      ],
+      "nombre": "Recertificación y monitoreo por client_id",
+      "descripcion": "Revisar periódicamente permisos y uso real de clientes técnicos; alertar sobre desviaciones por client_id, scope y frecuencia.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 800,
+        "max": 3500,
+        "medio": 2150
+      },
+      "referencias": [
+        "OWASP-API-2023",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "CE3-001",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Validación de audience por API destino y revalidación mínima en backend",
+      "descripcion": "El gateway y los backends críticos verifican que el token fue emitido para el recurso correcto antes de servir la operación.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 1000,
+        "max": 4500,
+        "medio": 2750
+      },
+      "referencias": [
+        "RFC-9700",
+        "MS-ENTRA-ACCESS-TOKENS-ES",
+        "KEYCLOAK-ADMIN-TIMEOUTS"
+      ]
+    },
+    {
+      "id": "CE3-002",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Token exchange o downscoping cuando cambia la frontera de confianza",
+      "descripcion": "Intercambiar el token de entrada o reducir permisos cuando el gateway llama a otro dominio/recurso con audiencia distinta.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 2000,
+        "max": 8000,
+        "medio": 5000
+      },
+      "referencias": [
+        "RFC-9700",
+        "KEYCLOAK-TOKEN-EXCHANGE"
+      ]
+    },
+    {
+      "id": "CE3-003",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Política uniforme de validación e introspección/JWKS",
+      "descripcion": "Homologar validación en gateway y APIs, incluyendo manejo de tokens opacos o lightweight, caché de introspección/JWKS y TLS.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 1200,
+        "max": 5000,
+        "medio": 3100
+      },
+      "referencias": [
+        "RFC-7662",
+        "KEYCLOAK-OIDC-LAYERS",
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "CE3-004",
+      "tipo": "ESPECIFICO",
+      "escenarioIds": [
+        "API_GATEWAY_FEDERADO"
+      ],
+      "nombre": "Trazabilidad correlacionada gateway-AS-RS",
+      "descripcion": "Correlacionar request id, client_id, sub, aud y backend invocado para reconstruir el camino del token extremo a extremo.",
+      "costoTotal": {
+        "moneda": "USD",
+        "min": 1000,
+        "max": 4500,
+        "medio": 2750
+      },
+      "referencias": [
+        "OWASP-API-2023",
+        "NIST-800-53",
+        "RFC-7662"
+      ]
+    }
+  ],
+  "riesgoControles": [
+    {
+      "id": "RC-001",
+      "riesgoId": "RG-001",
+      "controlId": "CG-001",
+      "pesoMitigacion": 0.3,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "La validación robusta reduce el replay útil de tokens inválidos, revocados o fuera de contexto.",
+      "referencias": [
+        "RFC-7662",
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-002",
+      "riesgoId": "RG-001",
+      "controlId": "CG-003",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "Vida corta y manejo seguro de refresh tokens reducen la ventana útil tras una filtración.",
+      "referencias": [
+        "RFC-9700",
+        "RFC-6819"
+      ]
+    },
+    {
+      "id": "RC-003",
+      "riesgoId": "RG-001",
+      "controlId": "CG-006",
+      "pesoMitigacion": 0.3,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "Bearer tokens solo deben viajar por TLS y no deberían exponerse en URI, logs o referers.",
+      "referencias": [
+        "RFC-6750",
+        "RFC-6819"
+      ]
+    },
+    {
+      "id": "RC-004",
+      "riesgoId": "RG-001",
+      "controlId": "CG-008",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": false,
+      "justificacion": "El binding del token al emisor mitiga replay en escenarios de alto riesgo.",
+      "referencias": [
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-005",
+      "riesgoId": "RG-002",
+      "controlId": "CG-001",
+      "pesoMitigacion": 0.6,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "La validación completa del token es el control primario frente a aceptación indebida.",
+      "referencias": [
+        "RFC-9700",
+        "MS-ENTRA-ACCESS-TOKENS-ES"
+      ]
+    },
+    {
+      "id": "RC-006",
+      "riesgoId": "RG-002",
+      "controlId": "CG-002",
+      "pesoMitigacion": 0.25,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "Audiencia y scopes bien definidos permiten validar el contexto esperado.",
+      "referencias": [
+        "RFC-6819",
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-007",
+      "riesgoId": "RG-002",
+      "controlId": "CG-007",
+      "pesoMitigacion": 0.15,
+      "gradoMitigacion": "BAJO",
+      "obligatorio": false,
+      "justificacion": "La trazabilidad no evita la aceptación, pero mejora detección y forense.",
+      "referencias": [
+        "OWASP-API-2023",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "RC-008",
+      "riesgoId": "RG-003",
+      "controlId": "CG-002",
+      "pesoMitigacion": 0.6,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "La restricción de audience/recurso y scopes mínimos ataca el sobrealcance en origen.",
+      "referencias": [
+        "RFC-6819",
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-009",
+      "riesgoId": "RG-003",
+      "controlId": "CG-001",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "El RS debe rechazar tokens con audiencias o acciones no previstas.",
+      "referencias": [
+        "RFC-9700",
+        "MS-ENTRA-ACCESS-TOKENS-ES"
+      ]
+    },
+    {
+      "id": "RC-010",
+      "riesgoId": "RG-003",
+      "controlId": "CG-004",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "El gobierno de clientes ayuda a evitar permisos heredados o reutilizados.",
+      "referencias": [
+        "RFC-6819",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "RC-011",
+      "riesgoId": "RG-004",
+      "controlId": "CG-004",
+      "pesoMitigacion": 0.35,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "Inventario, dueño y segregación reducen huérfanos y usos cruzados.",
+      "referencias": [
+        "RFC-6819",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "RC-012",
+      "riesgoId": "RG-004",
+      "controlId": "CG-005",
+      "pesoMitigacion": 0.45,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "El almacenamiento seguro y la rotación de secretos/claves son el control principal.",
+      "referencias": [
+        "RFC-6819",
+        "AUTH0-TOKEN-BEST"
+      ]
+    },
+    {
+      "id": "RC-013",
+      "riesgoId": "RG-004",
+      "controlId": "CG-007",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "BAJO",
+      "obligatorio": false,
+      "justificacion": "El monitoreo facilita detectar abuso o expiración de credenciales que no fueron retiradas.",
+      "referencias": [
+        "OWASP-API-2023",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "RC-014",
+      "riesgoId": "RG-005",
+      "controlId": "CG-007",
+      "pesoMitigacion": 0.65,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "La correlación de logs y eventos de token es el control principal de trazabilidad.",
+      "referencias": [
+        "OWASP-API-2023",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "RC-015",
+      "riesgoId": "RG-005",
+      "controlId": "CG-001",
+      "pesoMitigacion": 0.15,
+      "gradoMitigacion": "BAJO",
+      "obligatorio": false,
+      "justificacion": "La validación consistente mejora la calidad del logging de decisiones de acceso.",
+      "referencias": [
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-016",
+      "riesgoId": "RG-005",
+      "controlId": "CG-004",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "BAJO",
+      "obligatorio": false,
+      "justificacion": "Conocer el dueño del cliente mejora atribución y respuesta.",
+      "referencias": [
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "RC-017",
+      "riesgoId": "RE1-001",
+      "controlId": "CE1-001",
+      "pesoMitigacion": 0.7,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "PKCE con S256 mitiga la interceptación del authorization_code y el canje por terceros.",
+      "referencias": [
+        "RFC-7636",
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-018",
+      "riesgoId": "RE1-001",
+      "controlId": "CE1-002",
+      "pesoMitigacion": 0.15,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "State y nonce reducen inyección/sustitución ligada al callback.",
+      "referencias": [
+        "RFC-6819",
+        "OIDC-CORE"
+      ]
+    },
+    {
+      "id": "RC-019",
+      "riesgoId": "RE1-001",
+      "controlId": "CG-006",
+      "pesoMitigacion": 0.15,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "TLS y evitar exposición en canales inseguros reducen fuga del código y de tokens derivados.",
+      "referencias": [
+        "RFC-6750",
+        "RFC-6819"
+      ]
+    },
+    {
+      "id": "RC-020",
+      "riesgoId": "RE1-002",
+      "controlId": "CE1-003",
+      "pesoMitigacion": 0.55,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "No exponer tokens al navegador reduce la superficie frente a XSS, extensiones y almacenamiento local.",
+      "referencias": [
+        "OIDC-CORE",
+        "OWASP-OAUTH2"
+      ]
+    },
+    {
+      "id": "RC-021",
+      "riesgoId": "RE1-002",
+      "controlId": "CE1-004",
+      "pesoMitigacion": 0.25,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "Cookies seguras y defensas de CSRF reducen abuso de sesión.",
+      "referencias": [
+        "OWASP-SESSION",
+        "RFC-6819"
+      ]
+    },
+    {
+      "id": "RC-022",
+      "riesgoId": "RE1-002",
+      "controlId": "CG-003",
+      "pesoMitigacion": 0.1,
+      "gradoMitigacion": "BAJO",
+      "obligatorio": true,
+      "justificacion": "Vida corta y rotación limitan el valor residual de material expuesto.",
+      "referencias": [
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-023",
+      "riesgoId": "RE1-002",
+      "controlId": "CG-006",
+      "pesoMitigacion": 0.1,
+      "gradoMitigacion": "BAJO",
+      "obligatorio": true,
+      "justificacion": "Evitar URI/logs reduce canales adicionales de exposición.",
+      "referencias": [
+        "RFC-6750",
+        "RFC-6819"
+      ]
+    },
+    {
+      "id": "RC-024",
+      "riesgoId": "RE1-003",
+      "controlId": "CE1-002",
+      "pesoMitigacion": 0.55,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "La ligadura de state y nonce a la sesión mitiga CSRF y replay/login mix-up.",
+      "referencias": [
+        "RFC-6819",
+        "OIDC-CORE"
+      ]
+    },
+    {
+      "id": "RC-025",
+      "riesgoId": "RE1-003",
+      "controlId": "CE1-004",
+      "pesoMitigacion": 0.25,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "Controles de sesión/cookie ayudan a que el callback se asocie al contexto correcto.",
+      "referencias": [
+        "OWASP-SESSION"
+      ]
+    },
+    {
+      "id": "RC-026",
+      "riesgoId": "RE1-003",
+      "controlId": "CE1-001",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "PKCE complementa la protección frente a code injection y canje no autorizado.",
+      "referencias": [
+        "RFC-7636",
+        "OWASP-OAUTH2"
+      ]
+    },
+    {
+      "id": "RC-027",
+      "riesgoId": "RE2-001",
+      "controlId": "CE2-002",
+      "pesoMitigacion": 0.4,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "Separar clientes por propósito y reducir scopes administrativos disminuye el abuso privilegiado.",
+      "referencias": [
+        "RFC-6819",
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-028",
+      "riesgoId": "RE2-001",
+      "controlId": "CE2-004",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "La recertificación y el monitoreo por client_id ayudan a detectar y corregir exceso de privilegios.",
+      "referencias": [
+        "OWASP-API-2023",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "RC-029",
+      "riesgoId": "RE2-001",
+      "controlId": "CG-002",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "Scopes y recursos mínimos reducen la capacidad efectiva del cliente comprometido.",
+      "referencias": [
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-030",
+      "riesgoId": "RE2-001",
+      "controlId": "CG-004",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "El gobierno del cliente evita huérfanos y permisos acumulados.",
+      "referencias": [
+        "RFC-6819",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "RC-031",
+      "riesgoId": "RE2-002",
+      "controlId": "CE2-001",
+      "pesoMitigacion": 0.4,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "Guardar la credencial en vault y fuera del código reduce exposición accidental y exfiltración.",
+      "referencias": [
+        "RFC-6819",
+        "AUTH0-TOKEN-BEST"
+      ]
+    },
+    {
+      "id": "RC-032",
+      "riesgoId": "RE2-002",
+      "controlId": "CE2-003",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": false,
+      "justificacion": "Autenticación fuerte del cliente reduce utilidad del secreto si se filtra parcialmente.",
+      "referencias": [
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-033",
+      "riesgoId": "RE2-002",
+      "controlId": "CG-005",
+      "pesoMitigacion": 0.25,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "La rotación y custodia de secretos/certificados es el control estructural principal.",
+      "referencias": [
+        "RFC-6819",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "RC-034",
+      "riesgoId": "RE2-002",
+      "controlId": "CG-006",
+      "pesoMitigacion": 0.15,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "Evitar transporte inseguro disminuye exfiltración de credenciales o tokens asociados.",
+      "referencias": [
+        "RFC-6750",
+        "AUTH0-TOKEN-BEST"
+      ]
+    },
+    {
+      "id": "RC-035",
+      "riesgoId": "RE2-003",
+      "controlId": "CG-001",
+      "pesoMitigacion": 0.3,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "La API administrativa debe validar correctamente el token emitido por la misma plataforma.",
+      "referencias": [
+        "RFC-7662",
+        "MS-ENTRA-ACCESS-TOKENS-ES"
+      ]
+    },
+    {
+      "id": "RC-036",
+      "riesgoId": "RE2-003",
+      "controlId": "CE2-002",
+      "pesoMitigacion": 0.25,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "Separar clientes por propósito evita que un único cliente administre todo el plano IAM.",
+      "referencias": [
+        "RFC-6819"
+      ]
+    },
+    {
+      "id": "RC-037",
+      "riesgoId": "RE2-003",
+      "controlId": "CE2-004",
+      "pesoMitigacion": 0.25,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "La revisión periódica de client_id/roles compensa la concentración de poder en AS=RS.",
+      "referencias": [
+        "NIST-800-53",
+        "OWASP-API-2023"
+      ]
+    },
+    {
+      "id": "RC-038",
+      "riesgoId": "RE2-003",
+      "controlId": "CG-002",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "Scopes y recursos mínimos limitan el radio de acción del cliente técnico.",
+      "referencias": [
+        "RFC-9700",
+        "RFC-6819"
+      ]
+    },
+    {
+      "id": "RC-039",
+      "riesgoId": "RE3-001",
+      "controlId": "CE3-001",
+      "pesoMitigacion": 0.45,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "La verificación de aud por backend y gateway es el control primario frente a confusión de audiencia.",
+      "referencias": [
+        "RFC-9700",
+        "MS-ENTRA-ACCESS-TOKENS-ES"
+      ]
+    },
+    {
+      "id": "RC-040",
+      "riesgoId": "RE3-001",
+      "controlId": "CE3-002",
+      "pesoMitigacion": 0.35,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": false,
+      "justificacion": "Token exchange evita que el token inicial sirva indistintamente para múltiples backends.",
+      "referencias": [
+        "KEYCLOAK-TOKEN-EXCHANGE",
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-041",
+      "riesgoId": "RE3-001",
+      "controlId": "CG-002",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "Diseñar scopes y audience por recurso reduce el problema en origen.",
+      "referencias": [
+        "RFC-6819",
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-042",
+      "riesgoId": "RE3-002",
+      "controlId": "CE3-001",
+      "pesoMitigacion": 0.4,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": true,
+      "justificacion": "La revalidación mínima en backend evita confianza ciega en el gateway.",
+      "referencias": [
+        "RFC-9700",
+        "MS-ENTRA-ACCESS-TOKENS-ES"
+      ]
+    },
+    {
+      "id": "RC-043",
+      "riesgoId": "RE3-002",
+      "controlId": "CE3-003",
+      "pesoMitigacion": 0.35,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "Una política uniforme de validación reduce inconsistencias entre gateway y Resource Servers.",
+      "referencias": [
+        "RFC-7662",
+        "KEYCLOAK-OIDC-LAYERS"
+      ]
+    },
+    {
+      "id": "RC-044",
+      "riesgoId": "RE3-002",
+      "controlId": "CG-001",
+      "pesoMitigacion": 0.25,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "La validación técnica del token complementa la autorización de función/objeto.",
+      "referencias": [
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-045",
+      "riesgoId": "RE3-003",
+      "controlId": "CE3-002",
+      "pesoMitigacion": 0.5,
+      "gradoMitigacion": "ALTO",
+      "obligatorio": false,
+      "justificacion": "Intercambiar o reducir scopes al cruzar dominios controla privilegios residuales del token de entrada.",
+      "referencias": [
+        "KEYCLOAK-TOKEN-EXCHANGE",
+        "RFC-9700"
+      ]
+    },
+    {
+      "id": "RC-046",
+      "riesgoId": "RE3-003",
+      "controlId": "CE3-004",
+      "pesoMitigacion": 0.2,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "La trazabilidad extremo a extremo permite detectar uso transversal indebido del token.",
+      "referencias": [
+        "OWASP-API-2023",
+        "NIST-800-53"
+      ]
+    },
+    {
+      "id": "RC-047",
+      "riesgoId": "RE3-003",
+      "controlId": "CG-002",
+      "pesoMitigacion": 0.15,
+      "gradoMitigacion": "MEDIO",
+      "obligatorio": true,
+      "justificacion": "El downscoping se apoya en un buen diseño de audiencia y scopes por recurso.",
+      "referencias": [
+        "RFC-9700",
+        "RFC-6819"
+      ]
+    },
+    {
+      "id": "RC-048",
+      "riesgoId": "RE3-003",
+      "controlId": "CE3-003",
+      "pesoMitigacion": 0.15,
+      "gradoMitigacion": "BAJO",
+      "obligatorio": true,
+      "justificacion": "La política uniforme e introspección/JWKS consistente ayudan a aplicar la reducción de privilegios correctamente.",
+      "referencias": [
+        "RFC-7662",
+        "KEYCLOAK-OIDC-LAYERS"
+      ]
+    }
+  ],
+  "referenciasTecnicas": [
+    {
+      "id": "RFC-6819",
+      "tipo": "RFC",
+      "nombre": "OAuth 2.0 Threat Model and Security Considerations",
+      "seccion": "3.6; 4.1; 4.4.1.8; 4.6.4; 4.6.7; 5.1.5.5-5.1.5.9",
+      "url": "https://datatracker.ietf.org/doc/html/rfc6819"
+    },
+    {
+      "id": "RFC-7636",
+      "tipo": "RFC",
+      "nombre": "Proof Key for Code Exchange by OAuth Public Clients",
+      "seccion": "Abstract; 1; 4; 7.2",
+      "url": "https://datatracker.ietf.org/doc/html/rfc7636"
+    },
+    {
+      "id": "RFC-9700",
+      "tipo": "RFC",
+      "nombre": "Best Current Practice for OAuth 2.0 Security",
+      "seccion": "2.1.2; 2.2.2; 4.9; 4.10; 4.14",
+      "url": "https://datatracker.ietf.org/doc/html/rfc9700"
+    },
+    {
+      "id": "RFC-7662",
+      "tipo": "RFC",
+      "nombre": "OAuth 2.0 Token Introspection",
+      "seccion": "2; 2.1; 2.2; 4",
+      "url": "https://datatracker.ietf.org/doc/html/rfc7662"
+    },
+    {
+      "id": "RFC-6750",
+      "tipo": "RFC",
+      "nombre": "The OAuth 2.0 Authorization Framework: Bearer Token Usage",
+      "seccion": "1; 2.1; 2.3; 5",
+      "url": "https://datatracker.ietf.org/doc/html/rfc6750"
+    },
+    {
+      "id": "OIDC-CORE",
+      "tipo": "OIDC",
+      "nombre": "OpenID Connect Core 1.0 incorporating errata set 2",
+      "seccion": "3.1; 3.1.3.7; 15.5.2; 16.10",
+      "url": "https://openid.net/specs/openid-connect-core-1_0.html"
+    },
+    {
+      "id": "OWASP-OAUTH2",
+      "tipo": "OWASP",
+      "nombre": "OAuth2 Cheat Sheet",
+      "seccion": "OAuth 2.0 Essential Basics; PKCE; Implicit Grant; Token Replay Prevention; Access Token Privilege Restriction",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/OAuth2_Cheat_Sheet.html"
+    },
+    {
+      "id": "OWASP-API-2023",
+      "tipo": "OWASP",
+      "nombre": "OWASP Top 10 API Security Risks – 2023",
+      "seccion": "API1; API2; API3; API5",
+      "url": "https://owasp.org/API-Security/editions/2023/en/0x11-t10/"
+    },
+    {
+      "id": "OWASP-SESSION",
+      "tipo": "OWASP",
+      "nombre": "Session Management Cheat Sheet",
+      "seccion": "Secure Attribute; HttpOnly Attribute; SameSite Attribute",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html"
+    },
+    {
+      "id": "NIST-800-30",
+      "tipo": "NIST",
+      "nombre": "SP 800-30 Rev. 1 Guide for Conducting Risk Assessments",
+      "seccion": "Abstract; risk assessment, residual risk, security controls, threat vulnerability",
+      "url": "https://csrc.nist.gov/pubs/sp/800/30/r1/final"
+    },
+    {
+      "id": "NIST-800-53",
+      "tipo": "NIST",
+      "nombre": "SP 800-53 Rev. 5 Security and Privacy Controls for Information Systems and Organizations",
+      "seccion": "Control families: AC, AU, CA, CM, IA, SC, SI",
+      "url": "https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final"
+    },
+    {
+      "id": "MS-ENTRA-ACCESS-TOKENS-ES",
+      "tipo": "DocOficial",
+      "nombre": "Tokens de acceso de la Plataforma de identidad de Microsoft",
+      "seccion": "Validar tokens; aud; duración; clientes no validan access tokens",
+      "url": "https://learn.microsoft.com/es-es/entra/identity-platform/access-tokens"
+    },
+    {
+      "id": "AUTH0-TOKEN-BEST",
+      "tipo": "DocOficial",
+      "nombre": "Auth0 Token Best Practices",
+      "seccion": "Keep it secret; minimal claims; expiration; HTTPS; storage/reuse",
+      "url": "https://auth0.com/docs/secure/tokens/token-best-practices"
+    },
+    {
+      "id": "KEYCLOAK-OIDC-LAYERS",
+      "tipo": "DocOficial",
+      "nombre": "Keycloak Securing applications and services with OpenID Connect",
+      "seccion": "token endpoint; introspection endpoint",
+      "url": "https://www.keycloak.org/securing-apps/oidc-layers"
+    },
+    {
+      "id": "KEYCLOAK-TOKEN-EXCHANGE",
+      "tipo": "DocOficial",
+      "nombre": "Keycloak Configuring and using token exchange",
+      "seccion": "Scopes and audiences; audience filtering examples",
+      "url": "https://www.keycloak.org/securing-apps/token-exchange"
+    },
+    {
+      "id": "KEYCLOAK-ADMIN-TIMEOUTS",
+      "tipo": "DocOficial",
+      "nombre": "Keycloak Server Administration Guide",
+      "seccion": "Tokens tab; Access Token Lifespan; Revoke Refresh Token; Client Session Idle; audience checking",
+      "url": "https://www.keycloak.org/docs/latest/server_admin/"
+    }
+  ],
+  "mapeoScoreInicial": {
+    "madurez": {
+      "diseniada": 0,
+      "declarada": 25,
+      "implementada": 75,
+      "auditada": 100
+    },
+    "automatizacion": {
+      "manual": 0,
+      "semiautomatico": 50,
+      "automatico": 100
+    },
+    "momento": {
+      "correctivo": 0,
+      "detectivo": 50,
+      "preventivo": 100
+    },
+    "periodicidad": {
+      "ocasional": 25,
+      "periodico": 75,
+      "permanente": 100
+    },
+    "alcance": {
+      "especifico": 25,
+      "general": 100
+    },
+    "formulaScoreControl": "0.40*madurez + 0.20*automatizacion + 0.10*momento + 0.20*periodicidad + 0.10*alcance",
+    "formulaScoreControlNormalizado": "scoreControl / 100",
+    "formulaEficaciaFrenteAlRiesgo": "sum(pesoMitigacion * scoreControlNormalizado) / sum(pesoMitigacion)",
+    "formulaCostoAsignado": "costoMedio(control) * pesoMitigacion(r,c) / sum(pesoMitigacion(x,c) para riesgos activos x del escenario)",
+    "notaMoneda": "costos e impactos deben estar expresados en una misma moneda antes de calcular eficiencia"
+  },
+  "filtros": {
+    "SPA_BFF_IDP": {
+      "escenario": {
+        "id": "SPA_BFF_IDP",
+        "nombre": "SPA estática + BFF + IdP corporativo",
+        "descripcion": "El navegador usa sesión/cookie con el BFF; el BFF ejecuta OIDC Authorization Code + PKCE con el IdP y consume APIs protegidas."
+      },
+      "escenarioId": "SPA_BFF_IDP",
+      "riesgosCatalogoIds": [
+        "RG-001",
+        "RG-002",
+        "RG-003",
+        "RG-004",
+        "RG-005",
+        "RE1-001",
+        "RE1-002",
+        "RE1-003"
+      ],
+      "controlesEsperadosIds": [
+        "CG-001",
+        "CG-002",
+        "CG-003",
+        "CG-004",
+        "CG-005",
+        "CG-006",
+        "CG-007",
+        "CG-008",
+        "CE1-001",
+        "CE1-002",
+        "CE1-003",
+        "CE1-004"
+      ],
+      "riesgoControlIds": [
+        "RC-001",
+        "RC-002",
+        "RC-003",
+        "RC-004",
+        "RC-005",
+        "RC-006",
+        "RC-007",
+        "RC-008",
+        "RC-009",
+        "RC-010",
+        "RC-011",
+        "RC-012",
+        "RC-013",
+        "RC-014",
+        "RC-015",
+        "RC-016",
+        "RC-017",
+        "RC-018",
+        "RC-019",
+        "RC-020",
+        "RC-021",
+        "RC-022",
+        "RC-023",
+        "RC-024",
+        "RC-025",
+        "RC-026"
+      ]
+    },
+    "M2M_AS_RS": {
+      "escenario": {
+        "id": "M2M_AS_RS",
+        "nombre": "M2M con Authorization Server como Resource Server",
+        "descripcion": "Un cliente técnico obtiene access_token con client_credentials y consume APIs protegidas del propio Authorization Server o de su plano administrativo."
+      },
+      "escenarioId": "M2M_AS_RS",
+      "riesgosCatalogoIds": [
+        "RG-001",
+        "RG-002",
+        "RG-003",
+        "RG-004",
+        "RG-005",
+        "RE2-001",
+        "RE2-002",
+        "RE2-003"
+      ],
+      "controlesEsperadosIds": [
+        "CG-001",
+        "CG-002",
+        "CG-003",
+        "CG-004",
+        "CG-005",
+        "CG-006",
+        "CG-007",
+        "CG-008",
+        "CE2-001",
+        "CE2-002",
+        "CE2-003",
+        "CE2-004"
+      ],
+      "riesgoControlIds": [
+        "RC-001",
+        "RC-002",
+        "RC-003",
+        "RC-004",
+        "RC-005",
+        "RC-006",
+        "RC-007",
+        "RC-008",
+        "RC-009",
+        "RC-010",
+        "RC-011",
+        "RC-012",
+        "RC-013",
+        "RC-014",
+        "RC-015",
+        "RC-016",
+        "RC-027",
+        "RC-028",
+        "RC-029",
+        "RC-030",
+        "RC-031",
+        "RC-032",
+        "RC-033",
+        "RC-034",
+        "RC-035",
+        "RC-036",
+        "RC-037",
+        "RC-038"
+      ]
+    },
+    "API_GATEWAY_FEDERADO": {
+      "escenario": {
+        "id": "API_GATEWAY_FEDERADO",
+        "nombre": "API Gateway federado + Authorization Server corporativo",
+        "descripcion": "El gateway valida bearer tokens y puede propagar o intercambiar tokens hacia APIs internas con audiencias y scopes diferenciados."
+      },
+      "escenarioId": "API_GATEWAY_FEDERADO",
+      "riesgosCatalogoIds": [
+        "RG-001",
+        "RG-002",
+        "RG-003",
+        "RG-004",
+        "RG-005",
+        "RE3-001",
+        "RE3-002",
+        "RE3-003"
+      ],
+      "controlesEsperadosIds": [
+        "CG-001",
+        "CG-002",
+        "CG-003",
+        "CG-004",
+        "CG-005",
+        "CG-006",
+        "CG-007",
+        "CG-008",
+        "CE3-001",
+        "CE3-002",
+        "CE3-003",
+        "CE3-004"
+      ],
+      "riesgoControlIds": [
+        "RC-001",
+        "RC-002",
+        "RC-003",
+        "RC-004",
+        "RC-005",
+        "RC-006",
+        "RC-007",
+        "RC-008",
+        "RC-009",
+        "RC-010",
+        "RC-011",
+        "RC-012",
+        "RC-013",
+        "RC-014",
+        "RC-015",
+        "RC-016",
+        "RC-039",
+        "RC-040",
+        "RC-041",
+        "RC-042",
+        "RC-043",
+        "RC-044",
+        "RC-045",
+        "RC-046",
+        "RC-047",
+        "RC-048"
+      ]
+    }
+  }
+}

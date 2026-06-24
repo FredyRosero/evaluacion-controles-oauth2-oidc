@@ -1,0 +1,25 @@
+@startuml caso-base-0A.secuence
+title Caso base 0A - Login local y consumo en monolito
+
+actor Usuario
+participant "Navegador" as Browser
+participant "Monolito" as App
+database "BD usuarios / sesiones" as DB
+
+Usuario -> Browser : Ingresa usuario y contraseña
+Browser -> App : POST /login
+App -> DB : Consultar usuario y hash
+DB --> App : Usuario válido
+App -> DB : Crear sesión server-side
+DB --> App : SESSION_ID
+App --> Browser : Set-Cookie: SESSION_ID\nHttpOnly; Secure; SameSite
+
+Usuario -> Browser : Consulta recurso
+Browser -> App : GET /recurso + Cookie
+App -> DB : Validar SESSION_ID
+DB --> App : Sesión válida
+App -> DB : Consultar datos de negocio
+DB --> App : Datos
+App --> Browser : Respuesta
+
+@enduml

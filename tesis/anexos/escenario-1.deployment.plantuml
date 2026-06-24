@@ -1,0 +1,68 @@
+﻿@startuml escenario-1.deployment
+title Escenario 1 - SPA estática + BFF + IdP corporativo (OAuth 2.0/OIDC)
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+actor "Usuario" as User
+
+node "Navegador" as Browser {
+  component "SPA estática" as SPA
+  artifact "Cookie SESSION_ID" as Cookie
+}
+
+cloud "CDN / Hosting estático" as CDN {
+  artifact "index.html / JS / CSS" as StaticFiles
+}
+
+node "Zona aplicación" as AppZone {
+  component "BFF\nCliente OAuth2/OIDC" as BFF
+  database "Store de sesión y tokens" as SessionStore
+}
+
+node "Plataforma IAM corporativa" as IAM {
+  component "Authorization Server / IdP" as AS
+  database "Directorio corporativo" as Directory
+  artifact "JWKS" as JWKS
+}
+
+node "Zona APIs" as APIZone {
+  component "Resource Server\nAPI protegida" as API
+}
+
+node "Observabilidad" as OBS {
+  component "Logs / SIEM" as SIEM
+}
+
+User --> Browser
+Browser --> CDN : GET SPA
+CDN --> Browser : Archivos estáticos
+
+Browser --> BFF : HTTPS + SESSION_ID
+BFF --> AS : Auth Code + PKCE\nstate + nonce
+AS --> Directory : autenticar usuario
+BFF --> AS : POST /token\ncode + code_verifier
+BFF --> SessionStore : custodiar tokens server-side
+BFF --> API : Authorization: Bearer access_token
+API --> JWKS : validar firma / claves
+
+AS --> SIEM : log autenticación y emisión
+BFF --> SIEM : log sesión y consumo API
+API --> SIEM : log autorización backend
+
+note right of SPA
+La SPA no guarda tokens.
+Solo usa cookie contra el BFF.
+end note
+
+note right of BFF
+El BFF ejecuta OAuth2/OIDC.
+Custodia tokens del lado servidor.
+end note
+
+note right of API
+Validar issuer, audience,
+expiración y scopes.
+end note
+
+@enduml

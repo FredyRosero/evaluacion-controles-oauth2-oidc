@@ -1,0 +1,28 @@
+﻿@startuml escenario-2.sequence
+title Escenario 2 - Client Credentials contra API del propio AS
+
+participant "Servicio tecnico" as Client
+participant "Vault" as Vault
+participant "Authorization Server" as AS
+participant "Admin API / Resource Server" as RS
+database "BD configuracion IAM" as DB
+participant "SIEM" as SIEM
+
+Client -> Vault : Solicitar secreto o certificado
+Vault --> Client : Credencial tecnica
+
+Client -> AS : POST /token\ngrant_type=client_credentials\nclient_id + credencial
+AS -> AS : Autenticar cliente tecnico
+AS -> AS : Evaluar scopes permitidos
+AS --> Client : access_token\nscope=iam.read
+
+AS -> SIEM : Registrar emision de token
+
+Client -> RS : GET /admin/clients\nAuthorization: Bearer access_token
+RS -> RS : Validar issuer, audience,\nexpiracion y scopes
+RS -> DB : Consultar clientes OAuth
+DB --> RS : Resultado
+RS -> SIEM : Registrar acceso administrativo
+RS --> Client : Respuesta
+
+@enduml

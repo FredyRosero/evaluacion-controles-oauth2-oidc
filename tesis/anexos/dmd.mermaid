@@ -1,0 +1,168 @@
+classDiagram
+    direction LR
+
+    class CatalogoEvaluacion {
+      +id
+      +version
+      +idioma
+      +fechaBase
+      +alcance
+      +supuestoCosto
+      +monedaCosto
+    }
+
+    class Escenario {
+      +id
+      +nombre
+      +descripcion
+    }
+
+    class FiltroEscenario {
+      +escenarioId
+      +riesgosCatalogoIds
+      +controlesEsperadosIds
+      +riesgoControlIds
+    }
+
+    class RiesgoCatalogo {
+      +id
+      +tipo
+      +nombre
+      +descripcion
+    }
+
+    class ControlEsperado {
+      +id
+      +tipo
+      +nombre
+      +descripcion
+      +costoTotal
+    }
+
+    class RiesgoControl {
+      +id
+      +pesoMitigacion
+      +gradoMitigacion
+      +obligatorio
+      +justificacion
+    }
+
+    class ReferenciaTecnica {
+      +id
+      +tipo
+      +nombre
+      +seccion
+      +url
+    }
+
+    class ConfiguracionScore {
+      +madurez
+      +automatizacion
+      +momento
+      +periodicidad
+      +alcance
+      +factorEvidencia
+      +formulaScoreControl
+      +formulaEficaciaFrenteAlRiesgo
+      +formulaCostoAsignado
+    }
+
+    class EvaluacionArquitectura {
+      +id
+      +fecha
+      +evaluador
+      +ambiente
+      +versionCatalogo
+    }
+
+    class RegistroMatriz {
+      +id
+      +activoAfectado
+      +lucroCesante
+      +amenaza
+      +vulnerabilidad
+      +probabilidad
+      +impacto
+      +nivelRiesgo
+      +costoAsignado
+      +aporteEficacia
+      +observacion
+    }
+
+    class EvaluacionControl {
+      +madurez
+      +automatizacion
+      +momento
+      +periodicidad
+      +alcance
+      +factorEvidencia
+      +scoreControl
+      +eficaciaControl
+    }
+
+    class Evidencia {
+      +esperada
+      +encontrada
+      +fuente
+      +suficiencia
+    }
+
+    class EvaluacionRiesgo {
+      +riesgoId
+      +lucroCesante
+      +coberturaEsperada
+      +coberturaObservada
+      +eficaciaFrenteAlRiesgo
+      +costoAsignadoTotal
+      +beneficioMitigacionEstimado
+      +eficienciaFrenteAlRiesgo
+      +nivelExposicionObservado
+    }
+
+    class EvaluacionGlobal {
+      +registrosEvaluados
+      +riesgosEvaluados
+      +scorePromedioControl
+      +eficienciaCuantitativa
+      +eficaciaCuantitativa
+      +eficienciaCualitativa
+      +eficaciaCualitativa
+    }
+
+    CatalogoEvaluacion "1" *-- "*" Escenario : define
+    CatalogoEvaluacion "1" *-- "*" RiesgoCatalogo : contiene
+    CatalogoEvaluacion "1" *-- "*" ControlEsperado : contiene
+    CatalogoEvaluacion "1" *-- "*" RiesgoControl : contiene
+    CatalogoEvaluacion "1" *-- "*" ReferenciaTecnica : contiene
+    CatalogoEvaluacion "1" *-- "*" FiltroEscenario : contiene
+    CatalogoEvaluacion "1" *-- "1" ConfiguracionScore : parametriza
+
+    Escenario "*" -- "*" RiesgoCatalogo : aplicaA
+    Escenario "*" -- "*" ControlEsperado : aplicaA
+
+    FiltroEscenario "*" --> "1" Escenario : correspondeA
+    FiltroEscenario "1" --> "*" RiesgoCatalogo : selecciona
+    FiltroEscenario "1" --> "*" ControlEsperado : selecciona
+    FiltroEscenario "1" --> "*" RiesgoControl : selecciona
+
+    RiesgoCatalogo "1" -- "*" RiesgoControl : origen
+    ControlEsperado "1" -- "*" RiesgoControl : mitigacion
+
+    RiesgoCatalogo "*" -- "*" ReferenciaTecnica : sustentadoPor
+    ControlEsperado "*" -- "*" ReferenciaTecnica : sustentadoPor
+    RiesgoControl "*" -- "*" ReferenciaTecnica : justificadoPor
+
+    EvaluacionArquitectura "*" --> "1" CatalogoEvaluacion : usaVersion
+    EvaluacionArquitectura "*" --> "1" Escenario : evalua
+    EvaluacionArquitectura "1" *-- "*" RegistroMatriz : contiene
+    EvaluacionArquitectura "1" *-- "*" EvaluacionRiesgo : calcula
+    EvaluacionArquitectura "1" *-- "1" EvaluacionGlobal : produce
+
+    RegistroMatriz "*" --> "1" RiesgoControl : evaluaRelacion
+    RegistroMatriz "1" *-- "1" EvaluacionControl : incluye
+    RegistroMatriz "1" *-- "*" Evidencia : sustenta
+
+    EvaluacionControl "*" --> "1" ConfiguracionScore : usaMapeo
+    EvaluacionRiesgo "*" --> "1" RiesgoCatalogo : resume
+    EvaluacionRiesgo "1" --> "*" RegistroMatriz : agrega
+    EvaluacionGlobal "1" --> "*" EvaluacionRiesgo : consolida

@@ -1,0 +1,42 @@
+﻿@startuml escenario-3.sequence
+title Escenario 3 - Gateway, validacion y token exchange
+
+participant "Cliente / Canal / BFF" as Client
+participant "API Gateway" as GW
+participant "Authorization Server" as AS
+participant "API Cupos" as Limits
+participant "API Cartera" as Portfolio
+participant "SIEM" as SIEM
+
+Client -> GW : GET /originacion/resumen\nAuthorization: Bearer token_entrada
+
+GW -> AS : Validar token\nJWKS o introspection
+AS --> GW : Token valido\nclaims, scopes, aud, sub
+
+GW -> GW : Validar issuer, audience,\nexpiracion y scopes
+
+alt Propagacion directa del token
+  GW -> Limits : Bearer token_entrada
+  Limits -> Limits : Revalidar audience,\nscopes y autorizacion
+  Limits --> GW : Datos de cupos
+
+  GW -> Portfolio : Bearer token_entrada
+  Portfolio -> Portfolio : Revalidar audience,\nscopes y autorizacion
+  Portfolio --> GW : Datos de cartera
+
+else Token exchange / downscoping
+  GW -> AS : Token exchange\nsubject_token=token_entrada\naudience=api-cupos
+  AS --> GW : token_cupos
+  GW -> Limits : Bearer token_cupos
+  Limits --> GW : Datos de cupos
+
+  GW -> AS : Token exchange\nsubject_token=token_entrada\naudience=api-cartera
+  AS --> GW : token_cartera
+  GW -> Portfolio : Bearer token_cartera
+  Portfolio --> GW : Datos de cartera
+end
+
+GW -> SIEM : Log correlado\nsub, client_id, aud, backend, decision
+GW --> Client : Respuesta compuesta
+
+@enduml
