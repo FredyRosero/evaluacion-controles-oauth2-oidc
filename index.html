@@ -81,6 +81,33 @@
       border-radius: 10px;
       background: #eff6ff;
     }
+    .diagram-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .diagram-card {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      padding: 12px;
+    }
+    .diagram-frame {
+      margin-top: 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #f8fafc;
+      min-height: 120px;
+      padding: 8px;
+      overflow: auto;
+    }
+    .diagram-frame img {
+      width: auto;
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
     .demo-actions {
       display: flex;
       flex-wrap: wrap;
@@ -214,6 +241,21 @@
 
     <div id="scenarioSummary" class="readonly-block compact">Seleccione una arquitectura para cargar el catálogo.</div>
 
+    <section>
+      <h2>Diagramas del escenario</h2>
+      <p id="diagramStatus" class="muted">Seleccione una arquitectura para cargar los diagramas de despliegue y secuencia.</p>
+      <div class="diagram-grid">
+        <article class="diagram-card">
+          <h3>Diagrama de despliegue</h3>
+          <div id="deploymentDiagram" class="diagram-frame muted">Sin diagrama cargado.</div>
+        </article>
+        <article class="diagram-card">
+          <h3>Diagrama de secuencia</h3>
+          <div id="sequenceDiagram" class="diagram-frame muted">Sin diagrama cargado.</div>
+        </article>
+      </div>
+    </section>
+
     <div class="demo-panel">
       <strong>Demos por arquitectura</strong>
       <p class="muted">Use un botón para cargar datos demostrativos consistentes con el catálogo activo (caso bueno y caso malo por arquitectura).</p>
@@ -325,6 +367,7 @@
       }
     };
   </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/plantuml-encoder@1.4.0/dist/plantuml-encoder.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="app.js"></script>
 </body>

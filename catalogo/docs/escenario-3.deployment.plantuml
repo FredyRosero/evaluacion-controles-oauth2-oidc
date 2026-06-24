@@ -1,0 +1,59 @@
+﻿@startuml escenario_3_deployment
+title Escenario 3 - API Gateway federado + Authorization Server corporativo
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+node "Canal digital" as Channel {
+  component "SPA / Mobile / BFF / Partner" as Client
+}
+
+node "Zona de exposicion" as Edge {
+  component "API Gateway" as Gateway
+}
+
+node "Plataforma IAM corporativa" as IAM {
+  component "Authorization Server" as AS
+  artifact "JWKS" as JWKS
+  component "Introspection Endpoint" as Introspection
+  component "Token Exchange Endpoint" as TokenExchange
+}
+
+node "Zona interna de APIs" as Internal {
+  component "API Clientes" as Customers
+  component "API Cupos" as Limits
+  component "API Cartera" as Portfolio
+  component "API Listas restrictivas" as Watchlists
+}
+
+node "Observabilidad" as Obs {
+  component "Logs / SIEM / APM" as SIEM
+}
+
+Client --> Gateway : HTTPS + Bearer token
+Gateway --> JWKS : validar firma JWT
+Gateway --> Introspection : introspection si token opaco
+Gateway --> TokenExchange : token exchange si cambia audiencia
+
+Gateway --> Customers : token propagado\no token intercambiado
+Gateway --> Limits : token propagado\no token intercambiado
+Gateway --> Portfolio : token propagado\no token intercambiado
+Gateway --> Watchlists : token propagado\no token intercambiado
+
+Gateway --> SIEM : log decision gateway
+Customers --> SIEM : log backend
+Limits --> SIEM : log backend
+Portfolio --> SIEM : log backend
+Watchlists --> SIEM : log backend
+
+note right of Gateway
+El Gateway no debe ser
+el unico punto de confianza.
+end note
+
+note bottom of Internal
+APIs criticas deberian validar
+audience, scopes y autorizacion propia.
+end note
+
+@enduml

@@ -1,0 +1,53 @@
+﻿@startuml escenario_2_deployment
+title Escenario 2 - M2M con Authorization Server como Resource Server
+
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+' Anclas de layout para estabilizar el render en web
+Automation -[hidden]right-> Vault
+Vault -[hidden]right-> IAM
+IAM -[hidden]right-> Obs
+
+node "Plataforma de automatizacion" as Automation {
+  component "Servicio tecnico\nIAM Governance / Batch" as Client
+  artifact "client_id" as ClientId
+}
+
+node "Gestor de secretos" as Vault {
+  artifact "client_secret /\ncertificado /\nprivate key" as Secret
+}
+
+node "Plataforma IAM" as IAM {
+  component "Authorization Server" as AS
+  component "Resource Server interno\nAdmin API / Config API" as RS
+  database "BD configuracion IAM" as IAMDB
+}
+
+node "Observabilidad" as Obs {
+  component "Logs / SIEM" as SIEM
+}
+
+Client --> Vault : obtener credencial
+Client --> AS : POST /token\ngrant_type=client_credentials
+AS --> Client : access_token M2M
+
+Client --> RS : Authorization: Bearer\naccess_token
+RS --> AS : validar token\nlocal o introspection
+RS --> IAMDB : consultar / modificar\nconfiguracion
+
+AS --> SIEM : log emision token
+RS --> SIEM : log consumo API
+Client --> SIEM : log operacion tecnica
+
+note right of IAM
+AS y RS son roles logicos distintos,
+aunque convivan en la misma plataforma.
+end note
+
+note bottom of Client
+No hay usuario humano.
+El sujeto evaluado es el cliente tecnico.
+end note
+
+@enduml

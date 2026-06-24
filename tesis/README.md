@@ -1,7 +1,7 @@
 ---
 Titulo: Diseño de un modelo de evaluación de controles de seguridad para arquitecturas de identidad federada basadas en OAuth 2.0 y OpenID Connect
 Autor: Fredy Andres Rosero Cristancho
-Versión: 15
+Versión: 16
 ---
 
 ## 1. Introducción
@@ -54,7 +54,7 @@ Aunque ya existen estándares, guías y buenas prácticas sobre OAuth 2.0, OpenI
 
 Esta tesis busca aportar un modelo de evaluación, materializado en una matriz, que organice riesgos, controles, estados de implementación y evidencias auditables para escenarios representativos de uso de OAuth 2.0 u OIDC. Una parte sustantiva de ese aporte consiste en construir un catálogo estructurado de riesgos globales, riesgos específicos por escenario y controles esperados para las arquitecturas evaluadas. El aporte no consiste en crear un nuevo marco de gestión de riesgos, sino en adaptar un enfoque de aseguramiento orientado a riesgos al análisis de arquitecturas de identidad federada que implementan OAuth 2.0 y OpenID Connect.
 
-El trabajo se apoya conceptualmente en el enfoque de riesgo, control y auditoría presentado por Valencia Duque en el libro *Aseguramiento y auditoría de tecnologías de información orientados a riesgos: un enfoque basado en estándares internacionales*. En particular, se toma como referencia la idea de que la evaluación de controles debe considerar su efectividad, entendida a partir de la eficiencia y la eficacia del control.
+El trabajo se apoya conceptualmente en el enfoque de riesgo, control y auditoría presentado por Valencia Duque en el libro _Aseguramiento y auditoría de tecnologías de información orientados a riesgos: un enfoque basado en estándares internacionales_. En particular, se toma como referencia la idea de que la evaluación de controles debe considerar su efectividad, entendida a partir de la eficiencia y la eficacia del control.
 
 Desde esta perspectiva, la matriz propuesta no solo pregunta si un control existe, sino también si está adecuadamente diseñado para el riesgo que pretende mitigar y si puede verificarse mediante evidencia suficiente.
 
@@ -66,7 +66,7 @@ Diseñar un modelo de evaluación de controles de seguridad para arquitecturas d
 
 ### 1.6. Objetivos específicos
 
-1. Caracterizar los conceptos fundamentales de identidad federada, OAuth 2.0, OpenID Connect, tokens, clientes, servidores de autorización y servidores de recursos. 
+1. Caracterizar los conceptos fundamentales de identidad federada, OAuth 2.0, OpenID Connect, tokens, clientes, servidores de autorización y servidores de recursos.
 
 2. Identificar los riesgos de seguridad asociados a identidad federada y los controles técnicos y organizacionales aplicables.
 
@@ -115,7 +115,7 @@ Además de su formulación conceptual y matemática, el modelo se condensa en un
 
 La aplicación del modelo se estructura así:
 
-~~~mermaid
+```mermaid
 graph TD
     A[Catálogo maestro] --> B[Selección de arquitectura]
     B --> C[Riesgos globales]
@@ -130,7 +130,7 @@ graph TD
     J --> K[Eficiencia frente al riesgo]
     K --> L[Evaluación global]
     L --> M[Reporte Excel o JSON]
-~~~
+```
 
 En términos operativos, el entregable web no funciona como un motor abierto para que el usuario invente riesgos desde cero. El evaluador primero selecciona una de las tres arquitecturas del modelo; con esa selección, el formulario carga un catálogo predefinido de riesgos globales OAuth 2.0/OIDC, riesgos específicos del escenario y controles esperados. Lo dinámico son los datos diligenciados por el evaluador para cada riesgo y control: activo afectado, amenaza, vulnerabilidad, probabilidad, impacto, costo, evidencia y estado de las dimensiones del control.
 
@@ -168,12 +168,11 @@ El capítulo 4 describe los dos casos base usados como referencia conceptual y l
 
 El capítulo 5 presenta el diseño del modelo de evaluación y de la matriz de riesgos, controles, estados de implementación, eficiencia, eficacia y evidencias auditables.
 
-El capítulo 6 aplica la matriz únicamente a los tres escenarios OAuth 2.0/OIDC definidos, y analiza los resultados obtenidos.
+El capítulo 6 aplica la matriz mediante seis corridas demostrativas: un caso bueno y un caso malo para cada uno de los tres escenarios OAuth 2.0/OIDC definidos. Además, muestra cómo esos valores se serializan en el archivo `demo-prediligenciamiento.json` consumido por el formulario web.
 
 El capítulo 7 presenta las conclusiones, limitaciones del trabajo y posibles líneas de trabajo futuro.
 
 Los anexos incluyen la matriz completa, los diagramas de escenarios y la referencia del entregable web en GitHub Pages, junto con la estructura del formulario, el catálogo maestro JSON de riesgos y controles, los filtros por escenario y el formato del reporte Excel.
-
 
 ---
 
@@ -591,19 +590,19 @@ Un token opaco funciona como identificador de referencia.
 
 Ejemplo conceptual:
 
-~~~text
+```text
 2YotnFZFEjr1zCsicMWpAA
-~~~
+```
 
 El token no contiene información visible para el cliente ni para el Resource Server. Para saber si sigue activo y qué permisos representa, el Resource Server consulta al Authorization Server mediante introspección.
 
 Flujo conceptual:
 
-~~~text
+```text
 Cliente → Resource Server: access_token opaco
 Resource Server → Authorization Server: introspection
 Authorization Server → Resource Server: active, scope, sub, client_id, exp
-~~~
+```
 
 Ventajas:
 
@@ -623,9 +622,9 @@ Un JWT auto-contenido lleva claims dentro del token.
 
 Estructura conceptual:
 
-~~~text
+```text
 header.payload.signature
-~~~
+```
 
 El payload puede contener claims como:
 
@@ -723,12 +722,12 @@ De forma simplificada, el Authorization Server firma y el Resource Server verifi
 
 Ejemplo conceptual:
 
-~~~text
+```text
 base64url(header) + "." + base64url(payload) → datos firmados
 SHA-256(datos firmados) → hash
 firma(hash, clave_privada_AS) → signature
 JWT final → header.payload.signature
-~~~
+```
 
 #### Resource Server: validación
 
@@ -761,13 +760,13 @@ Este riesgo es especialmente importante en clientes públicos, como aplicaciones
 
 Ejemplo conceptual:
 
-~~~text
+```text
 1. App legítima inicia login.
 2. Authorization Server devuelve authorization_code.
 3. App maliciosa intercepta el callback.
 4. App maliciosa canjea el code.
 5. Authorization Server entrega tokens al atacante.
-~~~
+```
 
 El Authorization Server no puede distinguir adecuadamente a las dos aplicaciones si ambas comparten elementos observables como `client_id` o esquemas de redirección inseguros.
 
@@ -780,13 +779,13 @@ PKCE introduce dos valores:
 
 Normalmente:
 
-~~~text
+```text
 code_challenge = BASE64URL(SHA-256(code_verifier))
-~~~
+```
 
 Flujo conceptual:
 
-~~~text
+```text
 1. Cliente genera code_verifier.
 2. Cliente calcula code_challenge.
 3. Cliente inicia /authorize con code_challenge y code_challenge_method=S256.
@@ -795,7 +794,7 @@ Flujo conceptual:
 6. Cliente canjea code + code_verifier en /token.
 7. Authorization Server verifica que SHA-256(code_verifier) coincida con el challenge guardado.
 8. Si coincide, entrega tokens.
-~~~
+```
 
 Metáfora útil:
 
@@ -912,9 +911,9 @@ El navegador o SPA conserva una cookie de sesión emitida por el BFF.
 
 Ejemplo conceptual:
 
-~~~http
+```http
 Cookie: SESSION_ID=abc123
-~~~
+```
 
 La SPA no debería guardar:
 
@@ -949,18 +948,18 @@ Responsabilidades del BFF:
 
 Ejemplo conceptual:
 
-~~~http
+```http
 Authorization: Bearer eyJhbGciOiJSUzI1NiJ9...
-~~~
+```
 
 #### 2.10.3. Regla mental
 
-~~~text
+```text
 Frontend = cookie
 BFF = custodia tokens
 Authorization Server / IdP = emite tokens
 API / Resource Server = valida tokens
-~~~
+```
 
 #### 2.10.4. Implicación arquitectónica
 
@@ -1405,7 +1404,6 @@ Lectura para la matriz: el riesgo dominante es abuso de identidad técnica: secr
 
 Lectura para la matriz: el riesgo dominante es confusión de audiencia y exceso de confianza en el Gateway. El control crítico es que cada Resource Server valide su propia audiencia y que el intercambio de tokens reduzca scopes al cruzar dominios.
 
-
 ---
 
 ### 4.2. Vista general de los casos
@@ -1466,7 +1464,7 @@ Todo ocurre dentro de la misma aplicación. El navegador solo conserva una cooki
 
 #### 4.3.3. Diagrama de despliegue
 
-~~~plantuml
+```plantuml
 @startuml
 title Caso base 0A - Monolito con sesión local
 
@@ -1496,11 +1494,11 @@ Login --> DB : valida usuario/hash
 Authz --> DB : roles/permisos
 Business --> DB : operaciones de negocio
 @enduml
-~~~
+```
 
 #### 4.3.4. Diagrama de secuencia
 
-~~~plantuml
+```plantuml
 @startuml
 title Caso base 0A - Login local y operación en monolito
 
@@ -1525,7 +1523,7 @@ App -> DB : Consultar cuentas
 DB --> App : Saldos
 App --> Browser : Respuesta HTML/JSON
 @enduml
-~~~
+```
 
 #### 4.3.5. Activos y controles relevantes
 
@@ -1580,7 +1578,7 @@ Una tienda virtual regional publica su frontend Angular en un CDN. El usuario in
 
 #### 4.4.3. Diagrama de despliegue
 
-~~~plantuml
+```plantuml
 @startuml
 title Caso base 0B - SPA estática + BFF con usuarios propios
 
@@ -1614,11 +1612,11 @@ BFF --> Payments : llamada interna
 Orders --> BusinessDB
 Payments --> BusinessDB
 @enduml
-~~~
+```
 
 #### 4.4.4. Diagrama de secuencia
 
-~~~plantuml
+```plantuml
 @startuml
 title Caso base 0B - SPA + BFF con login propio
 
@@ -1643,7 +1641,7 @@ BFF -> Orders : GET /orders?userId=...
 Orders --> BFF : Pedidos
 BFF --> SPA : JSON pedidos
 @enduml
-~~~
+```
 
 #### 4.4.5. Activos y controles relevantes
 
@@ -1698,7 +1696,7 @@ Un portal de pagos de una entidad financiera publica una SPA estática para que 
 
 #### 4.5.3. Diagrama de despliegue
 
-~~~plantuml
+```plantuml
 @startuml
 title Escenario 1 - SPA + BFF + IdP corporativo
 
@@ -1734,11 +1732,11 @@ BFF --> SessionStore : guarda sesión/tokens
 BFF --> API : Bearer access_token
 API --> JWKS : valida firma, si aplica
 @enduml
-~~~
+```
 
 #### 4.5.4. Diagrama de secuencia
 
-~~~plantuml
+```plantuml
 @startuml
 title Escenario 1 - Authorization Code + PKCE en BFF
 
@@ -1769,7 +1767,7 @@ BFF -> API : GET /saldos + Bearer access_token
 API --> BFF : Respuesta
 BFF --> SPA : JSON filtrado para UI
 @enduml
-~~~
+```
 
 #### 4.5.5. Activos y controles relevantes
 
@@ -1830,7 +1828,7 @@ Un proceso de gobierno IAM necesita revisar clientes OAuth registrados, scopes a
 
 #### 4.6.3. Diagrama de despliegue
 
-~~~plantuml
+```plantuml
 @startuml
 title Escenario 2 - M2M con AS actuando como RS
 
@@ -1861,11 +1859,11 @@ RS --> IAMDB : consulta/modifica recurso protegido
 AS --> SIEM : log emisión token
 RS --> SIEM : log acceso API
 @enduml
-~~~
+```
 
 #### 4.6.4. Diagrama de secuencia
 
-~~~plantuml
+```plantuml
 @startuml
 title Escenario 2 - Client Credentials contra recurso del AS
 
@@ -1888,7 +1886,7 @@ RS -> DB : Consultar clientes OAuth
 DB --> RS : Lista de clientes
 RS --> Client : Respuesta
 @enduml
-~~~
+```
 
 #### 4.6.5. Activos y controles relevantes
 
@@ -1951,7 +1949,7 @@ Un portal de originación de crédito recibe una solicitud del cliente. La SPA o
 
 #### 4.7.3. Diagrama de despliegue
 
-~~~plantuml
+```plantuml
 @startuml
 title Escenario 3 - API Gateway federado + AS corporativo
 
@@ -1992,11 +1990,11 @@ Portfolio --> SIEM
 Watchlists --> SIEM
 Customers --> SIEM
 @enduml
-~~~
+```
 
 #### 4.7.4. Diagrama de secuencia
 
-~~~plantuml
+```plantuml
 @startuml
 title Escenario 3 - Gateway, validación y token exchange
 
@@ -2029,7 +2027,7 @@ Portfolio --> GW : Respuesta cartera
 GW -> SIEM : Log sujeto, cliente, audiencia, decisión
 GW --> Client : Respuesta compuesta
 @enduml
-~~~
+```
 
 #### 4.7.5. Activos y controles relevantes
 
@@ -2125,7 +2123,6 @@ Riesgos principales:
 - **M2M AS=RS:** inventario de clientes, scopes, vault, rotación, logs de token y consumo.
 - **Gateway federado:** configuración de Gateway, JWKS/introspection, políticas de audiencia, trazas, logs y pruebas de propagación o token exchange.
 
-
 ## 5. Diseño del modelo de evaluación
 
 ### 5.1. Propósito del modelo de evaluación
@@ -2157,9 +2154,6 @@ El modelo permite relacionar:
 9. nivel de exposición observado;
 10. hallazgo, brecha u observación.
 
-
-
-
 #### 5.1.1. Diagrama de modelo de dominio
 
 El siguiente diagrama presenta el modelo de dominio conceptual que soporta la matriz de evaluación, el catálogo maestro JSON y el entregable web. La versión 15 distingue tres planos:
@@ -2170,7 +2164,7 @@ El siguiente diagrama presenta el modelo de dominio conceptual que soporta la ma
 
 Esta separación evita mezclar el catálogo propuesto por la tesis con las evaluaciones diligenciadas por el usuario. El catálogo es estable y versionado; la evaluación cambia según el sistema, el ambiente, la evidencia disponible y el momento de revisión.
 
-~~~mermaid
+```mermaid
 classDiagram
     direction LR
 
@@ -2344,7 +2338,7 @@ classDiagram
     EvaluacionRiesgo "*" --> "1" RiesgoCatalogo : resume
     EvaluacionRiesgo "1" --> "*" RegistroMatriz : agrega
     EvaluacionGlobal "1" --> "*" EvaluacionRiesgo : consolida
-~~~
+```
 
 El diagrama no pretende representar una base de datos física. Representa los conceptos del dominio y sus relaciones. En particular, `RiesgoControl` existe porque la relación entre riesgo y control es muchos-a-muchos: un riesgo puede necesitar varios controles y un control puede mitigar varios riesgos. `FiltroEscenario` existe porque el catálogo maestro no se duplica por arquitectura; la UI selecciona subconjuntos de IDs según el escenario elegido. `ConfiguracionScore` existe porque la homologación cuantitativa no debe quedar embebida en el código JavaScript sin trazabilidad documental.
 
@@ -2368,7 +2362,7 @@ Atributos principales:
 
 Ejemplo:
 
-~~~json
+```json
 {
   "id": "CAT-OAUTH2-OIDC-2026-01",
   "version": "1.0.0",
@@ -2377,7 +2371,7 @@ Ejemplo:
   "alcance": "Catálogo maestro de riesgos y controles para SPA_BFF_IDP, M2M_AS_RS y API_GATEWAY_FEDERADO",
   "monedaCosto": "USD"
 }
-~~~
+```
 
 ##### Escenario
 
@@ -2391,13 +2385,13 @@ Atributos principales:
 
 Ejemplo:
 
-~~~json
+```json
 {
   "id": "SPA_BFF_IDP",
   "nombre": "SPA estática + BFF + IdP corporativo",
   "descripcion": "El navegador usa sesión/cookie con el BFF; el BFF ejecuta OIDC Authorization Code + PKCE con el IdP y consume APIs protegidas."
 }
-~~~
+```
 
 ##### FiltroEscenario
 
@@ -2412,14 +2406,14 @@ Atributos principales:
 
 Ejemplo:
 
-~~~json
+```json
 {
   "escenarioId": "SPA_BFF_IDP",
   "riesgosCatalogoIds": ["RG-001", "RG-002", "RE1-001", "RE1-002"],
   "controlesEsperadosIds": ["CG-001", "CG-006", "CE1-001", "CE1-003"],
   "riesgoControlIds": ["RC-001", "RC-003", "RC-017", "RC-020"]
 }
-~~~
+```
 
 ##### RiesgoCatalogo
 
@@ -2436,7 +2430,7 @@ Atributos principales:
 
 Ejemplo:
 
-~~~json
+```json
 {
   "id": "RE1-001",
   "tipo": "ESPECIFICO",
@@ -2445,7 +2439,7 @@ Ejemplo:
   "descripcion": "Un tercero obtiene o sustituye el authorization_code, o fuerza PKCE mal configurado, para canjearlo por tokens.",
   "referencias": ["RFC-7636", "RFC-9700", "OWASP-OAUTH2"]
 }
-~~~
+```
 
 ##### ControlEsperado
 
@@ -2465,7 +2459,7 @@ El `costoTotal` no es un precio de licenciamiento ni un costo contractual. En el
 
 Ejemplo:
 
-~~~json
+```json
 {
   "id": "CE3-002",
   "tipo": "ESPECIFICO",
@@ -2478,7 +2472,7 @@ Ejemplo:
   },
   "referencias": ["RFC-9700", "KEYCLOAK-TOKEN-EXCHANGE"]
 }
-~~~
+```
 
 ##### RiesgoControl
 
@@ -2496,17 +2490,17 @@ Atributos principales:
 
 Ejemplo:
 
-~~~json
+```json
 {
   "id": "RC-017",
   "riesgoId": "RE1-001",
   "controlId": "CE1-001",
-  "pesoMitigacion": 0.70,
+  "pesoMitigacion": 0.7,
   "gradoMitigacion": "ALTO",
   "obligatorio": true,
   "justificacion": "PKCE con S256 mitiga la interceptación del authorization_code y el canje por terceros."
 }
-~~~
+```
 
 ##### ReferenciaTecnica
 
@@ -2522,7 +2516,7 @@ Atributos principales:
 
 Ejemplo:
 
-~~~json
+```json
 {
   "id": "RFC-7636",
   "tipo": "RFC",
@@ -2530,11 +2524,11 @@ Ejemplo:
   "seccion": "Abstract; 1; 4; 7.2",
   "url": "https://datatracker.ietf.org/doc/html/rfc7636"
 }
-~~~
+```
 
 ##### ConfiguracionScore
 
-Representa los valores numéricos y ponderadores usados para homologar controles. En la versión 15, el score queda alineado con los ajustes metodológicos sugeridos por los profesores: cinco dimensiones, escala 0 a 100 y ponderación explícita.
+Representa los valores numéricos y ponderadores usados para homologar controles. En la versión 16, la notación queda alineada con las ecuaciones LaTeX mostradas por el formulario web: score base, normalización, factor de evidencia y score final del control.
 
 Atributos principales:
 
@@ -2549,7 +2543,7 @@ Atributos principales:
 
 Ejemplo:
 
-~~~json
+```json
 {
   "madurez": {
     "diseniada": 0,
@@ -2557,9 +2551,9 @@ Ejemplo:
     "implementada": 75,
     "auditada": 100
   },
-  "formulaScoreControl": "0.40*madurez + 0.20*automatizacion + 0.10*momento + 0.20*periodicidad + 0.10*alcance"
+  "formulaScoreControl": "S_control = norm(0.40*madurez + 0.20*automatizacion + 0.10*momento + 0.20*periodicidad + 0.10*alcance) * norm(factorEvidencia)"
 }
-~~~
+```
 
 En claves JSON se evita el uso de tildes y caracteres especiales. Por eso `diseñada` se representa como `diseniada`.
 
@@ -2581,7 +2575,7 @@ Atributos principales:
 
 Ejemplo:
 
-~~~json
+```json
 {
   "id": "EVA-2026-001",
   "fecha": "2026-06-03",
@@ -2595,7 +2589,7 @@ Ejemplo:
     "COP_USD": 4000
   }
 }
-~~~
+```
 
 ##### RegistroMatriz
 
@@ -2621,7 +2615,7 @@ Atributos principales:
 
 Ejemplo:
 
-~~~json
+```json
 {
   "id": "RM-001-1",
   "riesgoControlId": "RC-017",
@@ -2635,25 +2629,26 @@ Ejemplo:
   "costoAsignado": 1650,
   "aporteEficacia": 0.455
 }
-~~~
+```
 
 ##### EvaluacionControl
 
-Representa la calificación del control en las cinco dimensiones definidas por la metodología. Produce un score de 0 a 100 y un valor normalizado de 0 a 1 para los cálculos por riesgo.
+Representa la calificación del control en las cinco dimensiones definidas por la metodología y la evidencia disponible. En la notación del formulario, el valor operativo `scoreControl` corresponde a $S_{control}$, es decir, un valor normalizado entre 0 y 1 que se muestra como porcentaje.
 
 Ejemplo:
 
-~~~json
+```json
 {
-  "madurez": "Implementada",
+  "madurez": "Implementado",
   "automatizacion": "Automático",
   "momento": "Preventivo",
   "periodicidad": "Permanente",
-  "alcance": "Específico",
-  "scoreControl": 65,
-  "scoreControlNormalizado": 0.65
+  "alcance": "General",
+  "evidenceFactor": "Independiente o auditada",
+  "baseScore": 1.0,
+  "scoreControl": 1.0
 }
-~~~
+```
 
 ##### Evidencia
 
@@ -2661,14 +2656,14 @@ Representa el soporte usado para asignar los valores del control. La evidencia n
 
 Ejemplo:
 
-~~~json
+```json
 {
   "esperada": "Configuración del cliente OIDC con PKCE S256",
   "encontrada": "Captura de configuración del IdP y logs del BFF",
   "fuente": "Consola IdP, repositorio BFF, logs de callback",
   "suficiencia": "Suficiente"
 }
-~~~
+```
 
 ##### EvaluacionRiesgo
 
@@ -2676,7 +2671,7 @@ Agrega todos los registros asociados a un mismo riesgo. Permite calcular cobertu
 
 Ejemplo:
 
-~~~json
+```json
 {
   "riesgoId": "RE1-001",
   "impactoEconomicoEstimado": 12500,
@@ -2688,7 +2683,7 @@ Ejemplo:
   "eficienciaFrenteAlRiesgo": 2.48,
   "nivelExposicionObservado": "Medio"
 }
-~~~
+```
 
 ##### EvaluacionGlobal
 
@@ -2696,7 +2691,7 @@ Consolida todas las evaluaciones de riesgo de una arquitectura. Permite comparar
 
 Ejemplo:
 
-~~~json
+```json
 {
   "registrosEvaluados": 5,
   "riesgosEvaluados": 2,
@@ -2706,7 +2701,7 @@ Ejemplo:
   "eficienciaCualitativa": "Es parcialmente eficiente",
   "eficaciaCualitativa": "Es parcialmente eficaz"
 }
-~~~
+```
 
 #### 5.1.3. Catálogo maestro propuesto a partir de investigación técnica
 
@@ -2719,7 +2714,7 @@ El valor del catálogo es doble:
 
 La construcción del catálogo siguió esta lógica:
 
-~~~mermaid
+```mermaid
 graph TD
     A[Fuentes técnicas y normativas] --> B[Amenazas y debilidades recurrentes]
     B --> C[Riesgos globales y específicos]
@@ -2727,11 +2722,11 @@ graph TD
     D --> E[Relaciones riesgo-control]
     E --> F[Pesos de mitigación y obligatoriedad]
     F --> G[Catálogo maestro JSON consumible por la UI]
-~~~
+```
 
 El catálogo investigado cubre:
 
-~~~json
+```json
 {
   "riesgosGlobales": 5,
   "riesgosEspecificos": 9,
@@ -2739,7 +2734,7 @@ El catálogo investigado cubre:
   "controlesEspecificos": 12,
   "relacionesRiesgoControl": 48
 }
-~~~
+```
 
 ##### Leyenda de identificadores
 
@@ -2839,7 +2834,7 @@ Los controles específicos complementan esos controles globales según la arquit
 
 En el repositorio del entregable web, el catálogo puede materializarse como archivos JSON separados para facilitar mantenimiento y trazabilidad:
 
-~~~text
+```text
 data/
 ├─ catalogo/
 │  ├─ catalogo.json
@@ -2856,13 +2851,13 @@ data/
 ├─ evaluaciones/
 │  └─ ejemplo-spa-bff-idp.json
 └─ catalogo-maestro.json
-~~~
+```
 
 Los archivos separados son la forma mantenible del catálogo. El archivo `catalogo-maestro.json` funciona como un bundle autocontenido para pruebas, demostración, revisión académica o carga rápida de la UI con un único `fetch()`.
 
 El catálogo maestro tiene esta estructura:
 
-~~~json
+```json
 {
   "catalogoEvaluacion": {},
   "escenarios": [],
@@ -2873,13 +2868,13 @@ El catálogo maestro tiene esta estructura:
   "mapeoScoreInicial": {},
   "filtros": {}
 }
-~~~
+```
 
 ##### Filtros por escenario
 
 El catálogo maestro no se duplica por arquitectura. Cada escenario tiene un filtro que referencia los IDs aplicables:
 
-~~~json
+```json
 {
   "escenarioId": "SPA_BFF_IDP",
   "riesgosCatalogoIds": [
@@ -2907,11 +2902,11 @@ El catálogo maestro no se duplica por arquitectura. Cada escenario tiene un fil
     "CE1-004"
   ]
 }
-~~~
+```
 
 Con esta estructura, la UI realiza el siguiente flujo:
 
-~~~mermaid
+```mermaid
 graph TD
     A[Evaluador selecciona arquitectura] --> B[Aplicación carga filtro JSON del escenario]
     B --> C[Se activan riesgos globales y específicos]
@@ -2922,7 +2917,7 @@ graph TD
     G --> H[Sistema calcula eficacia y eficiencia por riesgo]
     H --> I[Sistema calcula evaluación global]
     I --> J[Exportación Excel o JSON]
-~~~
+```
 
 #### 5.1.5. Peso de mitigación y costo compartido
 
@@ -2930,16 +2925,16 @@ graph TD
 
 Ejemplo:
 
-~~~json
+```json
 {
   "id": "RC-017",
   "riesgoId": "RE1-001",
   "controlId": "CE1-001",
-  "pesoMitigacion": 0.70,
+  "pesoMitigacion": 0.7,
   "gradoMitigacion": "ALTO",
   "obligatorio": true
 }
-~~~
+```
 
 Lectura:
 
@@ -2947,7 +2942,7 @@ Lectura:
 
 Para el mismo riesgo, el catálogo puede tener otros controles:
 
-~~~mermaid
+```mermaid
 flowchart TD
     R[RE1-001<br/>Intercepción o sustitución del authorization_code]
     R --> C1[CE1-001<br/>PKCE con S256<br/>peso 0.70]
@@ -2956,7 +2951,7 @@ flowchart TD
     C1 --> T[Total esperado del riesgo = 1.00]
     C2 --> T
     C3 --> T
-~~~
+```
 
 Esta estructura evita una evaluación binaria. Si PKCE falla, el riesgo no queda cubierto, pero los controles complementarios pueden aportar mitigación residual.
 
@@ -2966,12 +2961,12 @@ Cuando un mismo control mitiga varios riesgos, su costo no debe contarse complet
 
 La regla propuesta es:
 
-~~~text
+```text
 costoAsignado(r,c) =
 costoMedio(c) * pesoMitigacion(r,c)
 /
 suma(pesoMitigacion(x,c) para todos los riesgos activos x del escenario)
-~~~
+```
 
 Donde:
 
@@ -2983,7 +2978,7 @@ Donde:
 
 Ejemplo con `CE3-002`, token exchange o downscoping:
 
-~~~text
+```text
 costoMedio(CE3-002) = 5000 USD
 
 RE3-001 usa CE3-002 con peso 0.35
@@ -2993,7 +2988,7 @@ denominador = 0.35 + 0.50 = 0.85
 
 costoAsignado(RE3-001, CE3-002) = 5000 * 0.35 / 0.85 = 2058.82 USD
 costoAsignado(RE3-003, CE3-002) = 5000 * 0.50 / 0.85 = 2941.18 USD
-~~~
+```
 
 La suma de costos asignados conserva el costo medio original del control. Así se evita duplicar el costo cuando el mismo control beneficia varios riesgos.
 
@@ -3003,7 +2998,7 @@ El catálogo expresa `costoTotal` en USD. Si el impacto económico del riesgo se
 
 Ejemplo:
 
-~~~json
+```json
 {
   "monedaEvaluacion": "USD",
   "tasaCambioReferencia": {
@@ -3018,23 +3013,104 @@ Ejemplo:
     "moneda": "USD"
   }
 }
-~~~
+```
 
 Esta regla evita dividir beneficios estimados en COP entre costos estimados en USD.
 
-#### 5.1.6. Mapeo inicial de scores y fórmulas
+#### 5.1.6. Notación matemática del score, ponderadores y fórmulas implementadas en la UI
 
-El catálogo incluye un `mapeoScoreInicial` para convertir valores cualitativos en valores numéricos comparables. En la versión 15, el mapeo se ajusta a la metodología revisada con los profesores: escala de 0 a 100, cinco dimensiones y ponderadores explícitos.
+El formulario web no solo calcula resultados, sino que también muestra ecuaciones en LaTeX para que el evaluador vea cómo se obtiene el score de cada control, la eficacia por riesgo, la eficiencia por riesgo y los promedios globales. Por esta razón, la tesis adopta en esta sección la misma notación usada por el formulario.
 
-El mapeo base es:
+La notación se organiza en cuatro niveles:
 
-~~~json
+1. **Nivel de dimensión del control:** madurez, automatización, momento, periodicidad, alcance funcional y evidencia.
+2. **Nivel de control:** cálculo de \(S*{base(raw)}\), \(S*{base}\), \(F*{ev}\) y \(S*{control}\).
+3. **Nivel riesgo-control:** cálculo del aporte ponderado \(Aporte_i\) mediante el peso \(w_i\).
+4. **Nivel de riesgo y evaluación global:** cálculo de \(E*r\), \(\eta_r\), \(E*{global}\) y \(\eta\_{global}\).
+
+##### Variables principales
+
+Para un control \(c\), se usan las siguientes variables:
+
+- \(M_c\): valor numérico de la **madurez** del control.
+- \(A_c\): valor numérico de la **automatización** del control.
+- \(T_c\): valor numérico del **momento** del control.
+- \(P_c\): valor numérico de la **periodicidad** del control.
+- \(L_c\): valor numérico del **alcance funcional** del control.
+- \(f\_{ev}(c)\): valor bruto asociado a la suficiencia de evidencia.
+- \(F\_{ev}(c)\): factor de evidencia normalizado.
+- \(S\_{base(raw)}(c)\): score base antes de normalización.
+- \(S\_{base}(c)\): score base normalizado.
+- \(S\_{control}(c)\): score final del control.
+- \(w_i\): peso de mitigación de la relación entre el riesgo y el control \(i\).
+- \(Aporte_i\): contribución ponderada del control \(i\) frente a un riesgo específico.
+
+##### Ponderadores de las dimensiones del control
+
+En la versión 16, el formulario y la tesis usan los siguientes ponderadores:
+
+$$
+\alpha_M = 0.40,\quad
+\alpha_A = 0.20,\quad
+\alpha_T = 0.10,\quad
+\alpha_P = 0.20,\quad
+\alpha_L = 0.10
+$$
+
+Por tanto:
+
+$$
+\alpha_M+\alpha_A+\alpha_T+\alpha_P+\alpha_L=1
+$$
+
+La fórmula base queda:
+
+$$
+S_{base(raw)}(c)
+=
+0.40M_c
++0.20A_c
++0.10T_c
++0.20P_c
++0.10L_c
+$$
+
+Estos ponderadores no pretenden ser universales para cualquier organización. Son una decisión metodológica del modelo propuesto y deben interpretarse como una escala semicuantitativa para comparar controles de forma consistente dentro de los tres escenarios evaluados.
+
+##### Justificación de los ponderadores de dimensión
+
+La asignación de ponderadores responde a la importancia relativa de cada dimensión en una evaluación de aseguramiento orientada a riesgos.
+
+**Madurez \(\alpha_M=0.40\).**  
+Es la dimensión de mayor peso porque indica si el control pasó de una intención o declaración a una implementación verificable. En una evaluación de controles, un control meramente declarado no debería recibir una calificación cercana a un control implementado o auditado. Por eso la madurez concentra el 40% del score base.
+
+**Automatización \(\alpha_A=0.20\).**  
+La automatización reduce dependencia de actividades manuales, disminuye variabilidad operativa y mejora repetibilidad. En arquitecturas OAuth 2.0/OIDC, controles como validación de tokens, aplicación de políticas de scopes, verificación de `audience`, rotación de claves o logging tienen mayor confiabilidad cuando están automatizados.
+
+**Periodicidad \(\alpha_P=0.20\).**  
+La periodicidad mide si el control opera de forma permanente, periódica u ocasional. En seguridad de identidad, un control ejecutado solo de forma eventual puede no cubrir ventanas críticas de exposición. Por eso la periodicidad recibe el mismo peso que la automatización.
+
+**Momento \(\alpha_T=0.10\).**  
+El momento distingue controles preventivos, detectivos y correctivos. Se privilegia lo preventivo, pero se evita sobredimensionar esta dimensión porque controles detectivos y correctivos también pueden ser relevantes en aseguramiento, especialmente para monitoreo, respuesta, auditoría y trazabilidad.
+
+**Alcance funcional \(\alpha_L=0.10\).**  
+El alcance indica si el control cubre un componente específico o la arquitectura de forma más general. Se le asigna un peso moderado porque un control específico puede ser altamente pertinente para un riesgo crítico. Por ejemplo, PKCE es específico del flujo de autorización, pero puede ser el control más importante frente a la interceptación del `authorization_code`. Por esta razón, el modelo evita penalizar excesivamente controles específicos.
+
+En síntesis, el modelo prioriza que el control esté **maduro, automatizado y operando con periodicidad suficiente**, sin perder de vista su momento y alcance.
+
+##### Mapeo cualitativo de dimensiones
+
+El catálogo puede expresar los valores de las dimensiones en escala de 0 a 100. La UI los normaliza antes de calcular el score operativo.
+
+Ejemplo de mapeo usado por la tesis:
+
+```json
 {
   "madurez": {
-    "diseniada": 0,
-    "declarada": 25,
-    "implementada": 75,
-    "auditada": 100
+    "declarado": 25,
+    "diseniado": 0,
+    "implementado": 75,
+    "auditado": 100
   },
   "automatizacion": {
     "manual": 0,
@@ -3054,156 +3130,383 @@ El mapeo base es:
   "alcance": {
     "especifico": 25,
     "general": 100
+  },
+  "factorEvidencia": {
+    "sinEvidencia": 0,
+    "parcial": 0.5,
+    "suficiente": 0.85,
+    "independienteOAditada": 1
   }
 }
-~~~
+```
 
-En claves JSON se evita el uso de tildes y caracteres especiales. Por eso `diseñada` se representa como `diseniada`.
+En claves JSON se evita el uso de tildes y caracteres especiales. Por eso `diseñado` se representa como `diseniado`.
 
-##### Justificación del mapeo
+##### Normalización
 
-La `madurez` recibe el mayor peso porque un control que no está implementado o auditado no puede considerarse fuerte, aunque sea automático o preventivo. La `automatización` recibe el segundo peso porque reduce dependencia humana y habilita capacidades como DevSecOps, SIEM, SOAR o EDR. La `periodicidad` también recibe peso relevante porque un control ejecutado una sola vez puede degradarse. El `momento` y el `alcance` completan la calificación, pero no reemplazan la madurez ni la automatización.
+La forma implementada en JavaScript es tolerante a dos escalas posibles del catálogo: valores entre 0 y 1, o valores entre 0 y 100. Para evitar ambigüedad, el formulario normaliza cualquier valor mayor que 1 dividiéndolo entre 100:
 
-El valor `alcance = especifico = 25` no significa que un control específico sea irrelevante. Significa que su cobertura organizacional es menor. La pertinencia técnica del control frente al riesgo se expresa mediante `pesoMitigacion`. Por ejemplo, PKCE es específico, pero tiene peso alto frente al riesgo de interceptación del `authorization_code`.
+$$
+\operatorname{norm}(x)=
+\begin{cases}
+0, & x \text{ no es numérico} \\
+\min\left(1,\max\left(0,\frac{x}{100}\right)\right), & x>1 \\
+\min(1,\max(0,x)), & 0\leq x\leq 1
+\end{cases}
+$$
 
-##### Fórmula del score de control
+##### Score base del control
 
-La fórmula propuesta para el score del control es:
+Para un control \(c\), primero se calcula el score base sin evidencia:
 
-~~~text
-scoreControl(c) =
-0.40 * madurez
-+ 0.20 * automatizacion
-+ 0.10 * momento
-+ 0.20 * periodicidad
-+ 0.10 * alcance
-~~~
+$$
+S_{base(raw)}(c)
+=
+0.40M_c
++0.20A_c
++0.10T_c
++0.20P_c
++0.10L_c
+$$
 
-El resultado se expresa en escala de 0 a 100. Para las fórmulas de eficacia frente al riesgo se usa:
+Luego se normaliza:
 
-~~~text
-scoreControlNormalizado(c) = scoreControl(c) / 100
-~~~
+$$
+S_{base}(c)=\operatorname{norm}\left(S_{base(raw)}(c)\right)
+$$
 
-Ejemplo:
+Esta separación es importante porque permite diferenciar entre el **diseño operativo del control** y la **evidencia disponible**. En la UI, esta lectura se presenta como eficiencia cualitativa del control.
 
-~~~text
-Control: CE1-001 PKCE con S256
+##### Factor de evidencia
 
-madurez = implementada = 75
-automatizacion = automatico = 100
-momento = preventivo = 100
-periodicidad = permanente = 100
-alcance = especifico = 25
+La evidencia se representa mediante \(F\_{ev}\). El formulario toma el valor asociado a la suficiencia de evidencia y lo normaliza:
 
-scoreControl =
-0.40*75 + 0.20*100 + 0.10*100 + 0.20*100 + 0.10*25
+$$
+F_{ev}(c)=\operatorname{norm}\left(f_{ev}(c)\right)
+$$
 
-scoreControl =
-30 + 20 + 10 + 20 + 2.5
+Donde \(f\_{ev}(c)\) puede tomar valores como 0, 0.5, 0.85 o 1, según la evidencia sea inexistente, parcial, suficiente o independiente/auditada.
 
-scoreControl = 82.5
-scoreControlNormalizado = 0.825
-~~~
+El factor de evidencia funciona como un ajuste multiplicativo. Esto evita que un control con buen diseño declarado, pero sin evidencia verificable, obtenga un aporte alto dentro de la matriz. En otras palabras, el modelo distingue entre:
+
+- control diseñado o declarado;
+- control implementado;
+- control evidenciado;
+- control auditado o validado independientemente.
+
+##### Score final del control
+
+El score final del control es el producto entre el score base normalizado y el factor de evidencia normalizado:
+
+$$
+S_{control}(c)=S_{base}(c)\times F_{ev}(c)
+$$
+
+El resultado \(S*{control}(c)\) está en escala de 0 a 1 y la UI lo muestra como porcentaje. Por ejemplo, \(S*{control}=0.85\) se presenta como 85%.
+
+##### Ejemplo de cálculo del score de un control bueno
+
+Supóngase el control `CE1-001`, asociado al uso de Authorization Code + PKCE con `S256`:
+
+$$
+M=100,\quad A=100,\quad T=100,\quad P=100,\quad L=100,\quad f_{ev}=1
+$$
+
+El cálculo base es:
+
+$$
+\begin{aligned}
+S_{base(raw)}
+&=0.40(100)+0.20(100)+0.10(100)+0.20(100)+0.10(100) \\
+&=40+20+10+20+10 \\
+&=100
+\end{aligned}
+$$
+
+Normalización:
+
+$$
+S_{base}=\operatorname{norm}(100)=1
+$$
+
+Factor de evidencia:
+
+$$
+F_{ev}=\operatorname{norm}(1)=1
+$$
+
+Score final:
+
+$$
+S_{control}=S_{base}\times F_{ev}=1\times 1=1
+$$
+
+Lectura: el control alcanza 100% porque está auditado, automatizado, es preventivo, permanente, tiene alcance general y cuenta con evidencia independiente o auditada.
+
+##### Ejemplo de cálculo del score de un control malo
+
+Ahora considérese un caso débil del mismo control:
+
+$$
+M=25,\quad A=0,\quad T=0,\quad P=25,\quad L=25,\quad f_{ev}=0
+$$
+
+$$
+\begin{aligned}
+S_{base(raw)}
+&=0.40(25)+0.20(0)+0.10(0)+0.20(25)+0.10(25) \\
+&=10+0+0+5+2.5 \\
+&=17.5
+\end{aligned}
+$$
+
+$$
+S_{base}=\operatorname{norm}(17.5)=0.175
+$$
+
+$$
+F_{ev}=\operatorname{norm}(0)=0
+$$
+
+$$
+S_{control}=0.175\times 0=0
+$$
+
+Lectura: aunque exista alguna declaración o diseño preliminar, la ausencia de evidencia suficiente hace que el control no aporte mitigación demostrable dentro del modelo.
+
+##### Peso de mitigación \(w_i\) de cada control
+
+Cada relación riesgo-control tiene un peso de mitigación \(w_i\). Este peso no corresponde al score del control ni al costo del control. Es un parámetro del catálogo que expresa la contribución técnica esperada de un control frente a un riesgo específico.
+
+Para un riesgo \(r\) con \(n_r\) controles asociados, el modelo busca que los pesos de mitigación cumplan:
+
+$$
+\sum_{i=1}^{n_r} w_i = 1
+$$
+
+Si en una implementación o filtro la suma no fuera exactamente 1, la fórmula de eficacia divide por \(\sum w_i\) para normalizar el resultado.
+
+El peso \(w_i\) se asigna con base en la relación causal entre el control y el riesgo. No todos los controles que aparecen en una relación mitigan con la misma fuerza. Algunos controles atacan directamente la causa principal del riesgo; otros reducen exposición, mejoran detección o fortalecen trazabilidad.
+
+##### Criterios para justificar \(w_i\)
+
+La asignación de \(w_i\) debe justificarse en el campo `justificacion` de cada relación `RiesgoControl`. Para mantener consistencia, la tesis usa los siguientes criterios:
+
+**1. Proximidad causal.**  
+Un control recibe mayor peso si mitiga directamente la condición que materializa el riesgo. Por ejemplo, PKCE con `S256` está causalmente más cerca de la interceptación del `authorization_code` que un control general de logging.
+
+**2. Especificidad frente al riesgo.**  
+Un control específico del escenario puede recibir mayor peso si fue diseñado para ese riesgo. Un control global puede recibir menor peso si aporta de forma transversal pero no resuelve por sí solo el evento de riesgo.
+
+**3. Carácter obligatorio.**  
+Un control marcado como obligatorio puede recibir un peso alto cuando su ausencia impide una mitigación razonable del riesgo. Sin embargo, obligatoriedad y peso no son equivalentes: un control obligatorio puede requerir controles complementarios.
+
+**4. Cobertura del vector de ataque.**  
+Un control recibe mayor peso si cubre la mayor parte del vector de ataque o de la condición habilitante. Si solo cubre una fase secundaria, su peso debe ser menor.
+
+**5. Dependencia de otros controles.**  
+Si un control solo funciona correctamente cuando otros controles están presentes, su peso debe reflejar esa dependencia. Por ejemplo, la validación de `state` ayuda contra CSRF, pero no reemplaza PKCE frente al canje indebido de un código interceptado.
+
+**6. Evidencia técnica y fuentes normativas.**  
+La ponderación debe estar respaldada por referencias técnicas del catálogo, como RFCs, OWASP, guías de proveedor o estándares de gestión de riesgos. La fuente no define automáticamente el número, pero sí sustenta la relación de mitigación.
+
+##### Rangos orientativos para \(w_i\)
+
+Para evitar asignaciones arbitrarias, se usan rangos orientativos:
+
+- \(0.50 \leq w_i \leq 0.80\): control principal o nuclear del riesgo.
+- \(0.20 \leq w_i < 0.50\): control relevante, pero no suficiente por sí solo.
+- \(0.05 \leq w_i < 0.20\): control complementario, transversal, detectivo o de soporte.
+- \(w_i < 0.05\): aporte marginal; debería evitarse salvo justificación explícita.
+
+Estos rangos no reemplazan el juicio del evaluador ni la justificación técnica. Sirven para que el catálogo mantenga coherencia interna.
+
+##### Ejemplo de justificación de \(w_i\): riesgo `RE1-001`
+
+El riesgo `RE1-001` corresponde a la intercepción o sustitución del `authorization_code` y downgrade de PKCE. Para este riesgo, el control específico `CE1-001` recibe un peso alto:
+
+$$
+w_{\text{CE1-001}}=0.70
+$$
+
+La justificación es que Authorization Code + PKCE con `S256` mitiga directamente el canje indebido del código de autorización, porque el atacante no puede completar el intercambio sin conocer el `code_verifier`. En cambio, controles como `state`, `nonce` o transporte seguro son necesarios, pero complementarios para este riesgo particular.
+
+Una distribución conceptual puede representarse así:
+
+$$
+w_{\text{CE1-001}} + w_{\text{CE1-002}} + w_{\text{CG-006}} = 0.70 + 0.15 + 0.15 = 1
+$$
 
 Lectura:
 
-> El control tiene score alto porque está implementado, automatizado, es preventivo y permanente. Su alcance específico le resta cobertura organizacional, pero no elimina su alta pertinencia frente al riesgo porque esa pertinencia se expresa con `pesoMitigacion`.
+- \(CE1\text{-}001\): control principal frente al canje indebido del código.
+- \(CE1\text{-}002\): control complementario de ligadura transaccional mediante `state` y `nonce`.
+- \(CG\text{-}006\): control transversal de transporte seguro y no exposición de tokens o artefactos sensibles en URI.
+
+##### Aporte de eficacia de un control frente a un riesgo
+
+Para un control \(c_i\) asociado a un riesgo \(r\), el aporte de eficacia es:
+
+$$
+Aporte_i(r,c_i)=w_i\cdot S_{control}(c_i)
+$$
+
+Este valor no se interpreta como eficacia global del control. Solo indica cuánto aporta ese control, con ese peso, frente a ese riesgo específico. El formulario muestra este valor como parte del paso a paso del control.
 
 ##### Eficacia frente al riesgo
 
-La eficacia frente al riesgo agrega los controles asociados a un riesgo:
+La eficacia frente al riesgo, representada en el formulario como \(E_r\), agrega todos los controles asociados a un riesgo:
 
-~~~text
-eficaciaFrenteAlRiesgo(r) =
-suma( pesoMitigacion(r,c) * scoreControlNormalizado(c) )
-/
-suma( pesoMitigacion(r,c) )
-~~~
+$$
+E_r=
+\frac{\sum_{i=1}^{n_r} w_i\cdot S_{control}(c_i)}{\sum_{i=1}^{n_r} w_i}
+$$
 
-Ejemplo para `RE1-001`:
+Donde:
 
-~~~text
-CE1-001 scoreNormalizado = 0.825, peso = 0.70
-CE1-002 scoreNormalizado = 0.650, peso = 0.15
-CG-006  scoreNormalizado = 0.950, peso = 0.15
-
-eficaciaFrenteAlRiesgo =
-(0.70*0.825 + 0.15*0.650 + 0.15*0.950) / 1.00
-
-eficaciaFrenteAlRiesgo = 0.8175
-~~~
-
-Lectura:
-
-> El riesgo queda cubierto en 81.75% según la combinación ponderada de controles. Esto no significa que el riesgo desaparezca; significa que, bajo el modelo, la cobertura observada es alta.
-
-##### Regla correctiva para controles obligatorios
-
-Para evitar que controles compensatorios maquillen la ausencia de un control crítico, se aplica una regla de límite:
-
-~~~text
-si existe un control obligatorio con scoreControlNormalizado(c) < 0.40,
-entonces eficaciaFrenteAlRiesgo(r) = min(eficaciaFrenteAlRiesgo(r), 0.59)
-~~~
+- \(E_r\) es la eficacia frente al riesgo \(r\).
+- \(n_r\) es el número de controles asociados al riesgo \(r\).
+- \(w_i\) es el peso de mitigación de la relación riesgo-control.
+- \(S\_{control}(c_i)\) es el score final normalizado del control \(c_i\).
 
 Ejemplo:
 
-~~~text
-Riesgo: exposición de tokens en navegador
-Control obligatorio: custodia server-side de tokens
-Score del control obligatorio: 0.00
+$$
+\begin{aligned}
+E_{RE1\text{-}001}
+&=\frac{0.70(1.00)+0.15(0.85)+0.15(0.90)}{0.70+0.15+0.15} \\
+&=\frac{0.70+0.1275+0.135}{1.00} \\
+&=0.9625
+\end{aligned}
+$$
 
-Aunque cookie segura y CSP aporten mitigación,
-la eficacia frente al riesgo no puede superar 0.59.
-~~~
+Lectura: el riesgo `RE1-001` queda cubierto en 96.25% bajo los controles y evidencias observadas.
 
-La razón es conceptual: los controles compensatorios pueden reducir exposición, pero no reemplazan al control principal cuando este es obligatorio.
+##### Costo asignado del control
 
-##### Beneficio de mitigación y eficiencia
+Un mismo control puede mitigar varios riesgos. Para evitar doble conteo, el costo se distribuye por peso relativo dentro del conjunto de relaciones activas del escenario:
 
-La eficiencia frente al riesgo relaciona mitigación estimada y costo asignado. Los valores económicos deben estar expresados en la misma moneda.
+$$
+C_{asig}(r,c)=
+C(c)\cdot
+\frac{w_{r,c}}{\sum_{x\in R_c} w_{x,c}}
+$$
 
-~~~text
-beneficioMitigacionEstimado(r) =
-impactoEconomicoEstimado(r) * eficaciaFrenteAlRiesgo(r)
-~~~
+Donde:
 
-~~~text
-eficienciaFrenteAlRiesgo(r) =
-beneficioMitigacionEstimado(r) / costoAsignadoTotal(r)
-~~~
+- \(C\_{asig}(r,c)\) es el costo asignado del control \(c\) al riesgo \(r\).
+- \(C(c)\) es el costo ingresado o sugerido del control.
+- \(w\_{r,c}\) es el peso de mitigación del control \(c\) frente al riesgo \(r\).
+- \(R_c\) es el conjunto de riesgos activos del escenario que usan el control \(c\).
 
-Ejemplo con impacto convertido a USD:
+El costo total asignado al riesgo es:
 
-~~~text
-impactoEconomicoEstimado = 20000 USD
-eficaciaFrenteAlRiesgo = 0.35
-costoAsignadoTotal = 7400 USD
+$$
+C_r=\sum_{i=1}^{n_r} C_{asig}(r,c_i)
+$$
 
-beneficioMitigacionEstimado = 7000 USD
+##### Beneficio de mitigación estimado
 
-eficienciaFrenteAlRiesgo =
-7000 / 7400 = 0.95
-~~~
+El beneficio de mitigación estimado se calcula multiplicando el impacto económico estimado del riesgo por su eficacia observada:
 
-Lectura:
+$$
+B_r=I_r\cdot E_r
+$$
 
-> Por cada dólar asignado a los controles del riesgo, el modelo estima 0.95 dólares de exposición mitigada. Esta cifra no debe interpretarse como retorno financiero exacto, sino como indicador semicuantitativo de priorización.
+Donde:
 
-##### Lectura cualitativa de eficiencia y eficacia global
+- \(B_r\) es el beneficio de mitigación estimado.
+- \(I_r\) es el impacto económico estimado del riesgo.
+- \(E_r\) es la eficacia frente al riesgo.
 
-La metodología mantiene una lectura cualitativa global:
+Los valores económicos deben estar expresados en la misma moneda antes de calcular eficiencia.
 
-- **No es eficiente:** el costo del control es excesivo frente al impacto económico estimado del activo o proceso en riesgo.
-- **Es parcialmente eficiente:** el costo es moderado frente al impacto económico estimado.
-- **Es eficiente:** el costo es razonable u óptimo frente a la reducción de exposición obtenida.
+##### Eficiencia frente al riesgo
 
-Para eficacia global:
+La eficiencia frente al riesgo se representa con la letra griega \(\eta\) y relaciona beneficio estimado contra costo asignado:
 
-- **No es eficaz:** el sistema no cumple los objetivos de seguridad establecidos.
-- **Es parcialmente eficaz:** el sistema cubre algunos objetivos, pero conserva brechas relevantes.
-- **Es eficaz:** el sistema cubre los objetivos de seguridad definidos y reduce de forma significativa la exposición.
+$$
+\eta_r=\frac{B_r}{C_r}
+$$
+
+Si \(C_r=0\) y \(B_r>0\), la UI representa el resultado como \(\infty\). En la práctica, ese caso debe revisarse porque puede indicar ausencia de costo registrado o un control sin estimación económica.
+
+Ejemplo:
+
+$$
+\begin{aligned}
+B_r &= 100000\times 0.85 = 85000 \\
+C_r &= 10000 \\
+\eta_r &= \frac{85000}{10000}=8.5
+\end{aligned}
+$$
+
+Lectura: por cada unidad monetaria asignada a controles del riesgo, el modelo estima 8.5 unidades monetarias de exposición mitigada. No debe interpretarse como retorno financiero exacto, sino como indicador semicuantitativo para priorización.
+
+##### Agregación global
+
+Para una evaluación con \(m\) riesgos activos, la eficacia global se calcula como promedio simple de las eficacias por riesgo:
+
+$$
+E_{global}=\frac{1}{m}\sum_{r=1}^{m}E_r
+$$
+
+La eficiencia global se calcula como promedio simple de las eficiencias por riesgo:
+
+$$
+\eta_{global}=\frac{1}{m}\sum_{r=1}^{m}\eta_r
+$$
+
+Esta es la misma notación que usa el formulario cuando muestra las ecuaciones globales:
+
+$$
+\begin{aligned}
+E_{global} &= \frac{1}{m}\sum_{r=1}^{m}E_r \\
+\eta_{global} &= \frac{1}{m}\sum_{r=1}^{m}\eta_r
+\end{aligned}
+$$
+
+##### Umbrales cualitativos
+
+La UI usa umbrales para traducir valores numéricos a etiquetas cualitativas.
+
+Para eficacia y score:
+
+$$
+Q(x)=
+\begin{cases}
+\text{Alta}, & x\geq 0.75 \\
+\text{Media}, & 0.50\leq x<0.75 \\
+\text{Baja}, & 0\leq x<0.50
+\end{cases}
+$$
+
+Para exposición observada:
+
+$$
+Exposicion(E_r)=
+\begin{cases}
+\text{Bajo}, & E_r\geq 0.75 \\
+\text{Medio}, & 0.50\leq E_r<0.75 \\
+\text{Alto}, & 0.25\leq E_r<0.50 \\
+\text{Crítico}, & 0\leq E_r<0.25
+\end{cases}
+$$
+
+Para eficiencia:
+
+$$
+Q_\eta(\eta)=
+\begin{cases}
+\text{Alta}, & \eta\geq 1 \\
+\text{Media}, & 0.50\leq \eta<1 \\
+\text{Baja}, & 0\leq \eta<0.50
+\end{cases}
+$$
+
+##### Relación entre la tesis y el formulario
+
+La tesis define las variables, fórmulas, ponderadores y reglas de interpretación. El formulario las operacionaliza en JavaScript y las renderiza mediante MathJax. Por eso los símbolos \(S*{base(raw)}\), \(S*{base}\), \(F*{ev}\), \(S*{control}\), \(w*i\), \(Aporte_i\), \(E_r\), \(\eta_r\), \(E*{global}\) y \(\eta\_{global}\) deben mantenerse estables entre la tesis, el código y el informe exportado.
 
 #### 5.1.7. Estructura del resultado de evaluación
 
@@ -3211,7 +3514,7 @@ El modelo produce dos artefactos JSON diferenciados: el **catálogo maestro** y 
 
 Ejemplo mínimo de resultado:
 
-~~~json
+```json
 {
   "evaluacionArquitectura": {
     "id": "EVA-2026-001",
@@ -3295,7 +3598,7 @@ Ejemplo mínimo de resultado:
     "eficaciaCualitativa": "Es parcialmente eficaz"
   }
 }
-~~~
+```
 
 Cada `RegistroMatriz` evalúa una relación riesgo-control concreta. El campo `aporteEficacia` es el producto entre `scoreControlNormalizado` y `pesoMitigacion`. Las `evaluacionesRiesgo` agregan todos los registros asociados a un mismo riesgo. La `evaluacionGlobal` consolida todas las evaluaciones de riesgo y permite comparar escenarios.
 
@@ -3309,7 +3612,7 @@ El modelo de evaluación se aplica en un único corte sobre el estado actual de 
 
 La lógica base es:
 
-~~~mermaid
+```mermaid
 graph TD
     A[Seleccionar catálogo aplicable] --> B[Seleccionar arquitectura evaluada]
     B --> C[Activar riesgos globales OAuth 2.0/OIDC]
@@ -3326,7 +3629,7 @@ graph TD
     L --> M[Evaluación por riesgo]
     M --> N[Evaluación global del sistema]
     N --> O[Exposición observada, hallazgos y observaciones]
-~~~
+```
 
 Esta estructura organiza la aplicación del modelo en cuatro momentos:
 
@@ -3442,7 +3745,7 @@ El enfoque de Valencia Duque permite hablar de eficiencia y eficacia del control
 
 La relación conceptual es:
 
-~~~mermaid
+```mermaid
 graph TD
     A[Evaluación de control] --> B[Score del control]
     B --> C[Aporte del control al riesgo]
@@ -3450,7 +3753,7 @@ graph TD
     D --> E[Beneficio de mitigación estimado]
     E --> F[Eficiencia frente al riesgo]
     F --> G[Evaluación global del sistema]
-~~~
+```
 
 Así se evita decir que un control tiene una eficacia única. Un mismo control puede ser muy eficaz para un riesgo y marginal para otro. Esa diferencia se modela con `pesoMitigacion`.
 
@@ -3518,12 +3821,12 @@ La matriz opera en un único momento de evaluación y produce una conclusión so
 
 La relación conceptual es:
 
-~~~mermaid
+```mermaid
 graph TD
     A[Riesgo identificado] --> D[Nivel de exposición observado]
     B[Estado observado del control] --> D
     C[Evidencia disponible] --> D
-~~~
+```
 
 Si posteriormente se aplican correcciones, la tesis no asume una segunda fase interna del mismo modelo, sino una nueva evaluación sobre un nuevo estado de la arquitectura. La tesis puede usar homologación cualitativa o semicuantitativa, siempre que mantenga trazabilidad entre riesgo, control, evidencia y conclusión.
 
@@ -3617,7 +3920,7 @@ Campos:
 
 La estructura general se representa así:
 
-~~~mermaid
+```mermaid
 graph TD
     A[Escenario OAuth 2.0/OIDC] --> B[Riesgo identificado]
     B --> C[Relación riesgo-control]
@@ -3629,7 +3932,7 @@ graph TD
     H --> I[Evaluación global]
     E --> J[Evidencia auditable]
     J --> H
-~~~
+```
 
 Esta estructura corrige la inconsistencia entre el esquema del modelo y la matriz: primero se identifica el riesgo, luego la relación riesgo-control, después la evidencia y finalmente el resultado por riesgo y global. La matriz no parte de los casos base; parte de los escenarios OAuth 2.0/OIDC.
 
@@ -3815,14 +4118,25 @@ Para conservar comparabilidad entre registros, cada dimensión debe diligenciars
 
 #### 5.5.15. Score del control
 
-Es la calificación cuantitativa del control en escala 0 a 100. Se calcula a partir de las cinco dimensiones ponderadas:
+Es la calificación cuantitativa del control usada por la UI y por la matriz. La notación coincide con el formulario web:
 
-~~~text
-scoreControl =
-0.40*madurez + 0.20*automatizacion + 0.10*momento + 0.20*periodicidad + 0.10*alcance
-~~~
+$$
+S_{base(raw)}(c)=0.40M_c+0.20A_c+0.10T_c+0.20P_c+0.10L_c
+$$
 
-Para las fórmulas de cobertura se usa `scoreControlNormalizado = scoreControl / 100`.
+$$
+S_{base}(c)=\operatorname{norm}\left(S_{base(raw)}(c)\right)
+$$
+
+$$
+F_{ev}(c)=\operatorname{norm}\left(f_{ev}(c)\right)
+$$
+
+$$
+S_{control}(c)=S_{base}(c)\times F_{ev}(c)
+$$
+
+El valor $S_{control}$ está en escala de 0 a 1 y se muestra como porcentaje. Por tanto, $S_{control}=0.85$ equivale a 85%.
 
 #### 5.5.16. Evidencia auditable esperada
 
@@ -3876,27 +4190,32 @@ Ejemplos:
 
 Mide cuánto aporta el control evaluado a la cobertura del riesgo:
 
-~~~text
-aporteEficacia = pesoMitigacion * scoreControlNormalizado
-~~~
+$$
+Aporte_i(r,c_i)=w_i\cdot S_{control}(c_i)
+$$
 
 #### 5.5.20. Eficacia frente al riesgo
 
 Agrega los aportes de todos los controles asociados a un riesgo:
 
-~~~text
-eficaciaFrenteAlRiesgo =
-suma(pesoMitigacion * scoreControlNormalizado) / suma(pesoMitigacion)
-~~~
+$$
+E_r=
+\frac{\sum_{i=1}^{n_r} w_i\cdot S_{control}(c_i)}{\sum_{i=1}^{n_r} w_i}
+$$
 
 #### 5.5.21. Eficiencia frente al riesgo
 
 Relaciona beneficio de mitigación estimado y costo asignado total:
 
-~~~text
-eficienciaFrenteAlRiesgo =
-beneficioMitigacionEstimado / costoAsignadoTotal
-~~~
+$$
+B_r=I_r\cdot E_r
+$$
+
+$$
+\eta_r=\frac{B_r}{C_r}
+$$
+
+Donde $I_r$ es el impacto económico estimado, $E_r$ la eficacia frente al riesgo y $C_r$ el costo asignado total de los controles del riesgo.
 
 #### 5.5.22. Nivel de exposición observado
 
@@ -3945,7 +4264,6 @@ Ejemplos:
 - Valencia Duque.
 
 ---
-
 
 ### 5.6. Plantilla inicial de la matriz
 
@@ -4015,207 +4333,443 @@ En el entregable web, esta plantilla se materializa como un catálogo precargado
 
 ---
 
-## 6. Experimento / Aplicación de la matriz a los escenarios OAuth 2.0/OIDC
+## 6. Experimento / Aplicación de la matriz a seis corridas demostrativas
 
-Este capítulo presenta la aplicación del modelo sobre los tres escenarios definidos por la tesis. La lógica aplicada es la del capítulo 5: seleccionar riesgos y controles del catálogo, caracterizar riesgo, evaluar controles por dimensiones y consolidar eficacia, eficiencia y nivel de exposición observado.
+Este capítulo presenta la aplicación del modelo sobre **seis corridas demostrativas** derivadas de los tres escenarios OAuth 2.0/OIDC definidos por la tesis. La decisión metodológica consiste en construir, para cada escenario arquitectónico, un caso con evidencia favorable y un caso con evidencia débil:
 
-El objetivo del experimento no es auditar una organización particular de extremo a extremo, sino demostrar que la matriz permite producir resultados comparables, trazables y accionables entre arquitecturas OAuth 2.0/OIDC distintas.
+1. `SPA_BFF_IDP_BUENO`
+2. `SPA_BFF_IDP_MALO`
+3. `M2M_AS_RS_BUENO`
+4. `M2M_AS_RS_MALO`
+5. `API_GATEWAY_FEDERADO_BUENO`
+6. `API_GATEWAY_FEDERADO_MALO`
 
-La ejecución se apoya en dos fuentes:
+Estos seis escenarios de demostración no representan seis arquitecturas distintas, sino seis **aplicaciones controladas de la matriz**: dos por cada arquitectura evaluable. Esta decisión permite observar cómo cambia el resultado cuando el catálogo de riesgos y controles se mantiene constante, pero la evidencia, la madurez, la automatización, el momento, la periodicidad y el alcance funcional de los controles cambian.
 
-1. Catálogo maestro y reglas de cálculo del modelo.
-2. Resultado de la corrida del prototipo para el escenario SPA+BFF+IdP y aplicación guiada de la misma matriz para los escenarios M2M y API Gateway.
+La fuente operativa de este capítulo es el archivo `demo-prediligenciamiento.json`. Ese archivo debe entenderse como un artefacto derivado del capítulo 6: serializa en JSON los valores definidos aquí para prediligenciar el formulario web. Por tanto, los datos de activos, amenazas, vulnerabilidades, hallazgos, impacto económico estimado, evidencias y fuentes de evidencia no se generan de forma arbitraria desde la aplicación; se derivan de los escenarios demostrativos documentados en esta sección y en el anexo correspondiente.
 
-En todos los ejemplos económicos de este capítulo, costos e impactos se expresan en una misma moneda antes de calcular eficiencia. Cuando el impacto original se estima en COP y los costos del catálogo están en USD, se usa una tasa de conversión declarada en la evaluación.
+### 6.1. Estructura de los datos demostrativos
 
-### 6.1. Aplicación al escenario 1: SPA estática + BFF + IdP corporativo
+Cada corrida demostrativa incluye dos bloques:
 
-En este escenario, la evaluación se concentró en riesgos asociados al flujo Authorization Code con PKCE, la sesión del usuario y la posible exposición de tokens en el navegador.
+1. **Contexto de evaluación:** organización ficticia, evaluador, ambiente, sistema evaluado y notas de alcance.
+2. **Datos de matriz:** riesgos caracterizados y controles evaluados.
 
-Riesgos priorizados en la aplicación:
+Los campos usados por riesgo son:
 
-1. `RE1-001`: intercepción o sustitución del `authorization_code`.
-2. `RE1-002`: exposición de tokens o material de sesión en el User Agent.
+- `asset`: activo en riesgo.
+- `threat`: amenaza o causa.
+- `vulnerability`: vulnerabilidad o condición habilitante.
+- `probability`: probabilidad estimada.
+- `impact`: impacto estimado.
+- `businessLoss`: lucro cesante o impacto económico estimado del activo.
+- `finding`: hallazgo, brecha u observación.
 
-Controles evaluados en la corrida:
+Los campos usados por control son:
 
-1. `CE1-001`: Authorization Code + PKCE con `S256`.
-2. `CE1-002`: `state` y `nonce` ligados a la sesión del cliente.
-3. `CE1-003`: custodia server-side de tokens y no exposición al User Agent.
-4. `CE1-004`: cookie de sesión segura y defensas anti-CSRF.
-5. `CG-006`: transporte seguro y no exposición de tokens en URI.
+- `controlCost`: costo del control.
+- `maturity`: madurez.
+- `automation`: automatización.
+- `timing`: momento.
+- `periodicity`: periodicidad.
+- `scope`: alcance funcional.
+- `evidenceFactor`: suficiencia de la evidencia.
+- `evidenceFound`: evidencia encontrada.
+- `evidenceSource`: fuente de evidencia.
 
-Ejemplo de cálculo para `RE1-001`:
+La estructura conceptual del prediligenciamiento es:
 
-~~~text
-CE1-001 PKCE con S256:
-  peso = 0.70
-  scoreControl = 82.5
-  scoreNormalizado = 0.825
-  aporte = 0.70 * 0.825 = 0.5775
+```mermaid
+flowchart TD
+    A[Capítulo 6 de la tesis] --> B[Seis corridas demostrativas]
+    B --> C[Datos por riesgo]
+    B --> D[Datos por control]
+    C --> E[demo-prediligenciamiento.json]
+    D --> E
+    E --> F[Formulario web]
+    F --> G[Cálculo de score, eficacia y eficiencia]
+    G --> H[Reporte Excel o JSON]
+```
 
-CE1-002 state y nonce:
-  peso = 0.15
-  scoreControl = 65
-  scoreNormalizado = 0.65
-  aporte = 0.15 * 0.65 = 0.0975
+### 6.2. Criterio para construir casos buenos y malos
 
-CG-006 transporte seguro:
-  peso = 0.15
-  scoreControl = 95
-  scoreNormalizado = 0.95
-  aporte = 0.15 * 0.95 = 0.1425
+En los casos **buenos**, los controles aparecen con valores altos en las dimensiones de evaluación:
 
-eficaciaFrenteAlRiesgo(RE1-001) = 0.8175
-~~~
+- madurez auditada o implementada;
+- automatización automática;
+- momento preventivo;
+- periodicidad permanente;
+- alcance general cuando el control cubre la arquitectura;
+- evidencia suficiente o independiente/auditada.
 
-Resumen cuantitativo observado en el prototipo:
+En los casos **malos**, los controles se configuran con valores débiles:
 
-| Riesgo | Cobertura observada | Eficacia | Eficiencia | Exposición |
-|---|---:|---:|---:|---|
-| `RE1-001` | 0.8175 | 0.8175 | 2.73 | Bajo |
-| `RE1-002` | 0.3900 | 0.3900 | 1.05 | Alto |
+- controles declarados o apenas diseñados;
+- operación manual;
+- momento correctivo;
+- periodicidad ocasional;
+- alcance específico o fragmentado;
+- evidencia ausente o parcial.
 
-La evaluación global del escenario fue:
+La comparación no busca afirmar que una organización real se encuentra en uno de esos extremos. Su función es validar que el modelo reacciona de forma esperada: cuando la evidencia y las dimensiones del control son fuertes, la eficacia frente al riesgo aumenta; cuando la evidencia es débil, la exposición observada permanece alta o crítica.
 
-- `scorePromedioControl = 61.5`
-- `eficienciaCuantitativa = 1.89`
-- `eficaciaCuantitativa = 0.60`
-- `eficienciaCualitativa = Es parcialmente eficiente`
-- `eficaciaCualitativa = Es parcialmente eficaz`
+### 6.3. Escenario demostrativo: SPA estática + BFF + IdP corporativo
 
-Interpretación del resultado:
+Para este escenario se documentan dos corridas: una buena y una mala. En ambas se conserva la misma arquitectura base y el mismo catálogo aplicable; lo que cambia es la calidad de la implementación y de la evidencia.
 
-1. El riesgo de intercepción del código (`RE1-001`) quedó bien cubierto por la combinación PKCE + ligadura transaccional (`state`/`nonce`) + transporte seguro.
-2. El riesgo de exposición de tokens en navegador (`RE1-002`) permaneció alto porque el control principal de custodia server-side de tokens no mostró implementación efectiva en la evidencia levantada.
-3. Los controles compensatorios, como cookie segura y transporte seguro, aportaron mitigación, pero no sustituyen la eliminación del almacenamiento de tokens en el User Agent.
+#### 6.3.1. Contextos de evaluación
 
-Hallazgo principal del escenario 1:
+| Campo            | Caso bueno                    | Caso malo                    |
+| ---------------- | ----------------------------- | ---------------------------- |
+| Organización     | Banco Demo OAuth - Caso bueno | Banco Demo OAuth - Caso malo |
+| Ambiente         | Preproducción                 | Preproducción                |
+| Sistema evaluado | Portal SPA con BFF endurecido | Portal SPA con BFF débil     |
 
-El diseño del flujo OIDC es razonable, pero la evidencia técnica muestra una brecha material en la custodia de tokens. Por tanto, el control crítico del escenario no puede considerarse eficaz mientras persista almacenamiento en contexto del navegador.
+#### 6.3.2. Riesgos específicos prediligenciados
 
-### 6.2. Aplicación al escenario 2: M2M con Authorization Server como Resource Server
+Los siguientes riesgos específicos muestran cómo se materializan los campos del formulario. Los riesgos globales también se incluyen en el JSON del anexo, pero aquí se resaltan los riesgos propios del escenario para evitar duplicar narrativa.
 
-En este escenario, la matriz se aplicó sobre el riesgo de concentración de poder en clientes técnicos y en el hecho de que el mismo componente actúe como Authorization Server y Resource Server.
+**Caso bueno:**
 
-Riesgos específicos priorizados:
+| Riesgo  | Activo                               | Prob. | Impacto | Impacto económico |
+| ------- | ------------------------------------ | ----- | ------- | ----------------- |
+| RE1-001 | authorization_code en callback OIDC  | media | alto    | 100,000           |
+| RE1-002 | material de sesión en navegador      | media | alto    | 150,000           |
+| RE1-003 | integridad de transacción OAuth/OIDC | media | medio   | 90,000            |
 
-1. `RE2-001`: abuso de cliente técnico privilegiado.
-2. `RE2-002`: secreto o certificado expuesto o sin rotación.
-3. `RE2-003`: segregación insuficiente cuando AS también es RS.
+**Caso malo:**
 
-Controles específicos y transversales de mayor peso:
+| Riesgo  | Activo                               | Prob. | Impacto | Impacto económico |
+| ------- | ------------------------------------ | ----- | ------- | ----------------- |
+| RE1-001 | authorization_code en callback OIDC  | alta  | critico | 125,000           |
+| RE1-002 | material de sesión en navegador      | alta  | critico | 187,500           |
+| RE1-003 | integridad de transacción OAuth/OIDC | alta  | critico | 112,500           |
 
-1. `CE2-002`: cliente técnico por ambiente y propósito con scopes mínimos.
-2. `CE2-001`: secreto/certificado en vault.
-3. `CE2-004`: recertificación y monitoreo por `client_id`.
-4. `CG-005`: gestión segura de secretos, claves y JWKS.
-5. `CG-001`: validación completa de token en APIs administrativas.
+#### 6.3.3. Ejemplos de controles prediligenciados
 
-Resultado de aplicación del instrumento en este escenario:
+Los controles siguientes ilustran la diferencia entre un caso con evidencia fuerte y un caso con evidencia débil. El detalle completo de evidencias y fuentes de evidencia se conserva en el anexo JSON.
 
-1. El patrón de brecha dominante fue de gobierno operativo, no de ausencia total de controles: existen controles diseñados, pero con evidencia parcial de rotación efectiva y recertificación periódica.
-2. La eficiencia del diseño de controles fue media-alta, porque los controles seleccionados atacan el riesgo principal.
-3. La eficacia operativa fue media, debido a debilidades de evidencia en automatización de recertificación y en segregación robusta de permisos administrativos.
-4. El nivel de exposición observado se ubicó entre medio y alto para operaciones administrativas críticas.
+**Caso bueno:**
 
-Lectura técnica del escenario 2:
+| Control | Madurez  | Autom.     | Momento    | Periodic.  | Alcance | Score  |
+| ------- | -------- | ---------- | ---------- | ---------- | ------- | ------ |
+| CE1-001 | auditado | automatico | preventivo | permanente | general | 100.00 |
+| CE1-003 | auditado | automatico | preventivo | permanente | general | 100.00 |
+| CE1-004 | auditado | automatico | preventivo | permanente | general | 100.00 |
 
-Cuando AS y RS conviven, un error de privilegios en `client_credentials` puede amplificar impacto sobre emisión de tokens, administración de clientes y acceso a APIs sensibles en un solo dominio técnico. Por ello, la matriz da prioridad a controles de separación por propósito, trazabilidad por `client_id` y endurecimiento de credenciales.
+**Caso malo:**
 
-### 6.3. Aplicación al escenario 3: API Gateway federado con Authorization Server corporativo
+| Control | Madurez   | Autom. | Momento    | Periodic. | Alcance    | Score |
+| ------- | --------- | ------ | ---------- | --------- | ---------- | ----- |
+| CE1-001 | declarado | manual | correctivo | ocasional | especifico | 17.50 |
+| CE1-003 | declarado | manual | correctivo | ocasional | especifico | 17.50 |
+| CE1-004 | declarado | manual | correctivo | ocasional | especifico | 17.50 |
 
-Este escenario se evaluó sobre riesgos de confianza entre fronteras y uso de tokens entre múltiples recursos con audiencias distintas.
+#### 6.3.4. Resultado cuantitativo del escenario
 
-Riesgos específicos priorizados:
+| Corrida | Score prom. control | Eficacia global | Eficiencia global | Eficacia cual. | Eficiencia cual. |
+| ------- | ------------------- | --------------- | ----------------- | -------------- | ---------------- |
+| Bueno   | 99.62               | 99.75%          | 28.80             | Alta           | Alta             |
+| Malo    | 14.81               | 15.25%          | 5.60              | Baja           | Alta             |
 
-1. `RE3-001`: confusión de audiencia entre gateway y APIs internas.
-2. `RE3-002`: confianza ciega del backend en el gateway.
-3. `RE3-003`: propagación de token sin downscoping o token exchange.
+Lectura: la diferencia principal entre las dos corridas no está en el catálogo, sino en la evidencia y en el estado del control. La corrida buena muestra controles con mayor score promedio y mayor eficacia frente al riesgo. La corrida mala conserva impacto económico relevante, pero con controles débiles; por eso la exposición observada se mantiene alta o crítica en los riesgos más sensibles.
 
-Controles críticos del escenario:
+### 6.4. Escenario demostrativo: M2M con Authorization Server como Resource Server
 
-1. `CE3-001`: validación de audiencia por API destino y revalidación mínima en backend.
-2. `CE3-002`: token exchange o downscoping al cruzar frontera de confianza.
-3. `CE3-003`: política uniforme de validación e introspección/JWKS.
-4. `CE3-004`: trazabilidad correlacionada gateway-AS-RS.
+Para este escenario se documentan dos corridas: una buena y una mala. En ambas se conserva la misma arquitectura base y el mismo catálogo aplicable; lo que cambia es la calidad de la implementación y de la evidencia.
 
-Resultado de aplicación del instrumento en este escenario:
+#### 6.4.1. Contextos de evaluación
 
-1. La capacidad de detección y trazabilidad fue relativamente alta cuando existe correlación de eventos entre componentes.
-2. La principal brecha se ubicó en propagación de tokens con permisos excesivos hacia backends múltiples, especialmente cuando no se aplica token exchange.
-3. La eficacia frente a riesgos de audiencia depende fuertemente de controles preventivos en Gateway y de revalidación mínima en backend.
-4. El nivel de exposición observado se concentró en rango medio, con picos altos en servicios donde se identificó confianza implícita del backend.
+| Campo            | Caso bueno                    | Caso malo                     |
+| ---------------- | ----------------------------- | ----------------------------- |
+| Organización     | Fintech Demo M2M - Caso bueno | Fintech Demo M2M - Caso malo  |
+| Ambiente         | Producción                    | Producción                    |
+| Sistema evaluado | Servicios M2M IAM gobernados  | Servicios M2M IAM con brechas |
 
-Lectura técnica del escenario 3:
+#### 6.4.2. Riesgos específicos prediligenciados
 
-Este escenario confirma que validar token solo en el perímetro no es suficiente para riesgos de autorización fina. La arquitectura requiere consistencia de validación y políticas explícitas de transferencia de confianza entre gateway y APIs internas.
+Los siguientes riesgos específicos muestran cómo se materializan los campos del formulario. Los riesgos globales también se incluyen en el JSON del anexo, pero aquí se resaltan los riesgos propios del escenario para evitar duplicar narrativa.
 
-### 6.4. Comparación de riesgos entre escenarios OAuth 2.0/OIDC
+**Caso bueno:**
 
-La comparación transversal muestra que los tres escenarios comparten riesgos globales (`RG-001` a `RG-005`), pero cada arquitectura introduce un riesgo dominante distinto:
+| Riesgo  | Activo                       | Prob. | Impacto | Impacto económico |
+| ------- | ---------------------------- | ----- | ------- | ----------------- |
+| RE2-001 | cliente técnico privilegiado | media | critico | 120,000           |
+| RE2-002 | credenciales M2M             | media | alto    | 95,000            |
+| RE2-003 | plano AS+RS administrativo   | media | alto    | 105,000           |
 
-| Escenario | Riesgo dominante | Exposición |
-|---|---|---|
-| SPA + BFF + IdP | Token en User Agent | Medio-Alto |
-| M2M con AS=RS | Cliente técnico privilegiado | Medio-Alto |
-| Gateway federado | Audiencia y propagación | Medio |
+**Caso malo:**
 
-Conclusión comparativa:
+| Riesgo  | Activo                       | Prob. | Impacto | Impacto económico |
+| ------- | ---------------------------- | ----- | ------- | ----------------- |
+| RE2-001 | cliente técnico privilegiado | alta  | critico | 150,000           |
+| RE2-002 | credenciales M2M             | alta  | critico | 118,750           |
+| RE2-003 | plano AS+RS administrativo   | alta  | critico | 131,250           |
 
-1. El escenario 1 concentra más riesgo en la frontera navegador-sesión.
-2. El escenario 2 concentra más riesgo en identidad no humana y privilegios administrativos.
-3. El escenario 3 concentra más riesgo en fronteras de confianza y autorización distribuida.
+#### 6.4.3. Ejemplos de controles prediligenciados
 
-### 6.5. Controles transversales y controles específicos
+Los controles siguientes ilustran la diferencia entre un caso con evidencia fuerte y un caso con evidencia débil. El detalle completo de evidencias y fuentes de evidencia se conserva en el anexo JSON.
 
-La aplicación confirma que los controles transversales son necesarios, pero no suficientes.
+**Caso bueno:**
 
-Controles transversales con mayor impacto recurrente:
+| Control | Madurez  | Autom.     | Momento    | Periodic.  | Alcance | Score  |
+| ------- | -------- | ---------- | ---------- | ---------- | ------- | ------ |
+| CE2-001 | auditado | automatico | preventivo | permanente | general | 100.00 |
+| CE2-002 | auditado | automatico | preventivo | permanente | general | 100.00 |
+| CE2-004 | auditado | automatico | preventivo | permanente | general | 100.00 |
 
-1. `CG-001`: validación completa de token.
-2. `CG-002`: scopes mínimos y restricción de audiencia/recurso.
-3. `CG-005`: gestión segura de secretos, claves y JWKS.
-4. `CG-007`: logging, correlación y monitoreo.
+**Caso malo:**
 
-Controles específicos decisivos por arquitectura:
+| Control | Madurez   | Autom. | Momento    | Periodic. | Alcance    | Score |
+| ------- | --------- | ------ | ---------- | --------- | ---------- | ----- |
+| CE2-001 | declarado | manual | correctivo | ocasional | especifico | 17.50 |
+| CE2-002 | declarado | manual | correctivo | ocasional | especifico | 17.50 |
+| CE2-004 | declarado | manual | correctivo | ocasional | especifico | 17.50 |
 
-1. Escenario 1: `CE1-001`, `CE1-002`, `CE1-003`, `CE1-004`.
-2. Escenario 2: `CE2-001`, `CE2-002`, `CE2-003`, `CE2-004`.
-3. Escenario 3: `CE3-001`, `CE3-002`, `CE3-003`, `CE3-004`.
+#### 6.4.4. Resultado cuantitativo del escenario
 
-La principal lección es que la efectividad del sistema cae cuando el control específico de mayor peso por riesgo no está implementado o no tiene evidencia suficiente, incluso si varios controles globales muestran buena calificación.
+| Corrida | Score prom. control | Eficacia global | Eficiencia global | Eficacia cual. | Eficiencia cual. |
+| ------- | ------------------- | --------------- | ----------------- | -------------- | ---------------- |
+| Bueno   | 99.62               | 94.75%          | 43.78             | Alta           | Alta             |
+| Malo    | 14.81               | 14.12%          | 8.33              | Baja           | Alta             |
 
-### 6.6. Evidencias mínimas para auditoría
+Lectura: la diferencia principal entre las dos corridas no está en el catálogo, sino en la evidencia y en el estado del control. La corrida buena muestra controles con mayor score promedio y mayor eficacia frente al riesgo. La corrida mala conserva impacto económico relevante, pero con controles débiles; por eso la exposición observada se mantiene alta o crítica en los riesgos más sensibles.
 
-La aplicación de la matriz permitió estandarizar un mínimo de evidencia verificable por escenario:
+### 6.5. Escenario demostrativo: API Gateway federado + Authorization Server corporativo
 
-1. Evidencia de configuración del Authorization Server: clientes, flujos, scopes, vigencias, políticas de rotación.
-2. Evidencia de validación en Resource Server o Gateway: firma/introspección, `issuer`, `audience`, expiración y autorización por operación.
-3. Evidencia de custodia de tokens y sesión: ausencia de tokens en navegador para escenario SPA+BFF, atributos de cookie y controles anti-CSRF.
-4. Evidencia de gobierno de identidades técnicas: vault, rotación, segregación por ambiente y propósito, recertificación periódica.
-5. Evidencia de trazabilidad extremo a extremo: correlación por `request_id`, `client_id`, `sub`, `aud`, API destino y decisión de autorización.
+Para este escenario se documentan dos corridas: una buena y una mala. En ambas se conserva la misma arquitectura base y el mismo catálogo aplicable; lo que cambia es la calidad de la implementación y de la evidencia.
 
-Criterio de suficiencia utilizado:
+#### 6.5.1. Contextos de evaluación
 
-- **Suficiente:** evidencia técnica reproducible y trazable al control.
-- **Parcial:** evidencia indirecta o incompleta.
-- **Insuficiente:** declaración sin soporte verificable.
+| Campo            | Caso bueno                                    | Caso malo                                 |
+| ---------------- | --------------------------------------------- | ----------------------------------------- |
+| Organización     | Holding APIs Federadas - Caso bueno           | Holding APIs Federadas - Caso malo        |
+| Ambiente         | Producción                                    | Producción                                |
+| Sistema evaluado | Gateway federado con validación y downscoping | Gateway federado con propagación insegura |
 
-### 6.7. Niveles de exposición observados
+#### 6.5.2. Riesgos específicos prediligenciados
 
-La aplicación integral de la matriz permite convertir hallazgos técnicos en lectura ejecutiva de exposición, sin perder trazabilidad técnica.
+Los siguientes riesgos específicos muestran cómo se materializan los campos del formulario. Los riesgos globales también se incluyen en el JSON del anexo, pero aquí se resaltan los riesgos propios del escenario para evitar duplicar narrativa.
 
-Regla de interpretación aplicada en este capítulo:
+**Caso bueno:**
 
-1. Exposición baja: eficacia alta y sin brechas críticas en controles obligatorios.
-2. Exposición media: eficacia intermedia o brechas parciales con controles compensatorios.
-3. Exposición alta: control obligatorio ausente o con evidencia insuficiente en riesgos de alto impacto.
-4. Exposición crítica: control obligatorio ausente y riesgo con impacto crítico o exposición sistémica.
+| Riesgo  | Activo                             | Prob. | Impacto | Impacto económico |
+| ------- | ---------------------------------- | ----- | ------- | ----------------- |
+| RE3-001 | audience por API destino           | media | alto    | 110,000           |
+| RE3-002 | confianza backend en gateway       | media | alto    | 115,000           |
+| RE3-003 | propagación de permisos entre APIs | media | critico | 140,000           |
 
-### 6.8. Síntesis del experimento
+**Caso malo:**
 
-La aplicación de la matriz muestra que el catálogo maestro permite comparar arquitecturas diferentes sin perder especificidad técnica. Los tres escenarios comparten riesgos globales, pero cada uno exige controles específicos y evidencia distinta. Esto confirma el aporte del modelo: no evaluar OAuth 2.0/OIDC como tecnología aislada, sino como arquitectura de controles, riesgos y evidencias auditables.
+| Riesgo  | Activo                             | Prob. | Impacto | Impacto económico |
+| ------- | ---------------------------------- | ----- | ------- | ----------------- |
+| RE3-001 | audience por API destino           | alta  | critico | 137,500           |
+| RE3-002 | confianza backend en gateway       | alta  | critico | 143,750           |
+| RE3-003 | propagación de permisos entre APIs | alta  | critico | 175,000           |
+
+#### 6.5.3. Ejemplos de controles prediligenciados
+
+Los controles siguientes ilustran la diferencia entre un caso con evidencia fuerte y un caso con evidencia débil. El detalle completo de evidencias y fuentes de evidencia se conserva en el anexo JSON.
+
+**Caso bueno:**
+
+| Control | Madurez      | Autom.     | Momento    | Periodic.  | Alcance | Score  |
+| ------- | ------------ | ---------- | ---------- | ---------- | ------- | ------ |
+| CE3-001 | auditado     | automatico | preventivo | permanente | general | 100.00 |
+| CE3-002 | implementado | automatico | preventivo | permanente | general | 90.00  |
+| CE3-004 | auditado     | automatico | preventivo | permanente | general | 100.00 |
+
+**Caso malo:**
+
+| Control | Madurez   | Autom. | Momento    | Periodic. | Alcance    | Score |
+| ------- | --------- | ------ | ---------- | --------- | ---------- | ----- |
+| CE3-001 | declarado | manual | correctivo | ocasional | especifico | 17.50 |
+| CE3-002 | declarado | manual | correctivo | ocasional | especifico | 17.50 |
+| CE3-004 | declarado | manual | correctivo | ocasional | especifico | 17.50 |
+
+#### 6.5.4. Resultado cuantitativo del escenario
+
+| Corrida | Score prom. control | Eficacia global | Eficiencia global | Eficacia cual. | Eficiencia cual. |
+| ------- | ------------------- | --------------- | ----------------- | -------------- | ---------------- |
+| Bueno   | 99.05               | 83.31%          | 26.16             | Alta           | Alta             |
+| Malo    | 15.12               | 12.89%          | 4.91              | Baja           | Alta             |
+
+Lectura: la diferencia principal entre las dos corridas no está en el catálogo, sino en la evidencia y en el estado del control. La corrida buena muestra controles con mayor score promedio y mayor eficacia frente al riesgo. La corrida mala conserva impacto económico relevante, pero con controles débiles; por eso la exposición observada se mantiene alta o crítica en los riesgos más sensibles.
+
+### 6.6. Comparación transversal de las seis corridas
+
+La siguiente tabla resume las seis corridas demostrativas. Esta comparación es posible porque todas usan el mismo catálogo maestro, la misma lógica de cálculo y la misma estructura de formulario.
+
+| Corrida demostrativa | Score prom. control | Eficacia global | Eficiencia global | Eficacia cual. | Eficiencia cual. |
+| -------------------- | ------------------- | --------------- | ----------------- | -------------- | ---------------- |
+| SPA+BFF+IdP bueno    | 99.62               | 99.75%          | 28.80             | Alta           | Alta             |
+| SPA+BFF+IdP malo     | 14.81               | 15.25%          | 5.60              | Baja           | Alta             |
+| M2M AS=RS bueno      | 99.62               | 94.75%          | 43.78             | Alta           | Alta             |
+| M2M AS=RS malo       | 14.81               | 14.12%          | 8.33              | Baja           | Alta             |
+| API Gateway bueno    | 99.05               | 83.31%          | 26.16             | Alta           | Alta             |
+| API Gateway malo     | 15.12               | 12.89%          | 4.91              | Baja           | Alta             |
+
+La eficiencia cuantitativa debe leerse junto con la eficacia. En algunos casos malos puede aparecer una eficiencia relativa alta porque el costo declarado del control es bajo frente al impacto económico estimado. Sin embargo, si la eficacia es baja, el resultado no debe interpretarse como una arquitectura saludable. Por esa razón, la lectura ejecutiva debe considerar simultáneamente:
+
+1. score promedio de control;
+2. eficacia frente al riesgo;
+3. nivel de exposición observado;
+4. suficiencia de evidencia;
+5. eficiencia económica de la mitigación.
+
+### 6.7. Resultados por riesgo en cada corrida
+
+Las siguientes tablas presentan el resultado consolidado por riesgo. Se omiten las descripciones largas para conservar legibilidad; los valores narrativos completos de activo, amenaza, vulnerabilidad, hallazgo, evidencia y fuente de evidencia quedan en el anexo JSON.
+
+#### SPA+BFF+IdP bueno
+
+| Riesgo  | Nivel riesgo | Eficacia | Exposición | Eficiencia | Costo asignado |
+| ------- | ------------ | -------- | ---------- | ---------- | -------------- |
+| RG-001  | Alto         | 98.00%   | Bajo       | 8.73       | 7,293.94 USD   |
+| RG-002  | Alto         | 100.00%  | Bajo       | 35.97      | 2,223.82 USD   |
+| RG-003  | Medio        | 100.00%  | Bajo       | 24.10      | 2,074.51 USD   |
+| RG-004  | Medio        | 100.00%  | Bajo       | 13.22      | 3,403.33 USD   |
+| RG-005  | Medio        | 100.00%  | Bajo       | 15.10      | 2,648.33 USD   |
+| RE1-001 | Alto         | 100.00%  | Bajo       | 55.54      | 1,800.54 USD   |
+| RE1-002 | Alto         | 100.00%  | Bajo       | 28.75      | 5,217.42 USD   |
+| RE1-003 | Medio        | 100.00%  | Bajo       | 48.96      | 1,838.10 USD   |
+
+#### SPA+BFF+IdP malo
+
+| Riesgo  | Nivel riesgo | Eficacia | Exposición | Eficiencia | Costo asignado |
+| ------- | ------------ | -------- | ---------- | ---------- | -------------- |
+| RG-001  | Crítico      | 11.50%   | Crítico    | 1.28       | 7,293.94 USD   |
+| RG-002  | Crítico      | 11.50%   | Crítico    | 5.17       | 2,223.82 USD   |
+| RG-003  | Crítico      | 15.50%   | Crítico    | 4.67       | 2,074.51 USD   |
+| RG-004  | Crítico      | 17.50%   | Crítico    | 2.89       | 3,403.33 USD   |
+| RG-005  | Crítico      | 16.00%   | Crítico    | 3.02       | 2,648.33 USD   |
+| RE1-001 | Crítico      | 16.00%   | Crítico    | 11.11      | 1,800.54 USD   |
+| RE1-002 | Crítico      | 16.50%   | Crítico    | 5.93       | 5,217.42 USD   |
+| RE1-003 | Crítico      | 17.50%   | Crítico    | 10.71      | 1,838.10 USD   |
+
+#### M2M AS=RS bueno
+
+| Riesgo  | Nivel riesgo | Eficacia | Exposición | Eficiencia | Costo asignado |
+| ------- | ------------ | -------- | ---------- | ---------- | -------------- |
+| RG-001  | Alto         | 60.00%   | Medio      | 5.35       | 7,850.54 USD   |
+| RG-002  | Crítico      | 100.00%  | Bajo       | 66.20      | 1,812.74 USD   |
+| RG-003  | Alto         | 100.00%  | Bajo       | 73.44      | 1,497.74 USD   |
+| RG-004  | Alto         | 100.00%  | Bajo       | 56.12      | 2,494.81 USD   |
+| RG-005  | Alto         | 100.00%  | Bajo       | 35.71      | 2,520.09 USD   |
+| RE2-001 | Crítico      | 100.00%  | Bajo       | 56.94      | 2,107.33 USD   |
+| RE2-002 | Alto         | 98.00%   | Bajo       | 11.76      | 7,919.05 USD   |
+| RE2-003 | Alto         | 100.00%  | Bajo       | 44.72      | 2,347.70 USD   |
+
+#### M2M AS=RS malo
+
+| Riesgo  | Nivel riesgo | Eficacia | Exposición | Eficiencia | Costo asignado |
+| ------- | ------------ | -------- | ---------- | ---------- | -------------- |
+| RG-001  | Crítico      | 4.50%    | Crítico    | 0.50       | 7,850.54 USD   |
+| RG-002  | Crítico      | 11.50%   | Crítico    | 9.52       | 1,812.74 USD   |
+| RG-003  | Crítico      | 15.50%   | Crítico    | 14.23      | 1,497.74 USD   |
+| RG-004  | Crítico      | 17.50%   | Crítico    | 12.28      | 2,494.81 USD   |
+| RG-005  | Crítico      | 16.00%   | Crítico    | 7.14       | 2,520.09 USD   |
+| RE2-001 | Crítico      | 17.50%   | Crítico    | 12.46      | 2,107.33 USD   |
+| RE2-002 | Crítico      | 16.00%   | Crítico    | 2.40       | 7,919.05 USD   |
+| RE2-003 | Crítico      | 14.50%   | Crítico    | 8.11       | 2,347.70 USD   |
+
+#### API Gateway bueno
+
+| Riesgo  | Nivel riesgo | Eficacia | Exposición | Eficiencia | Costo asignado |
+| ------- | ------------ | -------- | ---------- | ---------- | -------------- |
+| RG-001  | Alto         | 50.00%   | Medio      | 5.15       | 8,250.00 USD   |
+| RG-002  | Alto         | 100.00%  | Bajo       | 51.05      | 1,860.83 USD   |
+| RG-003  | Alto         | 80.00%   | Bajo       | 44.54      | 1,616.67 USD   |
+| RG-004  | Medio        | 65.00%   | Medio      | 13.37      | 3,403.33 USD   |
+| RG-005  | Medio        | 80.00%   | Bajo       | 18.47      | 2,598.33 USD   |
+| RE3-001 | Alto         | 96.50%   | Bajo       | 27.71      | 3,831.37 USD   |
+| RE3-002 | Alto         | 100.00%  | Bajo       | 29.63      | 3,880.78 USD   |
+| RE3-003 | Crítico      | 95.00%   | Bajo       | 19.39      | 6,858.68 USD   |
+
+#### API Gateway malo
+
+| Riesgo  | Nivel riesgo | Eficacia | Exposición | Eficiencia | Costo asignado |
+| ------- | ------------ | -------- | ---------- | ---------- | -------------- |
+| RG-001  | Crítico      | 5.75%    | Crítico    | 0.74       | 8,250.00 USD   |
+| RG-002  | Crítico      | 11.50%   | Crítico    | 7.34       | 1,860.83 USD   |
+| RG-003  | Crítico      | 12.00%   | Crítico    | 8.35       | 1,616.67 USD   |
+| RG-004  | Crítico      | 11.37%   | Crítico    | 2.92       | 3,403.33 USD   |
+| RG-005  | Crítico      | 12.50%   | Crítico    | 3.61       | 2,598.33 USD   |
+| RE3-001 | Crítico      | 17.50%   | Crítico    | 6.28       | 3,831.37 USD   |
+| RE3-002 | Crítico      | 15.00%   | Crítico    | 5.56       | 3,880.78 USD   |
+| RE3-003 | Crítico      | 17.50%   | Crítico    | 4.47       | 6,858.68 USD   |
+
+### 6.8. Relación entre el capítulo 6 y el formulario web
+
+El archivo `demo-prediligenciamiento.json` permite cargar en el formulario los seis escenarios demostrativos sin que el evaluador tenga que escribir manualmente todos los campos. En términos de trazabilidad, la relación es la siguiente:
+
+```mermaid
+flowchart LR
+    A[Capítulo 6] --> B[Seis escenarios demostrativos]
+    B --> C[demo-prediligenciamiento.json]
+    C --> D[Botones de carga demo en la UI]
+    D --> E[Formulario prediligenciado]
+    E --> F[Calculo local en JavaScript]
+    F --> G[Resultados por riesgo]
+    F --> H[Resultados globales]
+    F --> I[Exportación Excel]
+```
+
+Esta separación permite que el modelo sea revisable en tres niveles:
+
+1. **Nivel académico:** la tesis explica el origen de los valores, los riesgos, controles y fórmulas.
+2. **Nivel de datos:** el JSON conserva los seis conjuntos de valores de prediligenciamiento.
+3. **Nivel operativo:** la UI consume el JSON y reproduce la evaluación.
+
+#### 6.8.1. Correspondencia de notación entre tesis y formulario
+
+El formulario usa MathJax para renderizar las ecuaciones en el navegador. La notación mostrada en la UI coincide con la usada en la sección 5.1.6:
+
+$$
+\begin{aligned}
+S_{base(raw)} &= 0.40M + 0.20A + 0.10T + 0.20P + 0.10L \\
+S_{base} &= \operatorname{norm}(S_{base(raw)}) \\
+F_{ev} &= \operatorname{norm}(f_{ev}) \\
+S_{control} &= S_{base}\times F_{ev}
+\end{aligned}
+$$
+
+Para cada relación riesgo-control, el formulario muestra también el peso de mitigación y el aporte ponderado:
+
+$$
+Aporte_i = w_i \times S_{control}(c_i)
+$$
+
+Para cada riesgo, el formulario muestra:
+
+$$
+E_r=\frac{\sum (w_i\cdot s_i)}{\sum w_i}
+$$
+
+Donde $s_i$ corresponde al $S_{control}$ del control $i$ y $w_i$ al `pesoMitigacion` definido en la relación riesgo-control.
+
+También muestra la eficiencia por riesgo:
+
+$$
+\eta_r=\frac{Beneficio}{Costo}=\frac{B_r}{C_r}
+$$
+
+Finalmente, la UI muestra las ecuaciones globales:
+
+$$
+\begin{aligned}
+E_{global} &= \frac{1}{m}\sum_{r=1}^{m}E_r \\
+\eta_{global} &= \frac{1}{m}\sum_{r=1}^{m}\eta_r
+\end{aligned}
+$$
+
+Esta correspondencia evita que el formulario sea una caja negra. El evaluador puede ver los valores diligenciados, los resultados parciales y la expresión matemática usada para calcular cada resultado.
+
+### 6.9. Síntesis del experimento
+
+La aplicación de la matriz en seis corridas demuestra que el modelo no se limita a listar controles. El mismo catálogo produce resultados distintos cuando cambian las evidencias y el estado real de los controles. Esto confirma la utilidad del enfoque de aseguramiento: la arquitectura no se considera segura por usar OAuth 2.0 u OIDC, sino por demostrar controles diseñados, implementados, evidenciados y trazables frente a riesgos específicos.
+
+La comparación bueno/malo por escenario también permite validar el valor del catálogo maestro. Los riesgos globales se mantienen constantes, los riesgos específicos cambian según la arquitectura y los controles esperados se ponderan mediante relaciones riesgo-control. De esta forma, el modelo evita dos extremos: una lista genérica de buenas prácticas sin contexto, y una evaluación puramente subjetiva sin trazabilidad técnica.
 
 ---
 
@@ -4242,7 +4796,7 @@ La aplicación de la matriz muestra que el catálogo maestro permite comparar ar
 
 ## 9. Referencias
 
-9.1. Valencia Duque — *Aseguramiento y auditoría de tecnologías de información orientados a riesgos: un enfoque basado en estándares internacionales*.  
+9.1. Valencia Duque — _Aseguramiento y auditoría de tecnologías de información orientados a riesgos: un enfoque basado en estándares internacionales_.  
 9.2. RFC 6749 — OAuth 2.0 Authorization Framework.  
 9.3. RFC 6750 — OAuth 2.0 Bearer Token Usage.  
 9.4. OpenID Connect Core 1.0.  
@@ -4285,4 +4839,4 @@ La aplicación de la matriz muestra que el catálogo maestro permite comparar ar
 10.7. Catálogo maestro JSON de riesgos, controles, relaciones riesgo-control y referencias técnicas  
 10.8. Filtros JSON por escenario  
 10.9. Mapeo de score y reglas de cálculo para la UI
-
+10.10. Datos de prediligenciamiento de seis escenarios demostrativos

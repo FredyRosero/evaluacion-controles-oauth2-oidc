@@ -26,6 +26,8 @@ const ENVIRONMENT_OPTIONS = [
 ];
 
 const DEMO_SOURCE_MESSAGE = 'Datos de demostración basados en el Capítulo 6 de la tesis (Versión 15), secciones 6.1-6.3 y catálogo maestro v1.1.0.';
+const DIAGRAM_DOCS_BASE = 'catalogo/docs';
+const PLANTUML_SVG_BASE_URL = 'https://www.plantuml.com/plantuml/svg';
 
 const DEMO_PAYLOADS_URL = 'catalogo/data/demo-prediligenciamiento.json';
 const DEMO_PAYLOADS = {};
@@ -139,6 +141,9 @@ const demoGatewayBadBtn = document.getElementById('demoGatewayBadBtn');
 const demoClearBtn = document.getElementById('demoClearBtn');
 const demoNotice = document.getElementById('demoNotice');
 const metricEquations = document.getElementById('metricEquations');
+const diagramStatus = document.getElementById('diagramStatus');
+const deploymentDiagram = document.getElementById('deploymentDiagram');
+const sequenceDiagram = document.getElementById('sequenceDiagram');
 
 function formatMathNumber(value, decimals = 4) {
   if (!Number.isFinite(value)) return '\\infty';
@@ -254,6 +259,98 @@ function getActiveRisks(filter) {
 
 function getRiskRelations(filter, riskId) {
   return (filter?.riesgoControlIds || []).map((relationId) => state.lookups.relaciones.get(relationId)).filter((relation) => relation?.riesgoId === riskId);
+}
+
+function getScenarioDiagramIndex(architectureId) {
+  const scenarios = state.catalog?.escenarios || [];
+  const index = scenarios.findIndex((scenario) => scenario.id === architectureId);
+  return index >= 0 ? index + 1 : null;
+}
+
+function setDiagramPlaceholder(targetNode, message) {
+  targetNode.innerHTML = '';
+  targetNode.textContent = message;
+  targetNode.classList.add('muted');
+}
+
+async function loadDiagramInto(targetNode, filePath, label) {
+  const response = await fetch(filePath);
+  if (!response.ok) {
+    throw new Error(`No fue posible cargar ${filePath} (${response.status} ${response.statusText})`);
+  }
+
+  const plantumlSource = await response.text();
+  if (!plantumlSource.trim()) {
+    throw new Error(`El archivo ${filePath} está vacío.`);
+  }
+
+  const encoder = window.plantumlEncoder;
+  if (!encoder || typeof encoder.encode !== 'function') {
+    throw new Error('No se pudo inicializar plantuml-encoder desde CDN.');
+  }
+
+  const encoded = encoder.encode(plantumlSource);
+  const imageUrl = `${PLANTUML_SVG_BASE_URL}/${encoded}`;
+
+  targetNode.classList.remove('muted');
+  targetNode.innerHTML = `<img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(label)}" loading="lazy" />`;
+}
+
+async function loadSequenceDiagramWithFallback(targetNode, diagramIndex) {
+  const preferredPath = `${DIAGRAM_DOCS_BASE}/escenario-${diagramIndex}.sequence.plantuml`;
+  const legacyPath = `${DIAGRAM_DOCS_BASE}/escenario-${diagramIndex}.secuence.plantuml`;
+  const label = `Diagrama de secuencia escenario ${diagramIndex}`;
+
+  try {
+    await loadDiagramInto(targetNode, preferredPath, label);
+  } catch (error) {
+    if (String(error?.message || '').includes(preferredPath)) {
+      await loadDiagramInto(targetNode, legacyPath, label);
+      return;
+    }
+    throw error;
+  }
+}
+
+async function renderScenarioDiagrams() {
+  const architectureId = architectureSelect.value;
+  const diagramIndex = getScenarioDiagramIndex(architectureId);
+
+  if (!diagramIndex) {
+    diagramStatus.textContent = 'Seleccione una arquitectura para cargar los diagramas de despliegue y secuencia.';
+    setDiagramPlaceholder(deploymentDiagram, 'Sin diagrama cargado.');
+    setDiagramPlaceholder(sequenceDiagram, 'Sin diagrama cargado.');
+    return;
+  }
+
+  const deploymentPath = `${DIAGRAM_DOCS_BASE}/escenario-${diagramIndex}.deployment.plantuml`;
+
+  diagramStatus.textContent = `Cargando diagramas del escenario ${diagramIndex}...`;
+  setDiagramPlaceholder(deploymentDiagram, 'Cargando diagrama de despliegue...');
+  setDiagramPlaceholder(sequenceDiagram, 'Cargando diagrama de secuencia...');
+
+  const results = await Promise.allSettled([
+    loadDiagramInto(deploymentDiagram, deploymentPath, `Diagrama de despliegue escenario ${diagramIndex}`),
+    loadSequenceDiagramWithFallback(sequenceDiagram, diagramIndex)
+  ]);
+
+  const hasErrors = results.some((result) => result.status === 'rejected');
+  if (!hasErrors) {
+    diagramStatus.textContent = `Diagramas del escenario ${diagramIndex} cargados correctamente.`;
+    return;
+  }
+
+  const deploymentError = results[0].status === 'rejected' ? results[0].reason?.message || 'Error desconocido.' : null;
+  const sequenceError = results[1].status === 'rejected' ? results[1].reason?.message || 'Error desconocido.' : null;
+
+  if (deploymentError) {
+    setDiagramPlaceholder(deploymentDiagram, `No se pudo renderizar el diagrama de despliegue. ${deploymentError}`);
+  }
+  if (sequenceError) {
+    setDiagramPlaceholder(sequenceDiagram, `No se pudo renderizar el diagrama de secuencia. ${sequenceError}`);
+  }
+
+  diagramStatus.textContent = `Se cargó parcialmente el escenario ${diagramIndex}. Revise los mensajes en cada panel.`;
 }
 
 function buildControlCard(relation) {
@@ -498,6 +595,11 @@ function refreshDerivedState() {
 function renderRisks() {
   const filter = getActiveFilter();
   updateScenarioSummary();
+  renderScenarioDiagrams().catch((error) => {
+    diagramStatus.textContent = `Error cargando diagramas: ${error.message}`;
+    setDiagramPlaceholder(deploymentDiagram, 'Error al cargar el diagrama de despliegue.');
+    setDiagramPlaceholder(sequenceDiagram, 'Error al cargar el diagrama de secuencia.');
+  });
   if (!filter) {
     riskContainer.innerHTML = '';
     return;

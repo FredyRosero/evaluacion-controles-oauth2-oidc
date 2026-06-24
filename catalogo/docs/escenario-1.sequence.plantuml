@@ -1,0 +1,43 @@
+﻿@startuml
+title Escenario 1 - Authorization Code + PKCE con BFF
+
+actor Usuario
+participant "SPA" as SPA
+participant "BFF" as BFF
+participant "Authorization Server / IdP" as AS
+participant "API protegida" as API
+participant "SIEM" as SIEM
+
+Usuario -> SPA : Abre portal
+SPA -> BFF : GET /session
+BFF --> SPA : 401 Requiere login
+
+SPA -> BFF : GET /login
+BFF -> BFF : Genera state, nonce,\ncode_verifier y code_challenge
+BFF --> SPA : 302 Redirect al IdP
+
+SPA -> AS : GET /authorize\nclient_id, redirect_uri,\nstate, nonce, code_challenge
+AS -> Usuario : Autenticacion / MFA
+Usuario --> AS : Credenciales / factor
+AS --> SPA : 302 callback\ncode + state
+
+SPA -> BFF : GET /callback?code=...&state=...
+BFF -> BFF : Validar state
+BFF -> AS : POST /token\ncode + code_verifier
+AS --> BFF : access_token + id_token\nrefresh_token si aplica
+
+BFF -> BFF : Validar id_token\nissuer, audience, exp, nonce
+BFF -> BFF : Crear sesion server-side
+BFF --> SPA : Set-Cookie: SESSION_ID\nHttpOnly; Secure; SameSite
+
+SPA -> BFF : GET /api/recurso + Cookie
+BFF -> API : GET /recurso\nAuthorization: Bearer access_token
+API -> API : Validar issuer, audience,\nexp y scopes
+API --> BFF : Respuesta
+BFF --> SPA : JSON filtrado para UI
+
+AS -> SIEM : Log autenticacion / token
+API -> SIEM : Log autorizacion API
+BFF -> SIEM : Log correlado de sesion
+
+@enduml
