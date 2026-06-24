@@ -1,7 +1,7 @@
 ---
 Titulo: Diseño de un modelo de evaluación de controles de seguridad para arquitecturas de identidad federada basadas en OAuth 2.0 y OpenID Connect
 Autor: Fredy Andres Rosero Cristancho
-Versión: 12
+Versión: 15
 ---
 
 ## 1. Introducción
@@ -109,104 +109,46 @@ Tampoco busca cubrir todos los flujos, extensiones o perfiles existentes de OAut
 
 El modelo de evaluación propuesto en esta tesis está orientado a evaluar controles de seguridad en arquitecturas de identidad federada basadas en OAuth 2.0 y OpenID Connect.
 
-El componente central del modelo será una matriz de evaluación que permita relacionar riesgos aplicables al escenario, controles esperados, evidencia auditable, nivel de madurez del control y nivel de exposición observado. El enfoque no se limita a verificar la existencia nominal de OAuth 2.0 u OIDC, sino a evaluar si los riesgos relevantes para el escenario están contemplados y caracterizados, y si los controles asociados son diseñados, implementados y evidenciados de forma suficiente.
+El componente central del modelo es una matriz de evaluación que relaciona riesgos aplicables al escenario, controles esperados, evidencia auditable, score del control, eficacia frente al riesgo, eficiencia frente al riesgo y nivel de exposición observado. El enfoque no se limita a verificar la existencia nominal de OAuth 2.0 u OIDC, sino a evaluar si los riesgos relevantes para el escenario están contemplados y caracterizados, y si los controles asociados son diseñados, implementados y evidenciados de forma suficiente.
 
-Además de su formulación conceptual y matemática, el modelo se condensará en un entregable web publicado en GitHub Pages. En términos de aporte, esta materialización integra tres componentes: el catálogo predefinido de riesgos transversales, riesgos específicos y controles esperados; una interfaz de usuario (UI) web que aprovecha ese catálogo para guiar la evaluación; y unos algoritmos implementados en JavaScript que traducen operativamente las fórmulas y reglas de homologación expuestas en este documento. El formulario primero exige seleccionar una de las tres arquitecturas del modelo y, a partir de esa selección, carga el catálogo aplicable. Sobre ese catálogo, el evaluador diligencia los datos de evaluación, el sistema procesa y califica los controles, y genera un informe en formato Excel.
+Además de su formulación conceptual y matemática, el modelo se condensa en un entregable web publicado en GitHub Pages. Esta materialización integra tres componentes: el catálogo maestro de riesgos y controles, una interfaz de usuario web que guía la evaluación, y algoritmos JavaScript que traducen operativamente las fórmulas y reglas de homologación expuestas en este documento.
 
-La aplicación del modelo se estructura en los siguientes pasos:
-
-1. **Partir del catálogo de riesgos transversales o globales** aplicables a arquitecturas OAuth 2.0/OIDC, independientemente del escenario evaluado.
-
-2. **Seleccionar la arquitectura o escenario evaluado**, delimitando actores, componentes, activos de información, relaciones de confianza y flujos relevantes.
-
-3. **Activar y caracterizar los riesgos relevantes por escenario**, describiendo su manifestación en el estado actual de la arquitectura. Para cada riesgo se consideran, como mínimo:
-   - activo afectado;
-   - amenaza o causa;
-   - vulnerabilidad o condición habilitante;
-   - probabilidad;
-   - impacto.
-
-4. **Identificar controles esperados**, diferenciando entre:
-   - controles transversales o globales;
-   - controles específicos del escenario evaluado.
-
-5. **Evaluar cada control esperado** mediante evidencia documental, técnica, operativa o de auditoría.
-
-6. **Clasificar el control** según dimensiones de evaluación que permitan estimar su grado de madurez y capacidad real de mitigación:
-   - madurez;
-   - automatización;
-   - momento de actuación;
-   - periodicidad;
-   - alcance funcional.
-
-7. **Homologar cualitativa o cuantitativamente el estado del control**, con el fin de obtener una valoración comparable entre controles y escenarios.
-
-8. **Evaluar la efectividad del control**, considerando:
-   - eficiencia del control: adecuación del diseño frente al riesgo;
-   - eficacia del control: evidencia de operación real.
-
-9. **Estimar el nivel de exposición observado**, a partir del riesgo identificado, la efectividad de los controles existentes y la evidencia disponible al momento de la evaluación.
-
-10. **Formular brechas, hallazgos y observaciones auditables**, manteniendo trazabilidad entre riesgo, control, evidencia y referencia normativa o técnica.
-
-En términos operativos, el entregable web no funciona como un motor abierto para que el usuario invente riesgos desde cero. El evaluador primero selecciona una de las tres arquitecturas del modelo; con esa selección, el formulario carga un catálogo predefinido de riesgos globales OAuth 2.0/OIDC, riesgos específicos del escenario y controles esperados. Lo dinámico en la aplicación son los datos diligenciados por el evaluador para cada riesgo y control, como activo afectado, probabilidad, impacto, costo, evidencia y estado de las dimensiones del control.
-
-De forma general, la lógica del modelo puede representarse así:
+La aplicación del modelo se estructura así:
 
 ~~~mermaid
 graph TD
-A[Escenario OAuth 2.0/OIDC evaluado] --> B[Riesgos transversales y específicos]
-B --> C[Controles esperados y estado observado]
-C --> D[Evidencia auditable]
-D --> E[Evaluación del control]
-E --> F[Nivel de exposición observado]
-F --> G[Hallazgos, brechas y observaciones]
+    A[Catálogo maestro] --> B[Selección de arquitectura]
+    B --> C[Riesgos globales]
+    B --> D[Riesgos específicos]
+    C --> E[Controles globales]
+    D --> F[Controles específicos]
+    E --> G[Registro de matriz]
+    F --> G
+    G --> H[Evaluación de control]
+    H --> I[Score del control]
+    I --> J[Eficacia frente al riesgo]
+    J --> K[Eficiencia frente al riesgo]
+    K --> L[Evaluación global]
+    L --> M[Reporte Excel o JSON]
 ~~~
 
-Las dimensiones de evaluación del control son:
+En términos operativos, el entregable web no funciona como un motor abierto para que el usuario invente riesgos desde cero. El evaluador primero selecciona una de las tres arquitecturas del modelo; con esa selección, el formulario carga un catálogo predefinido de riesgos globales OAuth 2.0/OIDC, riesgos específicos del escenario y controles esperados. Lo dinámico son los datos diligenciados por el evaluador para cada riesgo y control: activo afectado, amenaza, vulnerabilidad, probabilidad, impacto, costo, evidencia y estado de las dimensiones del control.
 
-#### Madurez
-- **Descripción:** Estado del control frente a su formalización, diseño, implementación y verificación.
-- **Valores de referencia:** Declarado, diseñado, implementado, auditado.
+La evaluación se apoya en cinco dimensiones del control:
 
-#### Automatización
-- **Descripción:** Grado en que el control depende de intervención humana o de mecanismos técnicos automatizados.
-- **Valores de referencia:** Manual, semiautomático, automático.
+- **Madurez:** diseñada, declarada, implementada o auditada.
+- **Automatización:** manual, semiautomática o automática.
+- **Momento:** preventivo, detectivo o correctivo.
+- **Periodicidad:** ocasional, periódica o permanente.
+- **Alcance funcional:** específico o general.
 
-#### Momento
-- **Descripción:** Momento en el que el control actúa frente al riesgo.
-- **Valores de referencia:** Preventivo, detectivo, correctivo.
+La matriz incorpora tres niveles de cálculo:
 
-#### Periodicidad
-- **Descripción:** Frecuencia con la que el control se ejecuta o verifica.
-- **Valores de referencia:** Ocasional, periódico, permanente.
+1. **Score del control:** calificación del control en escala 0 a 100, calculada con las cinco dimensiones ponderadas.
+2. **Eficacia frente al riesgo:** cobertura del riesgo a partir de los controles asociados y sus pesos de mitigación.
+3. **Eficiencia frente al riesgo o global:** relación entre beneficio de mitigación estimado y costo asignado.
 
-#### Alcance funcional
-- **Descripción:** Cobertura del control dentro de la arquitectura evaluada.
-- **Valores de referencia:** Específico, general.
-
-La matriz propuesta clasifica el estado de cada control según el nivel de evidencia disponible. Para ello se consideran, entre otros, los siguientes estados:
-
-- **Declarado:** El control es afirmado por responsables técnicos o funcionales, pero no existe evidencia suficiente.
-- **Diseñado:** El control aparece en documentación, arquitectura, configuración esperada o diseño técnico.
-- **Implementado:** Existe evidencia técnica u operativa de que el control está implementado.
-- **Auditado:** Existe evidencia de revisión, prueba, auditoría o verificación independiente del control.
-- **Implementado parcialmente:** El control existe, pero no cubre completamente el riesgo identificado.
-- **No implementado / deuda técnica:** El control no existe, está pendiente o fue identificado como deuda técnica.
-
-Adicionalmente, la matriz incorpora una lectura de eficiencia y eficacia del control:
-
-#### Eficiencia del control
-- **Sentido en la tesis:** Evalúa si el control está adecuadamente diseñado para mitigar el riesgo.
-- **Pregunta orientadora:** ¿El control es pertinente y suficiente frente al riesgo identificado?
-
-#### Eficacia del control
-- **Sentido en la tesis:** Evalúa si el control opera y cumple el objetivo para el cual fue definido.
-- **Pregunta orientadora:** ¿Existe evidencia de que el control funciona en la arquitectura evaluada?
-
-#### Efectividad del control
-- **Sentido en la tesis:** Resultado conjunto entre diseño adecuado y operación verificable.
-- **Pregunta orientadora:** ¿El control mitiga realmente el riesgo de forma verificable?
+Esta separación evita confundir la existencia de un control con su aporte real al riesgo. Un control puede estar implementado, pero aportar poco a un riesgo específico; también puede mitigar varios riesgos y, por tanto, su costo debe distribuirse para evitar doble conteo.
 
 Las fuentes de evidencia pueden variar según el tipo de control evaluado. Estas pueden incluir documentación de arquitectura, configuración del proveedor de identidad, configuración del API Gateway, configuración del Resource Server, logs, resultados de pruebas técnicas, pipelines, políticas de seguridad o revisión puntual de código.
 
@@ -2217,9 +2159,16 @@ El modelo permite relacionar:
 
 
 
+
 #### 5.1.1. Diagrama de modelo de dominio
 
-El siguiente diagrama presenta el modelo de dominio conceptual que soporta la matriz de evaluación y el entregable web. El modelo distingue cinco niveles de agregación: el catálogo predefinido propuesto por la tesis, el escenario seleccionado, la evaluación concreta de una arquitectura, los registros por relación riesgo-control, y los resultados por riesgo y globales.
+El siguiente diagrama presenta el modelo de dominio conceptual que soporta la matriz de evaluación, el catálogo maestro JSON y el entregable web. La versión 15 distingue tres planos:
+
+1. **Plano de catálogo:** contiene escenarios, filtros, riesgos, controles, relaciones riesgo-control, referencias técnicas y configuración de score.
+2. **Plano de aplicación:** representa una evaluación concreta sobre una arquitectura, ambiente y versión del catálogo.
+3. **Plano de resultado:** consolida registros, evidencias, evaluación por riesgo y evaluación global.
+
+Esta separación evita mezclar el catálogo propuesto por la tesis con las evaluaciones diligenciadas por el usuario. El catálogo es estable y versionado; la evaluación cambia según el sistema, el ambiente, la evidencia disponible y el momento de revisión.
 
 ~~~mermaid
 classDiagram
@@ -2228,7 +2177,11 @@ classDiagram
     class CatalogoEvaluacion {
       +id
       +version
-      +descripcion
+      +idioma
+      +fechaBase
+      +alcance
+      +supuestoCosto
+      +monedaCosto
     }
 
     class Escenario {
@@ -2237,12 +2190,11 @@ classDiagram
       +descripcion
     }
 
-    class EvaluacionArquitectura {
-      +id
-      +fecha
-      +evaluador
-      +ambiente
-      +versionCatalogo
+    class FiltroEscenario {
+      +escenarioId
+      +riesgosCatalogoIds
+      +controlesEsperadosIds
+      +riesgoControlIds
     }
 
     class RiesgoCatalogo {
@@ -2250,6 +2202,7 @@ classDiagram
       +tipo
       +nombre
       +descripcion
+      +escenarioIds
     }
 
     class ControlEsperado {
@@ -2258,14 +2211,17 @@ classDiagram
       +nombre
       +descripcion
       +costoTotal
+      +escenarioIds
     }
 
     class RiesgoControl {
       +id
-      +justificacion
+      +riesgoId
+      +controlId
+      +pesoMitigacion
       +gradoMitigacion
       +obligatorio
-      +pesoMitigacion
+      +justificacion
     }
 
     class ReferenciaTecnica {
@@ -2273,12 +2229,35 @@ classDiagram
       +tipo
       +nombre
       +seccion
+      +url
+    }
+
+    class ConfiguracionScore {
+      +madurez
+      +automatizacion
+      +momento
+      +periodicidad
+      +alcance
+      +formulaScoreControl
+      +formulaEficaciaFrenteAlRiesgo
+      +formulaCostoAsignado
+    }
+
+    class EvaluacionArquitectura {
+      +id
+      +fecha
+      +evaluador
+      +ambiente
+      +versionCatalogo
+      +monedaEvaluacion
+      +tasaCambioReferencia
     }
 
     class RegistroMatriz {
       +id
       +activoAfectado
-      +lucroCesante
+      +tipoImpacto
+      +impactoEconomicoEstimado
       +amenaza
       +vulnerabilidad
       +probabilidad
@@ -2296,23 +2275,7 @@ classDiagram
       +periodicidad
       +alcance
       +scoreControl
-      +eficaciaControl
-    }
-
-    class EvaluacionRiesgo {
-      +riesgoId
-      +coberturaEsperada
-      +coberturaObservada
-      +eficaciaFrenteAlRiesgo
-      +eficienciaFrenteAlRiesgo
-      +nivelExposicionObservado
-    }
-
-    class EvaluacionGlobal {
-      +eficienciaCuantitativa
-      +eficaciaCuantitativa
-      +eficienciaCualitativa
-      +eficaciaCualitativa
+      +scoreControlNormalizado
     }
 
     class Evidencia {
@@ -2322,83 +2285,216 @@ classDiagram
       +suficiencia
     }
 
+    class EvaluacionRiesgo {
+      +riesgoId
+      +impactoEconomicoEstimado
+      +coberturaEsperada
+      +coberturaObservada
+      +eficaciaFrenteAlRiesgo
+      +costoAsignadoTotal
+      +beneficioMitigacionEstimado
+      +eficienciaFrenteAlRiesgo
+      +nivelExposicionObservado
+    }
+
+    class EvaluacionGlobal {
+      +registrosEvaluados
+      +riesgosEvaluados
+      +scorePromedioControl
+      +eficienciaCuantitativa
+      +eficaciaCuantitativa
+      +eficienciaCualitativa
+      +eficaciaCualitativa
+    }
+
     CatalogoEvaluacion "1" *-- "*" Escenario : define
     CatalogoEvaluacion "1" *-- "*" RiesgoCatalogo : contiene
     CatalogoEvaluacion "1" *-- "*" ControlEsperado : contiene
+    CatalogoEvaluacion "1" *-- "*" RiesgoControl : contiene
     CatalogoEvaluacion "1" *-- "*" ReferenciaTecnica : contiene
+    CatalogoEvaluacion "1" *-- "*" FiltroEscenario : contiene
+    CatalogoEvaluacion "1" *-- "1" ConfiguracionScore : parametriza
 
-    Escenario "1" --> "*" RiesgoCatalogo : activa
-    Escenario "1" --> "*" ControlEsperado : habilita
+    Escenario "*" -- "*" RiesgoCatalogo : aplicaA
+    Escenario "*" -- "*" ControlEsperado : aplicaA
 
-    RiesgoCatalogo "1" --> "*" RiesgoControl : se relaciona con
-    ControlEsperado "1" --> "*" RiesgoControl : mitiga mediante
+    FiltroEscenario "*" --> "1" Escenario : correspondeA
+    FiltroEscenario "1" --> "*" RiesgoCatalogo : selecciona
+    FiltroEscenario "1" --> "*" ControlEsperado : selecciona
+    FiltroEscenario "1" --> "*" RiesgoControl : selecciona
 
-    RiesgoCatalogo "*" --> "*" ReferenciaTecnica : sustentado por
-    ControlEsperado "*" --> "*" ReferenciaTecnica : sustentado por
+    RiesgoCatalogo "1" -- "*" RiesgoControl : origen
+    ControlEsperado "1" -- "*" RiesgoControl : mitigacion
 
+    RiesgoCatalogo "*" -- "*" ReferenciaTecnica : sustentadoPor
+    ControlEsperado "*" -- "*" ReferenciaTecnica : sustentadoPor
+    RiesgoControl "*" -- "*" ReferenciaTecnica : justificadoPor
+
+    EvaluacionArquitectura "*" --> "1" CatalogoEvaluacion : usaVersion
     EvaluacionArquitectura "*" --> "1" Escenario : evalua
     EvaluacionArquitectura "1" *-- "*" RegistroMatriz : contiene
     EvaluacionArquitectura "1" *-- "*" EvaluacionRiesgo : calcula
     EvaluacionArquitectura "1" *-- "1" EvaluacionGlobal : produce
 
-    RegistroMatriz "*" --> "1" RiesgoControl : evalua relacion
-    RegistroMatriz "*" --> "1" RiesgoCatalogo : caracteriza
-    RegistroMatriz "*" --> "1" ControlEsperado : evalua
+    RegistroMatriz "*" --> "1" RiesgoControl : evaluaRelacion
     RegistroMatriz "1" *-- "1" EvaluacionControl : incluye
     RegistroMatriz "1" *-- "*" Evidencia : sustenta
 
+    EvaluacionControl "*" --> "1" ConfiguracionScore : usaMapeo
+    EvaluacionRiesgo "*" --> "1" RiesgoCatalogo : resume
     EvaluacionRiesgo "1" --> "*" RegistroMatriz : agrega
     EvaluacionGlobal "1" --> "*" EvaluacionRiesgo : consolida
 ~~~
 
-El `CatalogoEvaluacion` es el aporte predefinido de la tesis: define los escenarios, riesgos, controles y referencias técnicas. La entidad `RiesgoControl` resuelve la relación muchos-a-muchos entre riesgo y control. Cada instancia de esta entidad conserva el `pesoMitigacion`, el `gradoMitigacion`, la obligatoriedad y la justificación técnica de la relación. La `EvaluacionArquitectura` representa una aplicación concreta del modelo. El `RegistroMatriz` evalúa una relación riesgo-control específica y conserva la evidencia recopilada. La `EvaluacionRiesgo` agrega todos los registros de un mismo riesgo. La `EvaluacionGlobal` consolida las evaluaciones de riesgo para producir las medidas globales del sistema.
+El diagrama no pretende representar una base de datos física. Representa los conceptos del dominio y sus relaciones. En particular, `RiesgoControl` existe porque la relación entre riesgo y control es muchos-a-muchos: un riesgo puede necesitar varios controles y un control puede mitigar varios riesgos. `FiltroEscenario` existe porque el catálogo maestro no se duplica por arquitectura; la UI selecciona subconjuntos de IDs según el escenario elegido. `ConfiguracionScore` existe porque la homologación cuantitativa no debe quedar embebida en el código JavaScript sin trazabilidad documental.
 
-#### 5.1.2. Catálogo maestro investigado de riesgos y controles
+#### 5.1.2. Diccionario del modelo de dominio
 
-Como parte del diseño del modelo se construyó un catálogo maestro de riesgos y controles para los tres escenarios OAuth 2.0/OIDC definidos en la tesis. Este catálogo no es una lista libre diligenciada por el usuario, sino un insumo predefinido, versionado y trazable que alimenta la matriz y el entregable web.
+El diccionario del modelo de dominio precisa qué representa cada entidad y evita ambigüedad entre catálogo, matriz, configuración y resultado. En cada concepto se incluye un ejemplo para mostrar cómo se materializa en el catálogo o en una evaluación concreta.
 
-El catálogo se fundamenta en fuentes técnicas especializadas de OAuth 2.0, OIDC, seguridad de APIs, gestión de riesgos y controles de seguridad. Entre las fuentes principales se incluyen RFC 6750, RFC 6819, RFC 7636, RFC 7662, RFC 9700, OpenID Connect Core, OWASP OAuth2 Cheat Sheet, OWASP API Security, OWASP Session Management Cheat Sheet, NIST SP 800-30, NIST SP 800-53 y documentación oficial de Microsoft Entra ID, Keycloak y Auth0.
+##### CatalogoEvaluacion
 
-El catálogo investigado cubre:
+Representa el artefacto maestro construido por la tesis. No corresponde a una evaluación diligenciada, sino a la base predefinida que alimenta el formulario y la matriz.
+
+Atributos principales:
+
+- `id`: identificador estable del catálogo.
+- `version`: versión usada para trazabilidad.
+- `idioma`: idioma del catálogo.
+- `fechaBase`: fecha de construcción o corte.
+- `alcance`: arquitecturas cubiertas.
+- `supuestoCosto`: cómo interpretar los costos.
+- `monedaCosto`: moneda usada en las estimaciones del catálogo.
+
+Ejemplo:
 
 ~~~json
 {
-  "coberturaMinimaCatalogo": {
-    "riesgosGlobales": 5,
-    "riesgosEspecificosPorEscenario": {
-      "SPA_BFF_IDP": 3,
-      "M2M_AS_RS": 3,
-      "API_GATEWAY_FEDERADO": 3
-    },
-    "controlesGlobales": 8,
-    "controlesEspecificosPorEscenario": {
-      "SPA_BFF_IDP": 4,
-      "M2M_AS_RS": 4,
-      "API_GATEWAY_FEDERADO": 4
-    },
-    "controlesTotales": 20,
-    "relacionesRiesgoControl": 48
-  }
+  "id": "CAT-OAUTH2-OIDC-2026-01",
+  "version": "1.0.0",
+  "idioma": "es",
+  "fechaBase": "2026-06-04",
+  "alcance": "Catálogo maestro de riesgos y controles para SPA_BFF_IDP, M2M_AS_RS y API_GATEWAY_FEDERADO",
+  "monedaCosto": "USD"
 }
 ~~~
 
-La estructura lógica del catálogo es:
+##### Escenario
 
-~~~text
-CatalogoEvaluacion
-  ├─ Escenarios
-  ├─ RiesgosCatalogo
-  │   ├─ Riesgos globales OAuth 2.0/OIDC
-  │   └─ Riesgos específicos por escenario
-  ├─ ControlesEsperados
-  │   ├─ Controles globales
-  │   └─ Controles específicos por escenario
-  ├─ RiesgoControl
-  │   └─ Relación muchos-a-muchos entre riesgo y control
-  └─ ReferenciasTecnicas
+Representa una arquitectura evaluable del modelo. En esta tesis solo son escenarios evaluables las tres arquitecturas OAuth 2.0/OIDC.
+
+Atributos principales:
+
+- `id`: código del escenario.
+- `nombre`: nombre legible de la arquitectura.
+- `descripcion`: resumen técnico del patrón arquitectónico.
+
+Ejemplo:
+
+~~~json
+{
+  "id": "SPA_BFF_IDP",
+  "nombre": "SPA estática + BFF + IdP corporativo",
+  "descripcion": "El navegador usa sesión/cookie con el BFF; el BFF ejecuta OIDC Authorization Code + PKCE con el IdP y consume APIs protegidas."
+}
 ~~~
 
-La entidad `RiesgoControl` es central porque permite representar que un riesgo puede ser mitigado por varios controles y que un control puede mitigar varios riesgos. Cada relación riesgo-control conserva atributos propios:
+##### FiltroEscenario
+
+Representa la vista operativa que usa la UI para cargar solo los riesgos, controles y relaciones aplicables al escenario seleccionado. No duplica el catálogo; solo referencia identificadores.
+
+Atributos principales:
+
+- `escenarioId`: escenario al que pertenece el filtro.
+- `riesgosCatalogoIds`: riesgos activados para el escenario.
+- `controlesEsperadosIds`: controles disponibles para el escenario.
+- `riesgoControlIds`: relaciones riesgo-control aplicables.
+
+Ejemplo:
+
+~~~json
+{
+  "escenarioId": "SPA_BFF_IDP",
+  "riesgosCatalogoIds": ["RG-001", "RG-002", "RE1-001", "RE1-002"],
+  "controlesEsperadosIds": ["CG-001", "CG-006", "CE1-001", "CE1-003"],
+  "riesgoControlIds": ["RC-001", "RC-003", "RC-017", "RC-020"]
+}
+~~~
+
+##### RiesgoCatalogo
+
+Representa un riesgo predefinido por la tesis. Puede ser global o específico de un escenario.
+
+Atributos principales:
+
+- `id`: identificador del riesgo.
+- `tipo`: `GLOBAL` o `ESPECIFICO`.
+- `nombre`: etiqueta corta del riesgo.
+- `descripcion`: explicación del evento o condición de riesgo.
+- `escenarioIds`: escenarios donde aplica.
+- `referencias`: fuentes que sustentan el riesgo.
+
+Ejemplo:
+
+~~~json
+{
+  "id": "RE1-001",
+  "tipo": "ESPECIFICO",
+  "escenarioIds": ["SPA_BFF_IDP"],
+  "nombre": "Intercepción o sustitución del authorization_code y downgrade PKCE",
+  "descripcion": "Un tercero obtiene o sustituye el authorization_code, o fuerza PKCE mal configurado, para canjearlo por tokens.",
+  "referencias": ["RFC-7636", "RFC-9700", "OWASP-OAUTH2"]
+}
+~~~
+
+##### ControlEsperado
+
+Representa un control que debería existir para mitigar uno o más riesgos.
+
+Atributos principales:
+
+- `id`: identificador del control.
+- `tipo`: `GLOBAL` o `ESPECIFICO`.
+- `nombre`: etiqueta corta del control.
+- `descripcion`: explicación del control esperado.
+- `costoTotal`: estimación de esfuerzo incremental.
+- `escenarioIds`: escenarios donde aplica.
+- `referencias`: fuentes que sustentan el control.
+
+El `costoTotal` no es un precio de licenciamiento ni un costo contractual. En el catálogo se interpreta como rango estimado de esfuerzo para análisis, configuración, pruebas y despliegue. Por eso se expresa con `min`, `max` y `medio`. El valor `medio` se usa como base para las fórmulas de eficiencia, mientras que `min` y `max` permiten análisis de sensibilidad.
+
+Ejemplo:
+
+~~~json
+{
+  "id": "CE3-002",
+  "tipo": "ESPECIFICO",
+  "nombre": "Token exchange o downscoping cuando cambia la frontera de confianza",
+  "costoTotal": {
+    "moneda": "USD",
+    "min": 2000,
+    "max": 8000,
+    "medio": 5000
+  },
+  "referencias": ["RFC-9700", "KEYCLOAK-TOKEN-EXCHANGE"]
+}
+~~~
+
+##### RiesgoControl
+
+Representa la relación muchos-a-muchos entre un riesgo y un control. Es la pieza que da valor analítico al catálogo, porque permite medir cuánto aporta un control específico frente a un riesgo específico.
+
+Atributos principales:
+
+- `id`: identificador de la relación.
+- `riesgoId`: riesgo que se busca mitigar.
+- `controlId`: control que aporta mitigación.
+- `pesoMitigacion`: proporción esperada del aporte del control frente al riesgo.
+- `gradoMitigacion`: lectura cualitativa del aporte esperado.
+- `obligatorio`: indica si el control es crítico para ese riesgo.
+- `justificacion`: razón técnica de la relación.
+
+Ejemplo:
 
 ~~~json
 {
@@ -2408,12 +2504,287 @@ La entidad `RiesgoControl` es central porque permite representar que un riesgo p
   "pesoMitigacion": 0.70,
   "gradoMitigacion": "ALTO",
   "obligatorio": true,
-  "justificacion": "PKCE con S256 mitiga la intercepcion del authorization_code y el canje por terceros.",
-  "referencias": ["RFC-7636", "RFC-9700"]
+  "justificacion": "PKCE con S256 mitiga la interceptación del authorization_code y el canje por terceros."
 }
 ~~~
 
-Esta decisión evita contar dos veces el costo de un mismo control cuando dicho control ayuda a mitigar más de un riesgo. En la implementación, el costo de un control puede distribuirse entre los riesgos activos del escenario de acuerdo con el `pesoMitigacion` definido en la relación riesgo-control.
+##### ReferenciaTecnica
+
+Representa la fuente que sustenta un riesgo, un control o una relación riesgo-control. Permite trazabilidad entre catálogo y literatura técnica.
+
+Atributos principales:
+
+- `id`: identificador usado por el catálogo.
+- `tipo`: RFC, OWASP, NIST, OIDC o documentación oficial.
+- `nombre`: nombre de la fuente.
+- `seccion`: parte relevante.
+- `url`: enlace público.
+
+Ejemplo:
+
+~~~json
+{
+  "id": "RFC-7636",
+  "tipo": "RFC",
+  "nombre": "Proof Key for Code Exchange by OAuth Public Clients",
+  "seccion": "Abstract; 1; 4; 7.2",
+  "url": "https://datatracker.ietf.org/doc/html/rfc7636"
+}
+~~~
+
+##### ConfiguracionScore
+
+Representa los valores numéricos y ponderadores usados para homologar controles. En la versión 15, el score queda alineado con los ajustes metodológicos sugeridos por los profesores: cinco dimensiones, escala 0 a 100 y ponderación explícita.
+
+Atributos principales:
+
+- `madurez`: mapeo de diseñada, declarada, implementada y auditada.
+- `automatizacion`: mapeo de manual, semiautomático y automático.
+- `momento`: mapeo de correctivo, detectivo y preventivo.
+- `periodicidad`: mapeo de ocasional, periódico y permanente.
+- `alcance`: mapeo de específico y general.
+- `formulaScoreControl`: fórmula ponderada del control.
+- `formulaEficaciaFrenteAlRiesgo`: agregación por riesgo.
+- `formulaCostoAsignado`: distribución del costo compartido.
+
+Ejemplo:
+
+~~~json
+{
+  "madurez": {
+    "diseniada": 0,
+    "declarada": 25,
+    "implementada": 75,
+    "auditada": 100
+  },
+  "formulaScoreControl": "0.40*madurez + 0.20*automatizacion + 0.10*momento + 0.20*periodicidad + 0.10*alcance"
+}
+~~~
+
+En claves JSON se evita el uso de tildes y caracteres especiales. Por eso `diseñada` se representa como `diseniada`.
+
+##### EvaluacionArquitectura
+
+Representa una aplicación concreta del modelo sobre una arquitectura, ambiente y fecha. Permite repetir evaluaciones sin modificar el catálogo.
+
+Atributos principales:
+
+- `id`: identificador de la evaluación.
+- `fecha`: fecha del levantamiento.
+- `evaluador`: persona o rol que aplica el modelo.
+- `ambiente`: entorno evaluado.
+- `escenarioId`: arquitectura seleccionada.
+- `catalogoId`: catálogo usado.
+- `versionCatalogo`: versión del catálogo.
+- `monedaEvaluacion`: moneda usada para costos e impacto.
+- `tasaCambioReferencia`: tasa usada si se convierten monedas.
+
+Ejemplo:
+
+~~~json
+{
+  "id": "EVA-2026-001",
+  "fecha": "2026-06-03",
+  "evaluador": "Fredy Rosero",
+  "ambiente": "Preproduccion",
+  "escenarioId": "SPA_BFF_IDP",
+  "catalogoId": "CAT-OAUTH2-OIDC-2026-01",
+  "versionCatalogo": "1.0.0",
+  "monedaEvaluacion": "USD",
+  "tasaCambioReferencia": {
+    "COP_USD": 4000
+  }
+}
+~~~
+
+##### RegistroMatriz
+
+Representa una fila de evaluación. No evalúa un riesgo aislado ni un control aislado, sino una relación riesgo-control aplicada a un activo y a una evidencia concreta.
+
+Atributos principales:
+
+- `id`: identificador del registro.
+- `riesgoControlId`: relación evaluada.
+- `riesgoId`: riesgo caracterizado.
+- `controlId`: control evaluado.
+- `activoAfectado`: activo o componente en riesgo.
+- `tipoImpacto`: lucro cesante, fraude, sanción, reputacional u operativo.
+- `impactoEconomicoEstimado`: estimación monetaria del impacto.
+- `amenaza`: causa o actor de amenaza.
+- `vulnerabilidad`: condición habilitante.
+- `probabilidad`: baja, media o alta.
+- `impacto`: bajo, medio, alto o crítico.
+- `nivelRiesgo`: resultado cualitativo de probabilidad e impacto.
+- `costoAsignado`: costo distribuido del control frente al riesgo.
+- `aporteEficacia`: contribución del control a la cobertura del riesgo.
+- `observacion`: conclusión breve del registro.
+
+Ejemplo:
+
+~~~json
+{
+  "id": "RM-001-1",
+  "riesgoControlId": "RC-017",
+  "riesgoId": "RE1-001",
+  "controlId": "CE1-001",
+  "activoAfectado": "authorization_code",
+  "tipoImpacto": "lucroCesante",
+  "impactoEconomicoEstimado": 12500,
+  "amenaza": "Atacante obtiene el authorization_code durante el callback",
+  "vulnerabilidad": "PKCE ausente o aceptación de plain",
+  "costoAsignado": 1650,
+  "aporteEficacia": 0.455
+}
+~~~
+
+##### EvaluacionControl
+
+Representa la calificación del control en las cinco dimensiones definidas por la metodología. Produce un score de 0 a 100 y un valor normalizado de 0 a 1 para los cálculos por riesgo.
+
+Ejemplo:
+
+~~~json
+{
+  "madurez": "Implementada",
+  "automatizacion": "Automático",
+  "momento": "Preventivo",
+  "periodicidad": "Permanente",
+  "alcance": "Específico",
+  "scoreControl": 65,
+  "scoreControlNormalizado": 0.65
+}
+~~~
+
+##### Evidencia
+
+Representa el soporte usado para asignar los valores del control. La evidencia no reemplaza el juicio del evaluador; lo respalda.
+
+Ejemplo:
+
+~~~json
+{
+  "esperada": "Configuración del cliente OIDC con PKCE S256",
+  "encontrada": "Captura de configuración del IdP y logs del BFF",
+  "fuente": "Consola IdP, repositorio BFF, logs de callback",
+  "suficiencia": "Suficiente"
+}
+~~~
+
+##### EvaluacionRiesgo
+
+Agrega todos los registros asociados a un mismo riesgo. Permite calcular cobertura, eficacia frente al riesgo, costo asignado total, beneficio de mitigación estimado y exposición observada.
+
+Ejemplo:
+
+~~~json
+{
+  "riesgoId": "RE1-001",
+  "impactoEconomicoEstimado": 12500,
+  "coberturaEsperada": 1,
+  "coberturaObservada": 0.7425,
+  "eficaciaFrenteAlRiesgo": 0.7425,
+  "costoAsignadoTotal": 3750,
+  "beneficioMitigacionEstimado": 9281.25,
+  "eficienciaFrenteAlRiesgo": 2.48,
+  "nivelExposicionObservado": "Medio"
+}
+~~~
+
+##### EvaluacionGlobal
+
+Consolida todas las evaluaciones de riesgo de una arquitectura. Permite comparar escenarios con una misma lógica.
+
+Ejemplo:
+
+~~~json
+{
+  "registrosEvaluados": 5,
+  "riesgosEvaluados": 2,
+  "scorePromedioControl": 63,
+  "eficienciaCuantitativa": 1.84,
+  "eficaciaCuantitativa": 0.55,
+  "eficienciaCualitativa": "Es parcialmente eficiente",
+  "eficaciaCualitativa": "Es parcialmente eficaz"
+}
+~~~
+
+#### 5.1.3. Catálogo maestro propuesto a partir de investigación técnica
+
+Como parte del diseño del modelo se construyó un catálogo maestro de riesgos y controles para los tres escenarios OAuth 2.0/OIDC definidos en la tesis, a partir de una revisión dirigida de fuentes técnicas y normativas. Este catálogo no es una lista libre diligenciada por el usuario. Es un insumo predefinido, versionado y trazable. Su aporte consiste en traducir fuentes dispersas sobre OAuth 2.0, OIDC, seguridad de APIs, evaluación de riesgos y controles de seguridad en una estructura evaluable.
+
+El valor del catálogo es doble:
+
+1. **Valor metodológico:** convierte fuentes dispersas en un conjunto estructurado de riesgos, controles y relaciones de mitigación.
+2. **Valor operativo:** permite que el entregable web cargue riesgos y controles aplicables según el escenario, sin depender de que el evaluador invente la matriz desde cero.
+
+La construcción del catálogo siguió esta lógica:
+
+~~~mermaid
+graph TD
+    A[Fuentes técnicas y normativas] --> B[Amenazas y debilidades recurrentes]
+    B --> C[Riesgos globales y específicos]
+    C --> D[Controles esperados]
+    D --> E[Relaciones riesgo-control]
+    E --> F[Pesos de mitigación y obligatoriedad]
+    F --> G[Catálogo maestro JSON consumible por la UI]
+~~~
+
+El catálogo investigado cubre:
+
+~~~json
+{
+  "riesgosGlobales": 5,
+  "riesgosEspecificos": 9,
+  "controlesGlobales": 8,
+  "controlesEspecificos": 12,
+  "relacionesRiesgoControl": 48
+}
+~~~
+
+##### Leyenda de identificadores
+
+Los identificadores del catálogo siguen una convención simple:
+
+- `RG-*`: riesgo global OAuth 2.0/OIDC.
+- `RE1-*`: riesgo específico del escenario SPA+BFF+IdP.
+- `RE2-*`: riesgo específico del escenario M2M AS=RS.
+- `RE3-*`: riesgo específico del escenario API Gateway federado.
+- `CG-*`: control global OAuth 2.0/OIDC.
+- `CE1-*`: control específico del escenario SPA+BFF+IdP.
+- `CE2-*`: control específico del escenario M2M AS=RS.
+- `CE3-*`: control específico del escenario API Gateway federado.
+- `RC-*`: relación riesgo-control.
+
+##### Validaciones mínimas del catálogo
+
+Para que el catálogo sea trazable y no solo una colección artesanal de objetos JSON, debe cumplir validaciones mínimas:
+
+1. Todo `riesgoControl.riesgoId` debe existir en `riesgosCatalogo`.
+2. Todo `riesgoControl.controlId` debe existir en `controlesEsperados`.
+3. Todo `filtroEscenario` debe referenciar solo IDs válidos.
+4. Todo control relacionado con un riesgo debe tener `costoTotal` definido.
+5. Toda referencia usada por riesgos, controles o relaciones debe existir en `referenciasTecnicas`.
+6. Para cada riesgo, la suma de `pesoMitigacion` de sus relaciones aplicables debería ser 1.0, salvo justificación documentada.
+7. Los costos e impactos usados en una evaluación concreta deben estar expresados en una misma moneda antes de calcular eficiencia.
+
+##### Parafraseo de fuentes usadas para construir el catálogo
+
+La selección de riesgos y controles se fundamenta en las siguientes lecturas técnicas:
+
+- **RFC 9700** actualiza y extiende la guía de seguridad de OAuth 2.0 frente a amenazas modernas. Por eso se usa como fuente transversal para controles de seguridad actuales, restricción de privilegios, protección de flujos redirigidos y prevención de replay.
+- **RFC 6750** establece el uso de bearer tokens y advierte que exponer tokens en URI tiene debilidades de seguridad, especialmente por logs e historial. De allí provienen controles como usar `Authorization: Bearer` y evitar tokens en query string.
+- **RFC 7636** explica el ataque de interceptación del código de autorización y la mitigación mediante `code_verifier` y `code_challenge`. También justifica exigir `S256` para evitar métodos que expongan el verifier.
+- **RFC 7662** define introspección de tokens y el campo `active`, útil para validar tokens opacos o consultar estado, expiración, cliente, scopes, audiencia y emisor.
+- **OpenID Connect Core** define el `nonce` como mecanismo para asociar la sesión del cliente con el `id_token` y mitigar replay. Por eso aparece como control crítico en el escenario SPA+BFF+IdP.
+- **OWASP OAuth2 Cheat Sheet** refuerza el uso de Authorization Code + PKCE, el uso de `state` o `nonce` según el flujo, la restricción de privilegios y la prevención de replay.
+- **OWASP Session Management Cheat Sheet** justifica controles de cookie como `HttpOnly`, `Secure` y `SameSite`, especialmente cuando la SPA opera con sesión frente al BFF.
+- **Microsoft Entra ID** enfatiza que los clientes deben tratar los access tokens como opacos y que las APIs deben validar tokens destinados a ellas, en especial la audiencia `aud`.
+- **Keycloak** documenta introspección y token exchange, incluyendo filtrado por `audience` y downscoping, lo cual alimenta los controles del escenario API Gateway federado.
+- **Auth0** recomienda proteger claves, usar HTTPS, no incluir datos sensibles innecesarios en tokens y definir expiración, lo cual alimenta controles de secretos, transporte, claims mínimos y vigencia.
+- **NIST SP 800-30** aporta la estructura de evaluación de riesgo basada en amenaza, vulnerabilidad, probabilidad e impacto.
+- **NIST SP 800-53** aporta familias de controles como acceso, auditoría, configuración, identificación/autenticación, protección del sistema y monitoreo.
+
+El catálogo no busca copiar literalmente esas fuentes. Su aporte consiste en traducirlas a una estructura evaluable para tres arquitecturas concretas.
 
 ##### Riesgos globales OAuth 2.0/OIDC
 
@@ -2427,19 +2798,19 @@ Los riesgos globales aplican a cualquier arquitectura del modelo que use OAuth 2
 
 ##### Riesgos específicos por escenario
 
-Para el escenario **SPA estática + BFF + IdP corporativo**, el catálogo incluye:
+Para **SPA estática + BFF + IdP corporativo**, el catálogo incluye:
 
 1. Intercepción o sustitución del `authorization_code` y downgrade de PKCE.
 2. Exposición de tokens o material de sesión en el navegador.
 3. Callback OAuth/OIDC vulnerable por `state`, `nonce` o CSRF incorrectos.
 
-Para el escenario **M2M con Authorization Server como Resource Server**, el catálogo incluye:
+Para **M2M con Authorization Server como Resource Server**, el catálogo incluye:
 
 1. Abuso de cliente técnico privilegiado.
 2. Secreto, certificado o clave M2M expuestos o sin rotación.
 3. Segregación insuficiente cuando el Authorization Server actúa también como Resource Server.
 
-Para el escenario **API Gateway federado + Authorization Server corporativo**, el catálogo incluye:
+Para **API Gateway federado + Authorization Server corporativo**, el catálogo incluye:
 
 1. Confusión de audiencia entre Gateway y APIs internas.
 2. Confianza ciega del backend en el Gateway.
@@ -2458,9 +2829,13 @@ Los controles globales definidos por el catálogo son:
 7. Logging, correlación y monitoreo de autenticación y autorización.
 8. Tokens sender-constrained para casos de alto riesgo.
 
-Los controles específicos complementan esos controles globales según la arquitectura seleccionada. Por ejemplo, el escenario SPA+BFF+IdP incorpora PKCE con `S256`, validación de `state` y `nonce`, custodia server-side de tokens y cookie segura. El escenario M2M incorpora vault, clientes técnicos separados por propósito, autenticación fuerte del cliente y recertificación por `client_id`. El escenario API Gateway incorpora validación de audiencia por API destino, token exchange o downscoping, política uniforme de validación e introspección/JWKS y trazabilidad correlacionada Gateway-AS-RS.
+Los controles específicos complementan esos controles globales según la arquitectura seleccionada:
 
-##### Archivos JSON del entregable web
+- En **SPA+BFF+IdP**, el foco está en PKCE con `S256`, `state`, `nonce`, custodia server-side de tokens y cookie segura.
+- En **M2M AS=RS**, el foco está en credenciales protegidas en vault, clientes por propósito, autenticación fuerte y recertificación por `client_id`.
+- En **API Gateway federado**, el foco está en audiencia por API destino, revalidación mínima en backend, token exchange o downscoping y trazabilidad Gateway-AS-RS.
+
+#### 5.1.4. Estructura JSON del catálogo maestro
 
 En el repositorio del entregable web, el catálogo puede materializarse como archivos JSON separados para facilitar mantenimiento y trazabilidad:
 
@@ -2485,16 +2860,28 @@ data/
 
 Los archivos separados son la forma mantenible del catálogo. El archivo `catalogo-maestro.json` funciona como un bundle autocontenido para pruebas, demostración, revisión académica o carga rápida de la UI con un único `fetch()`.
 
-##### Filtros por escenario
-
-El catálogo maestro no se duplica por arquitectura. En su lugar, cada escenario tiene un filtro que referencia los IDs aplicables.
+El catálogo maestro tiene esta estructura:
 
 ~~~json
 {
-  "escenario": {
-    "id": "SPA_BFF_IDP",
-    "nombre": "SPA estatica + BFF + IdP corporativo"
-  },
+  "catalogoEvaluacion": {},
+  "escenarios": [],
+  "riesgosCatalogo": [],
+  "controlesEsperados": [],
+  "riesgoControles": [],
+  "referenciasTecnicas": [],
+  "mapeoScoreInicial": {},
+  "filtros": {}
+}
+~~~
+
+##### Filtros por escenario
+
+El catálogo maestro no se duplica por arquitectura. Cada escenario tiene un filtro que referencia los IDs aplicables:
+
+~~~json
+{
+  "escenarioId": "SPA_BFF_IDP",
   "riesgosCatalogoIds": [
     "RG-001",
     "RG-002",
@@ -2524,20 +2911,58 @@ El catálogo maestro no se duplica por arquitectura. En su lugar, cada escenario
 
 Con esta estructura, la UI realiza el siguiente flujo:
 
-~~~text
-1. El evaluador selecciona una arquitectura.
-2. La aplicación carga el filtro JSON del escenario.
-3. El filtro activa riesgos globales y específicos.
-4. El filtro activa controles globales y específicos.
-5. La aplicación cruza las relaciones riesgo-control.
-6. El evaluador diligencia evidencia, probabilidad, impacto y dimensiones del control.
-7. El sistema calcula score de control, eficacia por riesgo, eficiencia por riesgo y evaluación global.
-8. El sistema exporta el resultado en Excel o JSON.
+~~~mermaid
+graph TD
+    A[Evaluador selecciona arquitectura] --> B[Aplicación carga filtro JSON del escenario]
+    B --> C[Se activan riesgos globales y específicos]
+    C --> D[Se activan controles globales y específicos]
+    D --> E[Se cruzan relaciones riesgo-control]
+    E --> F[Evaluador diligencia evidencia, probabilidad, impacto y dimensiones]
+    F --> G[Sistema calcula score de control]
+    G --> H[Sistema calcula eficacia y eficiencia por riesgo]
+    H --> I[Sistema calcula evaluación global]
+    I --> J[Exportación Excel o JSON]
 ~~~
+
+#### 5.1.5. Peso de mitigación y costo compartido
+
+`pesoMitigacion` expresa el aporte esperado de un control frente a un riesgo. No indica que el control esté implementado ni que sea eficaz. Solo indica cuánto debería pesar ese control en la mitigación del riesgo si se implementa y evidencia correctamente.
+
+Ejemplo:
+
+~~~json
+{
+  "id": "RC-017",
+  "riesgoId": "RE1-001",
+  "controlId": "CE1-001",
+  "pesoMitigacion": 0.70,
+  "gradoMitigacion": "ALTO",
+  "obligatorio": true
+}
+~~~
+
+Lectura:
+
+> Para el riesgo `RE1-001`, PKCE con `S256` representa el 70% de la mitigación esperada. No basta con que existan controles complementarios si este control principal no está implementado.
+
+Para el mismo riesgo, el catálogo puede tener otros controles:
+
+~~~mermaid
+flowchart TD
+    R[RE1-001<br/>Intercepción o sustitución del authorization_code]
+    R --> C1[CE1-001<br/>PKCE con S256<br/>peso 0.70]
+    R --> C2[CE1-002<br/>state y nonce<br/>peso 0.15]
+    R --> C3[CG-006<br/>transporte seguro y no tokens en URI<br/>peso 0.15]
+    C1 --> T[Total esperado del riesgo = 1.00]
+    C2 --> T
+    C3 --> T
+~~~
+
+Esta estructura evita una evaluación binaria. Si PKCE falla, el riesgo no queda cubierto, pero los controles complementarios pueden aportar mitigación residual.
 
 ##### Regla de costo compartido
 
-Cuando un mismo control mitiga varios riesgos, su costo no debe contarse completo en cada riesgo, porque eso inflaría artificialmente el costo total de mitigación. Por eso el modelo permite distribuir el costo del control entre los riesgos activos del escenario.
+Cuando un mismo control mitiga varios riesgos, su costo no debe contarse completo en cada riesgo. Si se hiciera así, la matriz inflaría artificialmente el costo total.
 
 La regla propuesta es:
 
@@ -2550,49 +2975,241 @@ suma(pesoMitigacion(x,c) para todos los riesgos activos x del escenario)
 
 Donde:
 
-- `r` es el riesgo evaluado;
-- `c` es el control;
-- `pesoMitigacion(r,c)` es el peso del control frente a ese riesgo;
-- `costoMedio(c)` proviene del catálogo de controles;
-- los riesgos activos son los riesgos aplicables al escenario seleccionado.
+- `r`: riesgo evaluado.
+- `c`: control evaluado.
+- `costoMedio(c)`: valor medio de `costoTotal` del control.
+- `pesoMitigacion(r,c)`: peso del control frente al riesgo.
+- `x`: otros riesgos activos del escenario mitigados por el mismo control.
 
-##### Regla de eficacia frente al riesgo
+Ejemplo con `CE3-002`, token exchange o downscoping:
 
-La eficacia frente al riesgo se calcula agregando los aportes de los controles asociados a ese riesgo:
+~~~text
+costoMedio(CE3-002) = 5000 USD
+
+RE3-001 usa CE3-002 con peso 0.35
+RE3-003 usa CE3-002 con peso 0.50
+
+denominador = 0.35 + 0.50 = 0.85
+
+costoAsignado(RE3-001, CE3-002) = 5000 * 0.35 / 0.85 = 2058.82 USD
+costoAsignado(RE3-003, CE3-002) = 5000 * 0.50 / 0.85 = 2941.18 USD
+~~~
+
+La suma de costos asignados conserva el costo medio original del control. Así se evita duplicar el costo cuando el mismo control beneficia varios riesgos.
+
+##### Moneda de evaluación
+
+El catálogo expresa `costoTotal` en USD. Si el impacto económico del riesgo se estima en COP, debe convertirse antes de calcular eficiencia. La evaluación concreta debe declarar `monedaEvaluacion` y, si aplica, `tasaCambioReferencia`.
+
+Ejemplo:
+
+~~~json
+{
+  "monedaEvaluacion": "USD",
+  "tasaCambioReferencia": {
+    "COP_USD": 4000
+  },
+  "impactoEconomicoOriginal": {
+    "valor": 50000000,
+    "moneda": "COP"
+  },
+  "impactoEconomicoEstimado": {
+    "valor": 12500,
+    "moneda": "USD"
+  }
+}
+~~~
+
+Esta regla evita dividir beneficios estimados en COP entre costos estimados en USD.
+
+#### 5.1.6. Mapeo inicial de scores y fórmulas
+
+El catálogo incluye un `mapeoScoreInicial` para convertir valores cualitativos en valores numéricos comparables. En la versión 15, el mapeo se ajusta a la metodología revisada con los profesores: escala de 0 a 100, cinco dimensiones y ponderadores explícitos.
+
+El mapeo base es:
+
+~~~json
+{
+  "madurez": {
+    "diseniada": 0,
+    "declarada": 25,
+    "implementada": 75,
+    "auditada": 100
+  },
+  "automatizacion": {
+    "manual": 0,
+    "semiautomatico": 50,
+    "automatico": 100
+  },
+  "momento": {
+    "correctivo": 0,
+    "detectivo": 50,
+    "preventivo": 100
+  },
+  "periodicidad": {
+    "ocasional": 25,
+    "periodico": 75,
+    "permanente": 100
+  },
+  "alcance": {
+    "especifico": 25,
+    "general": 100
+  }
+}
+~~~
+
+En claves JSON se evita el uso de tildes y caracteres especiales. Por eso `diseñada` se representa como `diseniada`.
+
+##### Justificación del mapeo
+
+La `madurez` recibe el mayor peso porque un control que no está implementado o auditado no puede considerarse fuerte, aunque sea automático o preventivo. La `automatización` recibe el segundo peso porque reduce dependencia humana y habilita capacidades como DevSecOps, SIEM, SOAR o EDR. La `periodicidad` también recibe peso relevante porque un control ejecutado una sola vez puede degradarse. El `momento` y el `alcance` completan la calificación, pero no reemplazan la madurez ni la automatización.
+
+El valor `alcance = especifico = 25` no significa que un control específico sea irrelevante. Significa que su cobertura organizacional es menor. La pertinencia técnica del control frente al riesgo se expresa mediante `pesoMitigacion`. Por ejemplo, PKCE es específico, pero tiene peso alto frente al riesgo de interceptación del `authorization_code`.
+
+##### Fórmula del score de control
+
+La fórmula propuesta para el score del control es:
+
+~~~text
+scoreControl(c) =
+0.40 * madurez
++ 0.20 * automatizacion
++ 0.10 * momento
++ 0.20 * periodicidad
++ 0.10 * alcance
+~~~
+
+El resultado se expresa en escala de 0 a 100. Para las fórmulas de eficacia frente al riesgo se usa:
+
+~~~text
+scoreControlNormalizado(c) = scoreControl(c) / 100
+~~~
+
+Ejemplo:
+
+~~~text
+Control: CE1-001 PKCE con S256
+
+madurez = implementada = 75
+automatizacion = automatico = 100
+momento = preventivo = 100
+periodicidad = permanente = 100
+alcance = especifico = 25
+
+scoreControl =
+0.40*75 + 0.20*100 + 0.10*100 + 0.20*100 + 0.10*25
+
+scoreControl =
+30 + 20 + 10 + 20 + 2.5
+
+scoreControl = 82.5
+scoreControlNormalizado = 0.825
+~~~
+
+Lectura:
+
+> El control tiene score alto porque está implementado, automatizado, es preventivo y permanente. Su alcance específico le resta cobertura organizacional, pero no elimina su alta pertinencia frente al riesgo porque esa pertinencia se expresa con `pesoMitigacion`.
+
+##### Eficacia frente al riesgo
+
+La eficacia frente al riesgo agrega los controles asociados a un riesgo:
 
 ~~~text
 eficaciaFrenteAlRiesgo(r) =
-suma( pesoMitigacion(r,c) * scoreControl(c) )
+suma( pesoMitigacion(r,c) * scoreControlNormalizado(c) )
 /
 suma( pesoMitigacion(r,c) )
 ~~~
 
-Esto evita una evaluación binaria. Si falta un control principal, pero existen controles compensatorios, la eficacia del riesgo no cae automáticamente a cero. Sin embargo, si un control obligatorio tiene score muy bajo, la eficacia debe quedar limitada para no maquillar el resultado.
-
-Regla correctiva propuesta:
+Ejemplo para `RE1-001`:
 
 ~~~text
-si existe un control obligatorio con scoreControl(c) < 0.40,
+CE1-001 scoreNormalizado = 0.825, peso = 0.70
+CE1-002 scoreNormalizado = 0.650, peso = 0.15
+CG-006  scoreNormalizado = 0.950, peso = 0.15
+
+eficaciaFrenteAlRiesgo =
+(0.70*0.825 + 0.15*0.650 + 0.15*0.950) / 1.00
+
+eficaciaFrenteAlRiesgo = 0.8175
+~~~
+
+Lectura:
+
+> El riesgo queda cubierto en 81.75% según la combinación ponderada de controles. Esto no significa que el riesgo desaparezca; significa que, bajo el modelo, la cobertura observada es alta.
+
+##### Regla correctiva para controles obligatorios
+
+Para evitar que controles compensatorios maquillen la ausencia de un control crítico, se aplica una regla de límite:
+
+~~~text
+si existe un control obligatorio con scoreControlNormalizado(c) < 0.40,
 entonces eficaciaFrenteAlRiesgo(r) = min(eficaciaFrenteAlRiesgo(r), 0.59)
 ~~~
 
-##### Referencias técnicas del catálogo
+Ejemplo:
 
-Las referencias técnicas del catálogo se agrupan así:
+~~~text
+Riesgo: exposición de tokens en navegador
+Control obligatorio: custodia server-side de tokens
+Score del control obligatorio: 0.00
 
-1. **IETF / OpenID:** RFC 6750, RFC 6819, RFC 7636, RFC 7662, RFC 8693, RFC 8705, RFC 9068, RFC 9449, RFC 9700 y OpenID Connect Core.
-2. **OWASP:** OAuth2 Cheat Sheet, API Security Top 10, Session Management Cheat Sheet y CSRF Prevention Cheat Sheet.
-3. **NIST:** SP 800-30 para evaluación de riesgos y SP 800-53 para familias de controles.
-4. **Documentación oficial de proveedores:** Microsoft Entra ID, Auth0 y Keycloak.
-5. **Marco conceptual de aseguramiento:** Valencia Duque para relación riesgo-control-auditoría y evaluación de eficiencia/eficacia.
+Aunque cookie segura y CSP aporten mitigación,
+la eficacia frente al riesgo no puede superar 0.59.
+~~~
 
-No se incluyen PAR, JAR, JARM, FAPI o RAR como entidades propias del catálogo porque el alcance actual de la tesis se concentra en OAuth 2.0/OIDC general y en tres arquitecturas representativas. Si el modelo se adapta posteriormente a banca abierta o perfiles de alto aseguramiento, esos perfiles podrían agregarse como otra capa del catálogo.
+La razón es conceptual: los controles compensatorios pueden reducir exposición, pero no reemplazan al control principal cuando este es obligatorio.
 
-#### 5.1.3. Estructura del resultado de evaluación
+##### Beneficio de mitigación y eficiencia
+
+La eficiencia frente al riesgo relaciona mitigación estimada y costo asignado. Los valores económicos deben estar expresados en la misma moneda.
+
+~~~text
+beneficioMitigacionEstimado(r) =
+impactoEconomicoEstimado(r) * eficaciaFrenteAlRiesgo(r)
+~~~
+
+~~~text
+eficienciaFrenteAlRiesgo(r) =
+beneficioMitigacionEstimado(r) / costoAsignadoTotal(r)
+~~~
+
+Ejemplo con impacto convertido a USD:
+
+~~~text
+impactoEconomicoEstimado = 20000 USD
+eficaciaFrenteAlRiesgo = 0.35
+costoAsignadoTotal = 7400 USD
+
+beneficioMitigacionEstimado = 7000 USD
+
+eficienciaFrenteAlRiesgo =
+7000 / 7400 = 0.95
+~~~
+
+Lectura:
+
+> Por cada dólar asignado a los controles del riesgo, el modelo estima 0.95 dólares de exposición mitigada. Esta cifra no debe interpretarse como retorno financiero exacto, sino como indicador semicuantitativo de priorización.
+
+##### Lectura cualitativa de eficiencia y eficacia global
+
+La metodología mantiene una lectura cualitativa global:
+
+- **No es eficiente:** el costo del control es excesivo frente al impacto económico estimado del activo o proceso en riesgo.
+- **Es parcialmente eficiente:** el costo es moderado frente al impacto económico estimado.
+- **Es eficiente:** el costo es razonable u óptimo frente a la reducción de exposición obtenida.
+
+Para eficacia global:
+
+- **No es eficaz:** el sistema no cumple los objetivos de seguridad establecidos.
+- **Es parcialmente eficaz:** el sistema cubre algunos objetivos, pero conserva brechas relevantes.
+- **Es eficaz:** el sistema cubre los objetivos de seguridad definidos y reduce de forma significativa la exposición.
+
+#### 5.1.7. Estructura del resultado de evaluación
 
 El modelo produce dos artefactos JSON diferenciados: el **catálogo maestro** y el **resultado de evaluación**. El catálogo es estable y predefinido por la tesis; el resultado es el artefacto diligenciado por el evaluador para una arquitectura y momento concretos.
 
-El resultado de evaluación tiene la siguiente estructura:
+Ejemplo mínimo de resultado:
 
 ~~~json
 {
@@ -2603,7 +3220,11 @@ El resultado de evaluación tiene la siguiente estructura:
     "ambiente": "Preproduccion",
     "escenarioId": "SPA_BFF_IDP",
     "catalogoId": "CAT-OAUTH2-OIDC-2026-01",
-    "versionCatalogo": "1.0.0"
+    "versionCatalogo": "1.0.0",
+    "monedaEvaluacion": "USD",
+    "tasaCambioReferencia": {
+      "COP_USD": 4000
+    }
   },
   "registrosMatriz": [
     {
@@ -2612,65 +3233,71 @@ El resultado de evaluación tiene la siguiente estructura:
       "riesgoId": "RE1-001",
       "controlId": "CE1-001",
       "activoAfectado": "authorization_code",
-      "lucroCesante": 50000000,
+      "tipoImpacto": "lucroCesante",
+      "impactoEconomicoOriginal": {
+        "valor": 50000000,
+        "moneda": "COP"
+      },
+      "impactoEconomicoEstimado": {
+        "valor": 12500,
+        "moneda": "USD"
+      },
       "amenaza": "Atacante obtiene el authorization_code durante el callback",
-      "vulnerabilidad": "PKCE ausente, PKCE mal configurado o aceptacion de code_challenge_method=plain",
+      "vulnerabilidad": "PKCE ausente, PKCE mal configurado o aceptación de code_challenge_method=plain",
       "probabilidad": "Media",
       "impacto": "Alto",
       "nivelRiesgo": "Alto",
-      "costoAsignado": 4800000,
+      "costoAsignado": 1650,
       "evaluacionControl": {
-        "madurez": "Implementado",
+        "madurez": "Implementada",
         "automatizacion": "Automatico",
         "momento": "Preventivo",
         "periodicidad": "Permanente",
         "alcance": "Especifico",
-        "scoreControl": 0.85,
-        "eficaciaControl": 0.85
+        "scoreControl": 82.5,
+        "scoreControlNormalizado": 0.825
       },
-      "aporteEficacia": 0.595,
+      "aporteEficacia": 0.5775,
       "evidencias": [
         {
-          "esperada": "Configuracion del cliente OIDC con PKCE S256",
-          "encontrada": "Captura de configuracion del IdP y logs del BFF",
+          "esperada": "Configuración del cliente OIDC con PKCE S256",
+          "encontrada": "Captura de configuración del IdP y logs del BFF",
           "fuente": "Consola IdP, repositorio BFF, logs de callback",
-          "suficiencia": "Parcial"
+          "suficiencia": "Suficiente"
         }
       ],
-      "observacion": "PKCE existe, pero falta evidencia de rechazo explicito de code_challenge_method=plain"
+      "observacion": "PKCE se evidencia como implementado; falta complementar con prueba negativa de rechazo de plain."
     }
   ],
   "evaluacionesRiesgo": [
     {
       "riesgoId": "RE1-001",
-      "lucroCesante": 50000000,
+      "impactoEconomicoEstimado": {
+        "valor": 12500,
+        "moneda": "USD"
+      },
       "coberturaEsperada": 1,
-      "coberturaObservada": 0.70,
-      "eficaciaFrenteAlRiesgo": 0.70,
-      "costoAsignadoTotal": 5600000,
-      "beneficioMitigacionEstimado": 35000000,
-      "eficienciaFrenteAlRiesgo": 6.25,
+      "coberturaObservada": 0.5775,
+      "eficaciaFrenteAlRiesgo": 0.5775,
+      "costoAsignadoTotal": 1650,
+      "beneficioMitigacionEstimado": 7218.75,
+      "eficienciaFrenteAlRiesgo": 4.38,
       "nivelExposicionObservado": "Medio"
     }
   ],
   "evaluacionGlobal": {
     "registrosEvaluados": 1,
     "riesgosEvaluados": 1,
-    "scorePromedioControl": 0.85,
-    "eficienciaCuantitativa": 6.25,
-    "eficaciaCuantitativa": 0.70,
-    "eficienciaCualitativa": "Alta",
-    "eficaciaCualitativa": "Media"
+    "scorePromedioControl": 82.5,
+    "eficienciaCuantitativa": 4.38,
+    "eficaciaCuantitativa": 0.5775,
+    "eficienciaCualitativa": "Es eficiente",
+    "eficaciaCualitativa": "Es parcialmente eficaz"
   }
 }
 ~~~
 
-Cada `RegistroMatriz` evalúa una relación riesgo-control concreta: referencia los IDs del catálogo (`riesgoId`, `controlId`, `riesgoControlId`), captura los datos del riesgo en ese activo específico, diligencia las cinco dimensiones del control mediante `evaluacionControl` y registra la evidencia recopilada. El campo `aporteEficacia` es el producto de `scoreControl × pesoMitigacion` del catálogo y representa la contribución proporcional de ese control a la cobertura del riesgo.
-
-Las `evaluacionesRiesgo` agregan todos los registros de un mismo riesgo: la `coberturaObservada` es la suma de los aportes de eficacia de sus registros, la `eficaciaFrenteAlRiesgo` refleja qué proporción del riesgo queda cubierta, y el `nivelExposicionObservado` traduce esa cobertura en una categoría cualitativa. La `eficienciaFrenteAlRiesgo` relaciona el beneficio de mitigación estimado con el costo asignado a los controles del riesgo.
-
-La `evaluacionGlobal` consolida todas las `evaluacionesRiesgo` y produce las cuatro medidas del modelo: `eficienciaCuantitativa`, `eficaciaCuantitativa`, `eficienciaCualitativa` y `eficaciaCualitativa`.
-
+Cada `RegistroMatriz` evalúa una relación riesgo-control concreta. El campo `aporteEficacia` es el producto entre `scoreControlNormalizado` y `pesoMitigacion`. Las `evaluacionesRiesgo` agregan todos los registros asociados a un mismo riesgo. La `evaluacionGlobal` consolida todas las evaluaciones de riesgo y permite comparar escenarios.
 
 ---
 
@@ -2678,96 +3305,39 @@ La `evaluacionGlobal` consolida todas las `evaluacionesRiesgo` y produce las cua
 
 #### 5.2.1. Relación riesgo, control y auditoría
 
-El modelo de evaluación se aplica en un único corte sobre el estado actual de la arquitectura revisada. No presupone una secuencia antes/después ni una fase de implementación dentro del mismo instrumento. En su lugar, se operacionaliza mediante un procedimiento de aplicación compuesto por cuatro momentos: selección del catálogo aplicable de riesgos y controles, caracterización del riesgo, evaluación de cada control y evaluación global del sistema. Si posteriormente se aplican correcciones, una nueva aplicación del modelo constituye una reevaluación independiente.
+El modelo de evaluación se aplica en un único corte sobre el estado actual de la arquitectura revisada. No presupone una secuencia antes/después ni una fase de implementación dentro del mismo instrumento. En su lugar, se operacionaliza mediante cuatro momentos: selección del catálogo aplicable, caracterización del riesgo, evaluación de controles y evaluación global del sistema. Si posteriormente se aplican correcciones, una nueva aplicación del modelo constituye una reevaluación independiente.
 
 La lógica base es:
 
-~~~text
-1. Selección del catálogo aplicable de riesgos y controles
-  ↓
-  Arquitectura evaluada
-  ↓
-  Riesgos globales OAuth 2.0/OIDC
-  ↓
-  Riesgos específicos de la arquitectura
-  ↓
-  Controles globales y controles esperados por riesgo
-2. Caracterización de cada riesgo aplicable
-  ↓
-  Activo en riesgo, amenaza, probabilidad e impacto
-3. Evaluación de cada control
-  ↓
-  Costo del control
-  ↓
-  Estado y evidencia en cinco dimensiones
-  ↓
-  Homologación cuantitativa por dimensión
-  ↓
-  Score ponderado del control
-4. Evaluación global del sistema
-  ↓
-  Eficiencia y eficacia del sistema
-  ↓
-  Nivel de exposición observado
-  ↓
-  Hallazgo / brecha / observación
+~~~mermaid
+graph TD
+    A[Seleccionar catálogo aplicable] --> B[Seleccionar arquitectura evaluada]
+    B --> C[Activar riesgos globales OAuth 2.0/OIDC]
+    B --> D[Activar riesgos específicos de la arquitectura]
+    C --> E[Activar controles globales]
+    D --> F[Activar controles específicos]
+    E --> G[Caracterizar riesgo]
+    F --> G
+    G --> H[Activo, amenaza, vulnerabilidad, probabilidad e impacto]
+    H --> I[Evaluar cada relación riesgo-control]
+    I --> J[Costo, evidencia y cinco dimensiones]
+    J --> K[Homologación cuantitativa]
+    K --> L[Score ponderado del control]
+    L --> M[Evaluación por riesgo]
+    M --> N[Evaluación global del sistema]
+    N --> O[Exposición observada, hallazgos y observaciones]
 ~~~
 
 Esta estructura organiza la aplicación del modelo en cuatro momentos:
 
 1. **Selección de riesgos y controles aplicables:** parte del catálogo de riesgos globales OAuth 2.0/OIDC, delimita la arquitectura evaluada y activa tanto los riesgos específicos como los controles aplicables definidos por el modelo.
-2. **Caracterización del riesgo:** registra el activo en riesgo, la amenaza, la probabilidad y el impacto de cada riesgo aplicable.
+2. **Caracterización del riesgo:** registra el activo en riesgo, la amenaza, la vulnerabilidad, la probabilidad y el impacto de cada riesgo aplicable.
 3. **Evaluación individual del control:** levanta costo, estado y evidencia del control, clasifica sus cinco dimensiones y homologa sus valores para obtener un score comparable.
-4. **Evaluación global del sistema:** integra los resultados de los controles evaluados para producir medidas agregadas de eficiencia, eficacia y nivel de exposición observado.
-
-De forma sintética, el procedimiento de aplicación del modelo puede resumirse así:
-
-1. **Seleccionar los riesgos y controles aplicables**
-  - partir del catálogo de riesgos globales OAuth 2.0/OIDC propuesto por el modelo, es decir, riesgos que pueden aparecer con independencia de la arquitectura seleccionada;
-  - seleccionar la arquitectura evaluada, limitada a una de las tres arquitecturas del modelo: SPA estática + BFF + IdP corporativo, M2M con Authorization Server actuando también como Resource Server, o API Gateway federado con Authorization Server corporativo;
-  - activar los riesgos específicos correspondientes a la arquitectura seleccionada;
-  - asociar los controles globales esperados para cada riesgo transversal;
-  - asociar los controles específicos esperados para cada riesgo propio de la arquitectura evaluada.
-
-2. **Caracterizar cada riesgo aplicable**
-  - activo en riesgo;
-  - amenaza;
-  - probabilidad;
-  - impacto.
-
-3. **Evaluar cada control asociado a cada riesgo**
-  - levantar el costo del control;
-  - levantar el estado y la evidencia del control en cinco dimensiones: madurez, automatización, momento, periodicidad y alcance funcional;
-  - homologar cada dimensión en una escala cuantitativa para hacer comparables los controles entre sí;
-  - calcular un score ponderado del control a partir de esas dimensiones homologadas.
-
-4. **Evaluar globalmente el sistema**
-  - aplicar una lectura cuantitativa de eficiencia del sistema, considerando la relación entre costo del control, nivel de protección y afectación económica estimada del activo en riesgo;
-  - aplicar una lectura cuantitativa de eficacia del sistema, considerando la cobertura de riesgos por parte de los controles evaluados;
-  - aplicar una lectura cualitativa de eficiencia, valorando si el sistema consume recursos de manera adecuada en relación con la protección obtenida;
-  - aplicar una lectura cualitativa de eficacia, valorando si el sistema cumple los objetivos de seguridad establecidos.
-
-En esta síntesis, las cinco dimensiones del control se usan como base del algoritmo de calificación. La homologación cuantitativa y los ponderadores del score se formalizan a partir de los valores definidos por la tesis para madurez, automatización, momento, periodicidad y alcance funcional.
+4. **Evaluación global del sistema:** integra los resultados por riesgo para producir medidas agregadas de eficiencia, eficacia y nivel de exposición observado.
 
 En la implementación web, el primer momento se materializa como un catálogo precargado. La selección de una de las tres arquitecturas habilita automáticamente los riesgos globales OAuth 2.0/OIDC, los riesgos específicos del escenario y los controles esperados asociados. El algoritmo no recibe riesgos libres escritos por el usuario; lo dinámico son los datos de evaluación diligenciados para cada registro.
 
 Los casos base sin OAuth 2.0/OIDC no se incluyen en esta lógica del modelo de evaluación porque no contienen Authorization Server, clientes OAuth, tokens OAuth 2.0/OIDC, scopes ni validación federada de tokens. Sirven como contraste conceptual, no como objeto de evaluación de la matriz.
-
-~~~mermaid
-graph TD
-A[Arquitectura evaluada] --> B[Riesgos globales OAuth 2.0/OIDC]
-A --> C[Riesgos específicos de la arquitectura]
-B --> D[Controles globales esperados]
-C --> E[Controles específicos esperados]
-D --> F[Caracterización del riesgo]
-E --> F
-F --> G[Evaluación individual del control]
-G --> H[Costo, estado y evidencia]
-H --> I[Homologación y score ponderado]
-I --> J[Eficiencia y eficacia del sistema]
-J --> K[Nivel de exposición observado]
-K --> L[Hallazgo / brecha / observación]
-~~~
 
 #### 5.2.2. Riesgos transversales y específicos
 
@@ -2792,15 +3362,7 @@ Ejemplos:
 - secretos hardcodeados o privilegios excesivos en clientes M2M del escenario 2;
 - confusión de audiencia o propagación indebida de tokens en el escenario 3.
 
-El modelo no separa, dentro de una misma ejecución, un riesgo "antes" y otro "después" de implantar controles. Trabaja con un único corte de evaluación sobre la arquitectura tal como existe al momento del levantamiento. Para cada riesgo se debe identificar:
-
-1. activo afectado;
-2. amenaza o causa;
-3. vulnerabilidad o condición habilitante;
-4. probabilidad;
-5. impacto.
-
-Esta separación es coherente con NIST SP 800-30, que estructura la evaluación de riesgos alrededor de amenazas, vulnerabilidades, probabilidad e impacto sobre activos u operaciones. En la tesis, transversal o específico describe el alcance del riesgo; el nivel de exposición observado expresa la conclusión evaluativa obtenida en ese mismo corte.
+El modelo trabaja con un único corte de evaluación sobre la arquitectura tal como existe al momento del levantamiento. Para cada riesgo se debe identificar: activo afectado, amenaza o causa, vulnerabilidad, probabilidad e impacto.
 
 #### 5.2.3. Controles transversales
 
@@ -2823,7 +3385,7 @@ Estos controles establecen una línea mínima de gobierno. Después, cada escena
 
 #### 5.2.4. Controles específicos por escenario
 
-Cada escenario introduce una superficie de riesgo distinta. Por eso la matriz no debe evaluar todos los escenarios con la misma lista de controles.
+Cada escenario introduce una superficie de riesgo distinta. Por eso la matriz no evalúa todos los escenarios con la misma lista de controles.
 
 ##### Escenario 1: SPA + BFF + IdP corporativo
 
@@ -2837,7 +3399,6 @@ Controles específicos:
 - tokens custodiados server-side en el BFF;
 - cookie `HttpOnly`, `Secure` y `SameSite`;
 - protección CSRF;
-- Content Security Policy para reducir riesgo de XSS;
 - evidencia de que la SPA no almacena tokens.
 
 ##### Escenario 2: M2M con AS como RS
@@ -2871,40 +3432,31 @@ Controles específicos:
 - correlación de logs Gateway-backend;
 - actualización y caché controlada de JWKS.
 
-#### 5.2.5. Eficiencia, eficacia y efectividad del control
+#### 5.2.5. Score del control, eficacia del riesgo y eficiencia del sistema
 
-Siguiendo el enfoque de Valencia Duque, la efectividad del control se analiza a partir de dos dimensiones:
+El enfoque de Valencia Duque permite hablar de eficiencia y eficacia del control, pero en esta tesis se operacionaliza en tres niveles para evitar ambigüedad:
 
-1. **Eficiencia del control:** evalúa si el control está bien diseñado frente al riesgo.
-2. **Eficacia del control:** evalúa si existe evidencia de que el control opera y cumple su objetivo.
+1. **Score del control:** mide qué tan fuerte está un control según madurez, automatización, momento, periodicidad y alcance.
+2. **Eficacia frente al riesgo:** mide qué tanto queda cubierto un riesgo al agregar los controles asociados y sus pesos de mitigación.
+3. **Eficiencia frente al riesgo o global:** relaciona beneficio de mitigación estimado con costo asignado.
 
-En esta tesis, la eficiencia responde:
+La relación conceptual es:
 
-> ¿El control es pertinente y suficiente para mitigar el riesgo identificado?
-
-La eficacia responde:
-
-> ¿Existe evidencia verificable de que el control opera en la arquitectura evaluada?
-
-La efectividad resulta de combinar ambas dimensiones:
-
-~~~text
-Buen diseño + evidencia suficiente = control efectivo
-Buen diseño + evidencia débil = control no demostrado
-Diseño insuficiente + evidencia operativa = control operativo pero incompleto
-Diseño débil + evidencia débil = control no confiable
+~~~mermaid
+graph TD
+    A[Evaluación de control] --> B[Score del control]
+    B --> C[Aporte del control al riesgo]
+    C --> D[Eficacia frente al riesgo]
+    D --> E[Beneficio de mitigación estimado]
+    E --> F[Eficiencia frente al riesgo]
+    F --> G[Evaluación global del sistema]
 ~~~
 
-Ejemplo:
-
-- Riesgo: confusión de audiencia.
-- Control declarado: validación de firma JWT.
-- Evaluación: el control es insuficiente si no valida `audience`.
-- Conclusión: puede existir un control implementado, pero no ser efectivo frente al riesgo.
+Así se evita decir que un control tiene una eficacia única. Un mismo control puede ser muy eficaz para un riesgo y marginal para otro. Esa diferencia se modela con `pesoMitigacion`.
 
 #### 5.2.6. Dimensiones de evaluación del control
 
-Cada control se clasifica mediante dimensiones que permiten medir su madurez y capacidad real de mitigación.
+Cada control se clasifica mediante cinco dimensiones.
 
 ##### Madurez
 
@@ -2912,10 +3464,10 @@ Describe el estado del control frente a su formalización, diseño, implementaci
 
 Valores:
 
-- Declarado.
-- Diseñado.
-- Implementado.
-- Auditado.
+- Diseñada.
+- Declarada.
+- Implementada.
+- Auditada.
 
 ##### Automatización
 
@@ -2936,8 +3488,6 @@ Valores:
 - Preventivo.
 - Detectivo.
 - Correctivo.
-
-Esta clasificación es compatible con los atributos de ISO/IEC 27002:2022, donde los controles pueden clasificarse como preventivos, detectivos o correctivos.
 
 ##### Periodicidad
 
@@ -2963,19 +3513,16 @@ Valores:
 La matriz opera en un único momento de evaluación y produce una conclusión sobre la exposición observada en la arquitectura revisada. Para ello articula tres elementos:
 
 1. **Riesgo identificado:** riesgo relevante en el escenario evaluado.
-2. **Evaluación del control:** valoración del diseño, la operación y la evidencia disponible sobre los controles existentes.
-3. **Nivel de exposición observado:** conclusión sobre la exposición actual del escenario, derivada de contrastar el riesgo identificado con el estado observado del control.
+2. **Estado observado del control:** valoración de diseño, operación, score y evidencia disponible.
+3. **Nivel de exposición observado:** conclusión sobre la exposición actual del escenario.
 
 La relación conceptual es:
 
-~~~text
-Riesgo identificado
-  +
-estado observado del control
-  +
-evidencia disponible
-  ↓
-nivel de exposición observado
+~~~mermaid
+graph TD
+    A[Riesgo identificado] --> D[Nivel de exposición observado]
+    B[Estado observado del control] --> D
+    C[Evidencia disponible] --> D
 ~~~
 
 Si posteriormente se aplican correcciones, la tesis no asume una segunda fase interna del mismo modelo, sino una nueva evaluación sobre un nuevo estado de la arquitectura. La tesis puede usar homologación cualitativa o semicuantitativa, siempre que mantenga trazabilidad entre riesgo, control, evidencia y conclusión.
@@ -3005,7 +3552,7 @@ Los criterios principales son:
 
 ### 5.4. Estructura de la matriz
 
-La matriz se organiza en tres bloques lógicos:
+La matriz se organiza en cuatro bloques lógicos.
 
 #### 5.4.1. Bloque 1: Riesgo
 
@@ -3014,62 +3561,77 @@ Este bloque identifica qué puede fallar.
 Campos:
 
 1. escenario OAuth 2.0/OIDC;
-2. tipo de riesgo: transversal o específico;
+2. tipo de riesgo: global o específico;
 3. activo afectado;
 4. riesgo identificado;
 5. amenaza o causa;
 6. vulnerabilidad o condición habilitante;
 7. probabilidad;
 8. impacto;
-9. nivel del riesgo identificado.
+9. nivel del riesgo identificado;
+10. impacto económico estimado o lucro cesante.
 
-#### 5.4.2. Bloque 2: Control
+#### 5.4.2. Bloque 2: Relación riesgo-control
 
-Este bloque identifica qué debería mitigar el riesgo y qué tan fuerte es el control.
+Este bloque identifica qué control mitiga qué riesgo y con qué peso.
 
 Campos:
 
 1. control esperado;
-2. tipo de control: transversal o específico;
-3. madurez;
-4. automatización;
-5. momento;
-6. periodicidad;
-7. alcance funcional;
-8. eficiencia del control;
-9. eficacia del control;
-10. efectividad del control.
+2. tipo de control: global o específico;
+3. identificador `riesgoControlId`;
+4. `pesoMitigacion`;
+5. obligatoriedad;
+6. costo total del control;
+7. costo asignado al riesgo.
 
-#### 5.4.3. Bloque 3: Auditoría y conclusión evaluativa
+#### 5.4.3. Bloque 3: Evaluación del control y evidencia
 
-Este bloque identifica cómo se verifica el control y qué riesgo permanece.
+Este bloque registra el estado observado del control.
 
 Campos:
 
-1. evidencia auditable esperada;
-2. evidencia encontrada;
-3. fuente de evidencia;
-4. responsable o custodio de la evidencia;
-5. nivel de exposición observado;
-6. hallazgo o brecha;
-7. observación evaluativa;
-8. referencia normativa o técnica.
+1. madurez;
+2. automatización;
+3. momento;
+4. periodicidad;
+5. alcance funcional;
+6. score del control;
+7. evidencia esperada;
+8. evidencia encontrada;
+9. fuente de evidencia;
+10. suficiencia de evidencia.
+
+#### 5.4.4. Bloque 4: Evaluación por riesgo y evaluación global
+
+Este bloque consolida los resultados.
+
+Campos:
+
+1. aporte de eficacia del control;
+2. eficacia frente al riesgo;
+3. eficiencia frente al riesgo;
+4. nivel de exposición observado;
+5. hallazgo, brecha u observación;
+6. referencia normativa o técnica.
 
 La estructura general se representa así:
 
 ~~~mermaid
 graph TD
-A[Escenario OAuth 2.0/OIDC] --> B[Riesgo identificado]
-B --> C[Control esperado]
-C --> D[Dimensiones del control]
-D --> E[Evidencia auditable]
-E --> F[Eficiencia + eficacia]
-F --> G[Efectividad del control]
-G --> H[Nivel de exposición observado]
-H --> I[Hallazgo / brecha / observación]
+    A[Escenario OAuth 2.0/OIDC] --> B[Riesgo identificado]
+    B --> C[Relación riesgo-control]
+    C --> D[Control esperado]
+    D --> E[Dimensiones del control]
+    E --> F[Score del control]
+    F --> G[Aporte de eficacia]
+    G --> H[Evaluación del riesgo]
+    H --> I[Evaluación global]
+    E --> J[Evidencia auditable]
+    J --> H
 ~~~
 
-Esta estructura corrige la inconsistencia entre el esquema del modelo y la matriz: primero se identifica el riesgo, luego el control, luego la evidencia y finalmente el nivel de exposición observado. La matriz no parte de los casos base; parte de los escenarios OAuth 2.0/OIDC.
+Esta estructura corrige la inconsistencia entre el esquema del modelo y la matriz: primero se identifica el riesgo, luego la relación riesgo-control, después la evidencia y finalmente el resultado por riesgo y global. La matriz no parte de los casos base; parte de los escenarios OAuth 2.0/OIDC.
 
 ---
 
@@ -3086,13 +3648,13 @@ Valores esperados:
 3. Escenario 3: API Gateway federado con Authorization Server corporativo.
 4. Transversal OAuth 2.0/OIDC, cuando el riesgo o control aplique a todos los escenarios.
 
-Los casos base 0A y 0B no son valores válidos de este campo porque no hacen parte de la matriz del modelo de evaluación. Se usan únicamente en el marco conceptual.
+Los casos base 0A y 0B no son valores válidos de este campo porque no hacen parte de la matriz del modelo de evaluación.
 
 #### 5.5.2. Tipo de riesgo
 
-Clasifica si el riesgo es transversal o específico.
+Clasifica si el riesgo es global o específico.
 
-- **Transversal:** aplica a toda arquitectura OAuth 2.0/OIDC.
+- **Global:** aplica a toda arquitectura OAuth 2.0/OIDC.
 - **Específico:** aplica a uno de los tres escenarios evaluados.
 
 #### 5.5.3. Activo afectado
@@ -3150,7 +3712,20 @@ Ejemplos:
 - Gateway con validación parcial;
 - backend que confía ciegamente en el Gateway.
 
-#### 5.5.6. Probabilidad
+#### 5.5.6. Vulnerabilidad
+
+Describe la condición técnica, operativa o documental que habilita el riesgo.
+
+Ejemplos:
+
+- configuración débil del cliente OAuth;
+- credencial expuesta;
+- token aceptado fuera de su audiencia;
+- falta de segregación por ambiente;
+- política de scopes demasiado amplia;
+- ausencia de evidencia de rotación.
+
+#### 5.5.7. Probabilidad
 
 Estima posibilidad de materialización.
 
@@ -3160,7 +3735,7 @@ Valores sugeridos:
 - Media.
 - Alta.
 
-#### 5.5.7. Impacto
+#### 5.5.8. Impacto
 
 Estima consecuencia sobre confidencialidad, integridad, disponibilidad, trazabilidad o cumplimiento.
 
@@ -3171,9 +3746,9 @@ Valores sugeridos:
 - Alto.
 - Crítico.
 
-#### 5.5.8. Nivel del riesgo identificado
+#### 5.5.9. Nivel del riesgo identificado
 
-Resultado de combinar probabilidad e impacto del riesgo caracterizado en el escenario evaluado.
+Resultado de combinar probabilidad e impacto del riesgo caracterizado.
 
 Valores sugeridos:
 
@@ -3182,7 +3757,22 @@ Valores sugeridos:
 - Alto.
 - Crítico.
 
-#### 5.5.9. Control esperado
+#### 5.5.10. Impacto económico estimado
+
+Registra la estimación monetaria usada para calcular eficiencia.
+
+Puede representar:
+
+- lucro cesante;
+- fraude potencial;
+- sanción;
+- costo operativo;
+- impacto reputacional monetizado;
+- costo de remediación.
+
+Si el valor original está en una moneda distinta a la moneda del catálogo, debe convertirse antes de calcular eficiencia.
+
+#### 5.5.11. Control esperado
 
 Describe el control que debería existir para mitigar el riesgo.
 
@@ -3203,18 +3793,19 @@ Ejemplos:
 - rotación de credenciales;
 - monitoreo por `client_id`.
 
-#### 5.5.10. Tipo de control
+#### 5.5.12. Relación riesgo-control
 
-Clasifica el alcance del control.
+Identifica la relación específica evaluada mediante `riesgoControlId`. Esta relación contiene el `pesoMitigacion`, la obligatoriedad y la justificación técnica de por qué el control mitiga el riesgo.
 
-- Transversal.
-- Específico.
+#### 5.5.13. Costo total y costo asignado
 
-#### 5.5.11. Dimensiones del control
+El `costoTotal` pertenece al control esperado. El `costoAsignado` pertenece a la relación evaluada en la matriz. Si un control mitiga varios riesgos, el costo se distribuye según `pesoMitigacion` para evitar doble conteo.
 
-Registra la valoración del control:
+#### 5.5.14. Dimensiones del control
 
-- **Madurez:** declarado, diseñado, implementado, auditado.
+Registra la valoración del control en las cinco dimensiones definidas por la metodología:
+
+- **Madurez:** diseñada, declarada, implementada, auditada.
 - **Automatización:** manual, semiautomático, automático.
 - **Momento:** preventivo, detectivo, correctivo.
 - **Periodicidad:** ocasional, periódico, permanente.
@@ -3222,45 +3813,18 @@ Registra la valoración del control:
 
 Para conservar comparabilidad entre registros, cada dimensión debe diligenciarse con un único valor por control.
 
-#### 5.5.12. Eficiencia del control
+#### 5.5.15. Score del control
 
-Evalúa si el control está bien diseñado frente al riesgo.
+Es la calificación cuantitativa del control en escala 0 a 100. Se calcula a partir de las cinco dimensiones ponderadas:
 
-Valores sugeridos:
+~~~text
+scoreControl =
+0.40*madurez + 0.20*automatizacion + 0.10*momento + 0.20*periodicidad + 0.10*alcance
+~~~
 
-- Baja.
-- Media.
-- Alta.
+Para las fórmulas de cobertura se usa `scoreControlNormalizado = scoreControl / 100`.
 
-#### 5.5.13. Eficacia del control
-
-Evalúa si hay evidencia verificable de operación real.
-
-Valores sugeridos:
-
-- Baja.
-- Media.
-- Alta.
-
-#### 5.5.14. Efectividad del control
-
-Resume la combinación entre eficiencia y eficacia.
-
-Valores sugeridos:
-
-- Baja.
-- Media.
-- Alta.
-
-Lectura sugerida para asignarla:
-
-- **Alta:** eficiencia alta y eficacia alta.
-- **Media:** eficiencia alta con eficacia media, eficiencia media con eficacia alta, o eficiencia media con eficacia media.
-- **Baja:** cualquier combinación donde al menos una de las dos dimensiones sea baja.
-
-Para conservar comparabilidad, no se deben usar valores compuestos como "Media/Alta".
-
-#### 5.5.15. Evidencia auditable esperada
+#### 5.5.16. Evidencia auditable esperada
 
 Describe qué evidencia debería existir.
 
@@ -3280,7 +3844,7 @@ Ejemplos:
 - documentación de arquitectura;
 - registros de monitoreo o alertamiento.
 
-#### 5.5.16. Evidencia encontrada
+#### 5.5.17. Evidencia encontrada
 
 Describe la evidencia efectivamente disponible durante la evaluación.
 
@@ -3291,7 +3855,7 @@ La matriz debe diferenciar entre:
 - evidencia declarada pero no demostrada;
 - ausencia de evidencia.
 
-#### 5.5.17. Fuente de evidencia
+#### 5.5.18. Fuente de evidencia
 
 Identifica de dónde proviene la evidencia.
 
@@ -3308,9 +3872,35 @@ Ejemplos:
 - documento de arquitectura;
 - entrevista técnica.
 
-#### 5.5.18. Nivel de exposición observado
+#### 5.5.19. Aporte de eficacia
 
-Describe la exposición que se observa en la arquitectura evaluada al momento del levantamiento, a partir del riesgo identificado, el estado del control y la evidencia disponible.
+Mide cuánto aporta el control evaluado a la cobertura del riesgo:
+
+~~~text
+aporteEficacia = pesoMitigacion * scoreControlNormalizado
+~~~
+
+#### 5.5.20. Eficacia frente al riesgo
+
+Agrega los aportes de todos los controles asociados a un riesgo:
+
+~~~text
+eficaciaFrenteAlRiesgo =
+suma(pesoMitigacion * scoreControlNormalizado) / suma(pesoMitigacion)
+~~~
+
+#### 5.5.21. Eficiencia frente al riesgo
+
+Relaciona beneficio de mitigación estimado y costo asignado total:
+
+~~~text
+eficienciaFrenteAlRiesgo =
+beneficioMitigacionEstimado / costoAsignadoTotal
+~~~
+
+#### 5.5.22. Nivel de exposición observado
+
+Describe la exposición que se observa en la arquitectura evaluada al momento del levantamiento, a partir del riesgo identificado, el score de los controles y la evidencia disponible.
 
 Valores sugeridos:
 
@@ -3319,7 +3909,7 @@ Valores sugeridos:
 - Alto.
 - Crítico.
 
-#### 5.5.19. Hallazgo, brecha u observación
+#### 5.5.23. Hallazgo, brecha u observación
 
 Registra la conclusión evaluativa.
 
@@ -3334,13 +3924,12 @@ Ejemplos:
 - ausencia de trazabilidad;
 - observación de mejora.
 
-#### 5.5.20. Referencia normativa o técnica
+#### 5.5.24. Referencia normativa o técnica
 
 Relaciona el control con una fuente.
 
 Ejemplos:
 
-- RFC 6749;
 - RFC 6750;
 - RFC 7636;
 - RFC 7662;
@@ -3357,6 +3946,7 @@ Ejemplos:
 
 ---
 
+
 ### 5.6. Plantilla inicial de la matriz
 
 La plantilla inicial se limita a los tres escenarios OAuth 2.0/OIDC. Los casos base no se incluyen.
@@ -3366,121 +3956,266 @@ En el entregable web, esta plantilla se materializa como un catálogo precargado
 #### Registro 1: Transversal OAuth 2.0/OIDC
 
 - **Escenario:** Transversal OAuth 2.0/OIDC.
-- **Tipo de riesgo:** Transversal.
+- **Riesgo identificado:** emisión, aceptación o uso indebido de tokens.
 - **Activo afectado:** Authorization Server, clientes OAuth, tokens y logs de autorización.
-- **Riesgo identificado:** Emisión, aceptación o uso indebido de tokens.
-- **Amenaza / causa:** Configuración débil, falta de gobierno de clientes o ausencia de monitoreo.
-- **Probabilidad:** Media.
-- **Impacto:** Alto.
-- **Nivel del riesgo identificado:** Alto.
-- **Control esperado:** Política central de emisión, validación, vigencia, scopes, monitoreo y gobierno de clientes OAuth.
-- **Tipo de control:** Transversal.
-- **Madurez:** Diseñado.
-- **Automatización:** Semiautomático.
-- **Momento:** Preventivo.
-- **Periodicidad:** Permanente.
-- **Alcance funcional:** General.
-- **Eficiencia:** Media.
-- **Eficacia:** Media.
-- **Efectividad:** Media.
-- **Evidencia auditable esperada:** Política de clientes, configuración del AS, logs de emisión, inventario de clientes y revisión de scopes.
-- **Evidencia encontrada:** Por diligenciar.
-- **Fuente de evidencia:** Consola AS, documentación, SIEM, repositorio de arquitectura.
-- **Nivel de exposición observado:** Medio.
-- **Hallazgo / observación:** La evidencia y el monitoreo transversal aún son insuficientes para respaldar completamente el control.
-- **Referencia:** RFC 6749, RFC 9700, ISO/IEC 27002, NIST SP 800-53.
+- **Amenaza / causa:** configuración débil, falta de gobierno de clientes o ausencia de monitoreo.
+- **Control esperado:** política central de emisión, validación, vigencia, scopes, monitoreo y gobierno de clientes OAuth.
+- **Relación riesgo-control:** relación global del catálogo, por ejemplo `RG-002` con `CG-001`.
+- **Dimensiones del control:** madurez, automatización, momento, periodicidad y alcance funcional.
+- **Score del control:** calculado con la fórmula ponderada de la sección 5.1.6.
+- **Evidencia esperada:** política de clientes, configuración del AS, logs de emisión, inventario de clientes y revisión de scopes.
+- **Fuente de evidencia:** consola AS, documentación, SIEM, repositorio de arquitectura.
+- **Resultado esperado:** aporte de eficacia al riesgo y exposición observada.
+- **Referencia:** RFC 9700, RFC 7662, NIST SP 800-53.
 
 #### Registro 2: Escenario 1 - SPA + BFF + IdP corporativo
 
 - **Escenario:** SPA estática + BFF + IdP corporativo.
-- **Tipo de riesgo:** Específico.
+- **Riesgo identificado:** intercepción de código, exposición de tokens o sesión mal vinculada.
 - **Activo afectado:** `authorization_code`, `id_token`, `access_token`, `refresh_token`, cookie de sesión.
-- **Riesgo identificado:** Interceptación de código, exposición de tokens o sesión mal vinculada.
-- **Amenaza / causa:** Falta de PKCE, validación débil de `state`/`nonce`, redirect URI débil o tokens en navegador.
-- **Probabilidad:** Media.
-- **Impacto:** Alto.
-- **Nivel del riesgo identificado:** Alto.
+- **Amenaza / causa:** falta de PKCE, validación débil de `state`/`nonce`, redirect URI débil o tokens en navegador.
 - **Control esperado:** Authorization Code + PKCE con `S256`, validación de `state` y `nonce`, redirect URI exacta, tokens server-side y cookie segura.
-- **Tipo de control:** Específico.
-- **Madurez:** Implementado.
-- **Automatización:** Automático.
-- **Momento:** Preventivo.
-- **Periodicidad:** Permanente.
-- **Alcance funcional:** Específico.
-- **Eficiencia:** Alta.
-- **Eficacia:** Media.
-- **Efectividad:** Media.
-- **Evidencia auditable esperada:** Configuración del cliente OIDC, callback, código BFF, configuración de cookies, logs IdP/BFF y prueba de ausencia de tokens en la SPA.
-- **Evidencia encontrada:** Por diligenciar.
+- **Relación riesgo-control:** ejemplo `RE1-001` con `CE1-001` mediante `RC-017`.
+- **Dimensiones del control:** implementada, automático, preventivo, permanente, específico.
+- **Score del control:** ejemplo `82.5` para PKCE implementado y evidenciado.
+- **Evidencia esperada:** configuración del cliente OIDC, callback, código BFF, configuración de cookies, logs IdP/BFF y prueba de ausencia de tokens en la SPA.
 - **Fuente de evidencia:** IdP, repositorio BFF, navegador DevTools, logs.
-- **Nivel de exposición observado:** Medio.
-- **Hallazgo / observación:** La evidencia disponible aún no demuestra de forma suficiente que los tokens no llegan al navegador ni que `state`/`nonce` estén implementados correctamente.
-- **Referencia:** RFC 6749, RFC 7636, OIDC Core, RFC 9700.
+- **Resultado esperado:** eficacia frente al riesgo y nivel de exposición observado.
+- **Referencia:** RFC 7636, OIDC Core, RFC 9700.
 
 #### Registro 3: Escenario 2 - M2M con AS como RS
 
 - **Escenario:** M2M con Authorization Server como Resource Server.
-- **Tipo de riesgo:** Específico.
+- **Riesgo identificado:** abuso de cliente técnico privilegiado.
 - **Activo afectado:** `client_secret`, certificado, `access_token` M2M, API administrativa.
-- **Riesgo identificado:** Abuso de cliente técnico privilegiado.
-- **Amenaza / causa:** Secretos expuestos, scopes excesivos, cliente sin responsable o ausencia de rotación.
-- **Probabilidad:** Alta.
-- **Impacto:** Alto.
-- **Nivel del riesgo identificado:** Crítico.
+- **Amenaza / causa:** secretos expuestos, scopes excesivos, cliente sin responsable o ausencia de rotación.
 - **Control esperado:** `client_credentials` con credencial protegida en vault, scopes mínimos, rotación y trazabilidad por `client_id`.
-- **Tipo de control:** Específico.
-- **Madurez:** Diseñado.
-- **Automatización:** Semiautomático.
-- **Momento:** Preventivo.
-- **Periodicidad:** Periódico.
-- **Alcance funcional:** Específico.
-- **Eficiencia:** Alta.
-- **Eficacia:** Media.
-- **Efectividad:** Media.
-- **Evidencia auditable esperada:** Inventario de clientes, configuración de scopes, vault, logs de emisión y consumo, evidencia de rotación.
-- **Evidencia encontrada:** Por diligenciar.
-- **Fuente de evidencia:** Consola AS, vault, SIEM, pipeline, documentación IAM.
-- **Nivel de exposición observado:** Alto.
-- **Hallazgo / observación:** La rotación y la revisión de privilegios administrativos todavía presentan una exposición alta y requieren mejor evidencia de control.
-- **Referencia:** RFC 6749, RFC 8705, RFC 9700, NIST SP 800-53.
+- **Relación riesgo-control:** ejemplo `RE2-001` con `CE2-002`.
+- **Dimensiones del control:** por diligenciar según evidencia.
+- **Score del control:** calculado con la fórmula ponderada.
+- **Evidencia esperada:** inventario de clientes, configuración de scopes, vault, logs de emisión y consumo, evidencia de rotación.
+- **Fuente de evidencia:** consola AS, vault, SIEM, pipeline, documentación IAM.
+- **Resultado esperado:** eficacia frente al riesgo y exposición observada.
+- **Referencia:** RFC 9700, NIST SP 800-53, OWASP API Security.
 
 #### Registro 4: Escenario 3 - API Gateway federado
 
 - **Escenario:** API Gateway federado con Authorization Server corporativo.
-- **Tipo de riesgo:** Específico.
+- **Riesgo identificado:** confusión de audiencia o propagación indebida de tokens.
 - **Activo afectado:** `access_token`, audiencia, scopes, claims, trazabilidad Gateway-backend.
-- **Riesgo identificado:** Confusión de audiencia o propagación indebida de tokens.
 - **Amenaza / causa:** Gateway valida parcialmente el token, propaga el mismo token a múltiples APIs internas o backend confía ciegamente en el Gateway.
-- **Probabilidad:** Media.
-- **Impacto:** Alto.
-- **Nivel del riesgo identificado:** Alto.
-- **Control esperado:** Validación de firma/introspection, `issuer`, `audience`, expiración, scopes, autorización por operación y token exchange cuando cambie la audiencia.
-- **Tipo de control:** Específico.
-- **Madurez:** Implementado.
-- **Automatización:** Automático.
-- **Momento:** Preventivo.
-- **Periodicidad:** Permanente.
-- **Alcance funcional:** General.
-- **Eficiencia:** Alta.
-- **Eficacia:** Media.
-- **Efectividad:** Media.
-- **Evidencia auditable esperada:** Configuración Gateway, JWKS/introspection, reglas de audiencia, trazas, logs y pruebas de token exchange o propagación.
-- **Evidencia encontrada:** Por diligenciar.
+- **Control esperado:** validación de firma/introspection, `issuer`, `audience`, expiración, scopes, autorización por operación y token exchange cuando cambie la audiencia.
+- **Relación riesgo-control:** ejemplo `RE3-001` con `CE3-001` o `CE3-002`.
+- **Dimensiones del control:** por diligenciar según evidencia.
+- **Score del control:** calculado con la fórmula ponderada.
+- **Evidencia esperada:** configuración Gateway, JWKS/introspection, reglas de audiencia, trazas, logs y pruebas de token exchange o propagación.
 - **Fuente de evidencia:** Gateway, AS, Resource Servers, SIEM, APM.
-- **Nivel de exposición observado:** Medio.
-- **Hallazgo / observación:** Persiste exposición por confianza excesiva en el Gateway cuando los backends críticos no muestran validación mínima suficientemente evidenciada.
-- **Referencia:** RFC 6750, RFC 7662, RFC 8693, RFC 9068, RFC 9700.
+- **Resultado esperado:** eficacia frente al riesgo y exposición observada.
+- **Referencia:** RFC 7662, RFC 8693, RFC 9700.
 
+---
 
 ## 6. Experimento / Aplicación de la matriz a los escenarios OAuth 2.0/OIDC
 
-6.1. Aplicación al escenario 1: SPA estática + BFF + IdP corporativo  
-6.2. Aplicación al escenario 2: M2M con Authorization Server como Resource Server  
-6.3. Aplicación al escenario 3: API Gateway federado con Authorization Server corporativo  
-6.4. Comparación de riesgos entre escenarios OAuth 2.0/OIDC  
-6.5. Controles transversales y controles específicos  
-6.6. Evidencias mínimas para auditoría  
-6.7. Niveles de exposición observados
+Este capítulo presenta la aplicación del modelo sobre los tres escenarios definidos por la tesis. La lógica aplicada es la del capítulo 5: seleccionar riesgos y controles del catálogo, caracterizar riesgo, evaluar controles por dimensiones y consolidar eficacia, eficiencia y nivel de exposición observado.
+
+El objetivo del experimento no es auditar una organización particular de extremo a extremo, sino demostrar que la matriz permite producir resultados comparables, trazables y accionables entre arquitecturas OAuth 2.0/OIDC distintas.
+
+La ejecución se apoya en dos fuentes:
+
+1. Catálogo maestro y reglas de cálculo del modelo.
+2. Resultado de la corrida del prototipo para el escenario SPA+BFF+IdP y aplicación guiada de la misma matriz para los escenarios M2M y API Gateway.
+
+En todos los ejemplos económicos de este capítulo, costos e impactos se expresan en una misma moneda antes de calcular eficiencia. Cuando el impacto original se estima en COP y los costos del catálogo están en USD, se usa una tasa de conversión declarada en la evaluación.
+
+### 6.1. Aplicación al escenario 1: SPA estática + BFF + IdP corporativo
+
+En este escenario, la evaluación se concentró en riesgos asociados al flujo Authorization Code con PKCE, la sesión del usuario y la posible exposición de tokens en el navegador.
+
+Riesgos priorizados en la aplicación:
+
+1. `RE1-001`: intercepción o sustitución del `authorization_code`.
+2. `RE1-002`: exposición de tokens o material de sesión en el User Agent.
+
+Controles evaluados en la corrida:
+
+1. `CE1-001`: Authorization Code + PKCE con `S256`.
+2. `CE1-002`: `state` y `nonce` ligados a la sesión del cliente.
+3. `CE1-003`: custodia server-side de tokens y no exposición al User Agent.
+4. `CE1-004`: cookie de sesión segura y defensas anti-CSRF.
+5. `CG-006`: transporte seguro y no exposición de tokens en URI.
+
+Ejemplo de cálculo para `RE1-001`:
+
+~~~text
+CE1-001 PKCE con S256:
+  peso = 0.70
+  scoreControl = 82.5
+  scoreNormalizado = 0.825
+  aporte = 0.70 * 0.825 = 0.5775
+
+CE1-002 state y nonce:
+  peso = 0.15
+  scoreControl = 65
+  scoreNormalizado = 0.65
+  aporte = 0.15 * 0.65 = 0.0975
+
+CG-006 transporte seguro:
+  peso = 0.15
+  scoreControl = 95
+  scoreNormalizado = 0.95
+  aporte = 0.15 * 0.95 = 0.1425
+
+eficaciaFrenteAlRiesgo(RE1-001) = 0.8175
+~~~
+
+Resumen cuantitativo observado en el prototipo:
+
+| Riesgo | Cobertura observada | Eficacia | Eficiencia | Exposición |
+|---|---:|---:|---:|---|
+| `RE1-001` | 0.8175 | 0.8175 | 2.73 | Bajo |
+| `RE1-002` | 0.3900 | 0.3900 | 1.05 | Alto |
+
+La evaluación global del escenario fue:
+
+- `scorePromedioControl = 61.5`
+- `eficienciaCuantitativa = 1.89`
+- `eficaciaCuantitativa = 0.60`
+- `eficienciaCualitativa = Es parcialmente eficiente`
+- `eficaciaCualitativa = Es parcialmente eficaz`
+
+Interpretación del resultado:
+
+1. El riesgo de intercepción del código (`RE1-001`) quedó bien cubierto por la combinación PKCE + ligadura transaccional (`state`/`nonce`) + transporte seguro.
+2. El riesgo de exposición de tokens en navegador (`RE1-002`) permaneció alto porque el control principal de custodia server-side de tokens no mostró implementación efectiva en la evidencia levantada.
+3. Los controles compensatorios, como cookie segura y transporte seguro, aportaron mitigación, pero no sustituyen la eliminación del almacenamiento de tokens en el User Agent.
+
+Hallazgo principal del escenario 1:
+
+El diseño del flujo OIDC es razonable, pero la evidencia técnica muestra una brecha material en la custodia de tokens. Por tanto, el control crítico del escenario no puede considerarse eficaz mientras persista almacenamiento en contexto del navegador.
+
+### 6.2. Aplicación al escenario 2: M2M con Authorization Server como Resource Server
+
+En este escenario, la matriz se aplicó sobre el riesgo de concentración de poder en clientes técnicos y en el hecho de que el mismo componente actúe como Authorization Server y Resource Server.
+
+Riesgos específicos priorizados:
+
+1. `RE2-001`: abuso de cliente técnico privilegiado.
+2. `RE2-002`: secreto o certificado expuesto o sin rotación.
+3. `RE2-003`: segregación insuficiente cuando AS también es RS.
+
+Controles específicos y transversales de mayor peso:
+
+1. `CE2-002`: cliente técnico por ambiente y propósito con scopes mínimos.
+2. `CE2-001`: secreto/certificado en vault.
+3. `CE2-004`: recertificación y monitoreo por `client_id`.
+4. `CG-005`: gestión segura de secretos, claves y JWKS.
+5. `CG-001`: validación completa de token en APIs administrativas.
+
+Resultado de aplicación del instrumento en este escenario:
+
+1. El patrón de brecha dominante fue de gobierno operativo, no de ausencia total de controles: existen controles diseñados, pero con evidencia parcial de rotación efectiva y recertificación periódica.
+2. La eficiencia del diseño de controles fue media-alta, porque los controles seleccionados atacan el riesgo principal.
+3. La eficacia operativa fue media, debido a debilidades de evidencia en automatización de recertificación y en segregación robusta de permisos administrativos.
+4. El nivel de exposición observado se ubicó entre medio y alto para operaciones administrativas críticas.
+
+Lectura técnica del escenario 2:
+
+Cuando AS y RS conviven, un error de privilegios en `client_credentials` puede amplificar impacto sobre emisión de tokens, administración de clientes y acceso a APIs sensibles en un solo dominio técnico. Por ello, la matriz da prioridad a controles de separación por propósito, trazabilidad por `client_id` y endurecimiento de credenciales.
+
+### 6.3. Aplicación al escenario 3: API Gateway federado con Authorization Server corporativo
+
+Este escenario se evaluó sobre riesgos de confianza entre fronteras y uso de tokens entre múltiples recursos con audiencias distintas.
+
+Riesgos específicos priorizados:
+
+1. `RE3-001`: confusión de audiencia entre gateway y APIs internas.
+2. `RE3-002`: confianza ciega del backend en el gateway.
+3. `RE3-003`: propagación de token sin downscoping o token exchange.
+
+Controles críticos del escenario:
+
+1. `CE3-001`: validación de audiencia por API destino y revalidación mínima en backend.
+2. `CE3-002`: token exchange o downscoping al cruzar frontera de confianza.
+3. `CE3-003`: política uniforme de validación e introspección/JWKS.
+4. `CE3-004`: trazabilidad correlacionada gateway-AS-RS.
+
+Resultado de aplicación del instrumento en este escenario:
+
+1. La capacidad de detección y trazabilidad fue relativamente alta cuando existe correlación de eventos entre componentes.
+2. La principal brecha se ubicó en propagación de tokens con permisos excesivos hacia backends múltiples, especialmente cuando no se aplica token exchange.
+3. La eficacia frente a riesgos de audiencia depende fuertemente de controles preventivos en Gateway y de revalidación mínima en backend.
+4. El nivel de exposición observado se concentró en rango medio, con picos altos en servicios donde se identificó confianza implícita del backend.
+
+Lectura técnica del escenario 3:
+
+Este escenario confirma que validar token solo en el perímetro no es suficiente para riesgos de autorización fina. La arquitectura requiere consistencia de validación y políticas explícitas de transferencia de confianza entre gateway y APIs internas.
+
+### 6.4. Comparación de riesgos entre escenarios OAuth 2.0/OIDC
+
+La comparación transversal muestra que los tres escenarios comparten riesgos globales (`RG-001` a `RG-005`), pero cada arquitectura introduce un riesgo dominante distinto:
+
+| Escenario | Riesgo dominante | Exposición |
+|---|---|---|
+| SPA + BFF + IdP | Token en User Agent | Medio-Alto |
+| M2M con AS=RS | Cliente técnico privilegiado | Medio-Alto |
+| Gateway federado | Audiencia y propagación | Medio |
+
+Conclusión comparativa:
+
+1. El escenario 1 concentra más riesgo en la frontera navegador-sesión.
+2. El escenario 2 concentra más riesgo en identidad no humana y privilegios administrativos.
+3. El escenario 3 concentra más riesgo en fronteras de confianza y autorización distribuida.
+
+### 6.5. Controles transversales y controles específicos
+
+La aplicación confirma que los controles transversales son necesarios, pero no suficientes.
+
+Controles transversales con mayor impacto recurrente:
+
+1. `CG-001`: validación completa de token.
+2. `CG-002`: scopes mínimos y restricción de audiencia/recurso.
+3. `CG-005`: gestión segura de secretos, claves y JWKS.
+4. `CG-007`: logging, correlación y monitoreo.
+
+Controles específicos decisivos por arquitectura:
+
+1. Escenario 1: `CE1-001`, `CE1-002`, `CE1-003`, `CE1-004`.
+2. Escenario 2: `CE2-001`, `CE2-002`, `CE2-003`, `CE2-004`.
+3. Escenario 3: `CE3-001`, `CE3-002`, `CE3-003`, `CE3-004`.
+
+La principal lección es que la efectividad del sistema cae cuando el control específico de mayor peso por riesgo no está implementado o no tiene evidencia suficiente, incluso si varios controles globales muestran buena calificación.
+
+### 6.6. Evidencias mínimas para auditoría
+
+La aplicación de la matriz permitió estandarizar un mínimo de evidencia verificable por escenario:
+
+1. Evidencia de configuración del Authorization Server: clientes, flujos, scopes, vigencias, políticas de rotación.
+2. Evidencia de validación en Resource Server o Gateway: firma/introspección, `issuer`, `audience`, expiración y autorización por operación.
+3. Evidencia de custodia de tokens y sesión: ausencia de tokens en navegador para escenario SPA+BFF, atributos de cookie y controles anti-CSRF.
+4. Evidencia de gobierno de identidades técnicas: vault, rotación, segregación por ambiente y propósito, recertificación periódica.
+5. Evidencia de trazabilidad extremo a extremo: correlación por `request_id`, `client_id`, `sub`, `aud`, API destino y decisión de autorización.
+
+Criterio de suficiencia utilizado:
+
+- **Suficiente:** evidencia técnica reproducible y trazable al control.
+- **Parcial:** evidencia indirecta o incompleta.
+- **Insuficiente:** declaración sin soporte verificable.
+
+### 6.7. Niveles de exposición observados
+
+La aplicación integral de la matriz permite convertir hallazgos técnicos en lectura ejecutiva de exposición, sin perder trazabilidad técnica.
+
+Regla de interpretación aplicada en este capítulo:
+
+1. Exposición baja: eficacia alta y sin brechas críticas en controles obligatorios.
+2. Exposición media: eficacia intermedia o brechas parciales con controles compensatorios.
+3. Exposición alta: control obligatorio ausente o con evidencia insuficiente en riesgos de alto impacto.
+4. Exposición crítica: control obligatorio ausente y riesgo con impacto crítico o exposición sistémica.
+
+### 6.8. Síntesis del experimento
+
+La aplicación de la matriz muestra que el catálogo maestro permite comparar arquitecturas diferentes sin perder especificidad técnica. Los tres escenarios comparten riesgos globales, pero cada uno exige controles específicos y evidencia distinta. Esto confirma el aporte del modelo: no evaluar OAuth 2.0/OIDC como tecnología aislada, sino como arquitectura de controles, riesgos y evidencias auditables.
 
 ---
 
