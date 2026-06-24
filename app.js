@@ -304,7 +304,7 @@ function buildControlCard(relation) {
       </div>
       <p class="muted" data-kind="controlScore">Score del control: ${formatPercent(0)}</p>
       <p class="muted" data-kind="controlQualitative">Eficiencia: Baja · Eficacia: Baja · Efectividad: Baja</p>
-      <div class="math-block muted" data-kind="controlMath">Seleccione valores para visualizar la ecuación del score.</div>
+      <div class="math-block muted" data-kind="controlMath">Calcule o modifique valores para habilitar el paso a paso.</div>
     </div>
   `;
 }
@@ -474,7 +474,12 @@ w_i &= ${formatMathNumber(weight)} \\\\
 Aporte_i &= w_i \\times S_{control} = ${formatMathNumber(weight)} \\times ${formatMathNumber(evaluation.scoreControl)} = ${formatMathNumber(weightedContribution)}
 \\end{aligned}$$`;
 
-  controlCard.querySelector('[data-kind="controlMath"]').innerHTML = `<strong>Paso a paso del score del control</strong>${latex}`;
+  controlCard.querySelector('[data-kind="controlMath"]').innerHTML = `
+    <details class="step-details">
+      <summary>Paso a paso del score del control</summary>
+      ${latex}
+    </details>
+  `;
   renderMath(controlCard);
 }
 
@@ -891,11 +896,13 @@ function drawMetrics(metrics) {
     : Number.POSITIVE_INFINITY;
 
   metricEquations.innerHTML = `
-    <strong>Ecuaciones globales (paso a paso)</strong>
-    $$\\begin{aligned}
+    <details class="step-details">
+      <summary>Paso a paso global</summary>
+      $$\\begin{aligned}
     E_{global} &= \\frac{1}{${n}}\\sum_{r=1}^{${n}}E_r = \\frac{${formatMathNumber(eficaciaSum)}}{${n}} = ${formatMathNumber(metrics.eficaciaCuantitativa)} \\\\
     \\eta_{global} &= \\frac{1}{${n}}\\sum_{r=1}^{${n}}\\eta_r = \\frac{${formatMathNumber(eficienciaSumFinite)}}{${n}} = ${formatMathNumber(metrics.eficienciaCuantitativa)}
     \\end{aligned}$$
+    </details>
   `;
   renderMath(metricEquations);
 }
@@ -910,7 +917,19 @@ function drawRiskResults(risks) {
   tbody.innerHTML = risks.map((risk) => {
     const totalWeight = risk.controls.reduce((sum, control) => sum + control.pesoMitigacion, 0);
     const weightedScore = risk.controls.reduce((sum, control) => sum + (control.pesoMitigacion * control.scoreControl), 0);
-    const riskEfficacyLatex = `$$E_{${risk.riskId}} = \\frac{\\sum (w_i\\cdot s_i)}{\\sum w_i} = \\frac{${formatMathNumber(weightedScore)}}{${formatMathNumber(totalWeight)}} = ${formatMathNumber(risk.eficaciaFrenteAlRiesgo)}$$`;
+    const numeratorExpanded = risk.controls.length
+      ? risk.controls.map((control) => `(${formatMathNumber(control.pesoMitigacion)}\\cdot${formatMathNumber(control.scoreControl)})`).join(' + ')
+      : '0';
+    const denominatorExpanded = risk.controls.length
+      ? risk.controls.map((control) => `${formatMathNumber(control.pesoMitigacion)}`).join(' + ')
+      : '0';
+
+    const riskEfficacyLatex = `$$\\begin{aligned}
+E_{${risk.riskId}} &= \\frac{\\sum (w_i\\cdot s_i)}{\\sum w_i} \\\\
+&= \\frac{${numeratorExpanded}}{${denominatorExpanded}} \\\\
+&= \\frac{${formatMathNumber(weightedScore)}}{${formatMathNumber(totalWeight)}} \\\\
+&= ${formatMathNumber(risk.eficaciaFrenteAlRiesgo)}
+\\end{aligned}$$`;
     const riskEfficiencyLatex = `$$\\eta_{${risk.riskId}} = \\frac{Beneficio}{Costo} = \\frac{${formatMathNumber(risk.beneficioMitigacionEstimado, 2)}}{${formatMathNumber(risk.costoAsignadoTotal, 2)}} = ${formatMathNumber(risk.eficienciaFrenteAlRiesgo)}$$`;
 
     return `
@@ -925,8 +944,10 @@ function drawRiskResults(risks) {
       </tr>
       <tr class="risk-math-row">
         <td colspan="7">
-          <div class="muted"><strong>Paso a paso del riesgo ${escapeHtml(risk.riskId)}</strong></div>
-          <div class="math-block muted">${riskEfficacyLatex}${riskEfficiencyLatex}</div>
+          <details class="step-details">
+            <summary>Paso a paso del riesgo ${escapeHtml(risk.riskId)}</summary>
+            <div class="math-block muted">${riskEfficacyLatex}${riskEfficiencyLatex}</div>
+          </details>
         </td>
       </tr>
     `;
