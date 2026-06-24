@@ -138,6 +138,18 @@ const demoGatewayGoodBtn = document.getElementById('demoGatewayGoodBtn');
 const demoGatewayBadBtn = document.getElementById('demoGatewayBadBtn');
 const demoClearBtn = document.getElementById('demoClearBtn');
 const demoNotice = document.getElementById('demoNotice');
+const metricEquations = document.getElementById('metricEquations');
+
+function formatMathNumber(value, decimals = 4) {
+  if (!Number.isFinite(value)) return '\\infty';
+  return Number(value).toFixed(decimals);
+}
+
+function renderMath(scopeNode = document) {
+  if (window.MathJax?.typesetPromise) {
+    window.MathJax.typesetPromise([scopeNode]).catch(() => {});
+  }
+}
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -234,12 +246,12 @@ function buildControlCard(relation) {
   const referenceText = getReferenceText(control.referencias);
 
   return `
-    <div class="control-card" data-relation-id="${escapeHtml(relation.id)}" data-control-id="${escapeHtml(control.id)}">
+    <div class="control-card" data-relation-id="${escapeHtml(relation.id)}" data-control-id="${escapeHtml(control.id)}" data-weight="${escapeHtml(String(relation.pesoMitigacion))}">
       <div class="card-header">
         <h4>${escapeHtml(control.id)} - ${escapeHtml(control.nombre)}</h4>
         <span class="badge ${control.tipo === 'GLOBAL' ? 'badge-global' : 'badge-specific'}">${control.tipo === 'GLOBAL' ? 'Global' : 'Específico'}</span>
       </div>
-      <p class="muted">Peso de mitigación: ${formatPercent(relation.pesoMitigacion)} · ${relation.obligatorio ? 'Control obligatorio' : 'Control complementario'}</p>
+      <p class="muted">Peso de mitigación del control ($w_i$): ${formatPercent(relation.pesoMitigacion)} · ${relation.obligatorio ? 'Control obligatorio' : 'Control complementario'}</p>
       <div class="readonly-block">
         <strong>Descripción del control:</strong><br />${escapeHtml(control.descripcion)}
       </div>
@@ -276,6 +288,7 @@ function buildControlCard(relation) {
       </div>
       <p class="muted" data-kind="controlScore">Score del control: ${formatPercent(0)}</p>
       <p class="muted" data-kind="controlQualitative">Eficiencia: Baja · Eficacia: Baja · Efectividad: Baja</p>
+      <div class="math-block muted" data-kind="controlMath">Seleccione valores para visualizar la ecuación del score.</div>
     </div>
   `;
 }
@@ -415,6 +428,8 @@ function getControlEvaluationFromCard(controlCard) {
 
   return {
     scoreControl,
+    baseScoreRaw,
+    evidenceFactorRaw,
     baseScore,
     evidenceFactor,
     dimensions: dimensionValues,
@@ -429,8 +444,22 @@ function getControlEvaluationFromCard(controlCard) {
 
 function updateControlScore(controlCard) {
   const evaluation = getControlEvaluationFromCard(controlCard);
+  const weight = Number(controlCard.dataset.weight || 0);
+  const weightedContribution = weight * evaluation.scoreControl;
   controlCard.querySelector('[data-kind="controlScore"]').textContent = `Score del control: ${formatPercent(evaluation.scoreControl)}`;
   controlCard.querySelector('[data-kind="controlQualitative"]').textContent = `Eficiencia: ${evaluation.efficiencyQl} · Eficacia: ${evaluation.efficacyQl} · Efectividad: ${evaluation.effectivenessQl}`;
+
+  const latex = `$$\\begin{aligned}
+S_{base(raw)} &= 0.35(${formatMathNumber(evaluation.dimensions.madurez, 2)}) + 0.15(${formatMathNumber(evaluation.dimensions.automatizacion, 2)}) + 0.15(${formatMathNumber(evaluation.dimensions.momento, 2)}) + 0.15(${formatMathNumber(evaluation.dimensions.periodicidad, 2)}) + 0.20(${formatMathNumber(evaluation.dimensions.alcance, 2)}) = ${formatMathNumber(evaluation.baseScoreRaw)} \\\\
+S_{base} &= \\operatorname{norm}(S_{base(raw)}) = ${formatMathNumber(evaluation.baseScore)} \\\\
+F_{ev} &= \\operatorname{norm}(${formatMathNumber(evaluation.evidenceFactorRaw)}) = ${formatMathNumber(evaluation.evidenceFactor)} \\\\
+S_{control} &= S_{base} \\times F_{ev} = ${formatMathNumber(evaluation.baseScore)} \\times ${formatMathNumber(evaluation.evidenceFactor)} = ${formatMathNumber(evaluation.scoreControl)} \\\\
+w_i &= ${formatMathNumber(weight)} \\\\
+Aporte_i &= w_i \\times S_{control} = ${formatMathNumber(weight)} \\times ${formatMathNumber(evaluation.scoreControl)} = ${formatMathNumber(weightedContribution)}
+\\end{aligned}$$`;
+
+  controlCard.querySelector('[data-kind="controlMath"]').innerHTML = `<strong>Paso a paso del score del control</strong>${latex}`;
+  renderMath(controlCard);
 }
 
 function refreshDerivedState() {
@@ -680,6 +709,7 @@ function clearEvaluationForm() {
     eficienciaCualitativa: '-',
     eficaciaCualitativa: '-'
   });
+  metricEquations.textContent = 'Calcule resultados para visualizar el paso a paso de las ecuaciones globales.';
 
   showDemoMessage('Formulario limpiado. Puede cargar un demo o diligenciar manualmente.');
 }
@@ -830,6 +860,28 @@ function drawMetrics(metrics) {
   document.getElementById('metricEfficacyQ').textContent = formatPercent(metrics.eficaciaCuantitativa);
   document.getElementById('metricEfficiencyQl').textContent = metrics.eficienciaCualitativa;
   document.getElementById('metricEfficacyQl').textContent = metrics.eficaciaCualitativa;
+
+  const risks = state.lastEvaluation?.risks || [];
+  if (!risks.length) {
+    metricEquations.textContent = 'Calcule resultados para visualizar el paso a paso de las ecuaciones globales.';
+    return;
+  }
+
+  const n = risks.length;
+  const eficaciaSum = risks.reduce((sum, risk) => sum + risk.eficaciaFrenteAlRiesgo, 0);
+  const eficienciaValues = risks.map((risk) => risk.eficienciaFrenteAlRiesgo);
+  const eficienciaSumFinite = eficienciaValues.every(Number.isFinite)
+    ? eficienciaValues.reduce((sum, value) => sum + value, 0)
+    : Number.POSITIVE_INFINITY;
+
+  metricEquations.innerHTML = `
+    <strong>Ecuaciones globales (paso a paso)</strong>
+    $$\\begin{aligned}
+    E_{global} &= \\frac{1}{${n}}\\sum_{r=1}^{${n}}E_r = \\frac{${formatMathNumber(eficaciaSum)}}{${n}} = ${formatMathNumber(metrics.eficaciaCuantitativa)} \\\\
+    \\eta_{global} &= \\frac{1}{${n}}\\sum_{r=1}^{${n}}\\eta_r = \\frac{${formatMathNumber(eficienciaSumFinite)}}{${n}} = ${formatMathNumber(metrics.eficienciaCuantitativa)}
+    \\end{aligned}$$
+  `;
+  renderMath(metricEquations);
 }
 
 function drawRiskResults(risks) {
@@ -839,17 +891,32 @@ function drawRiskResults(risks) {
     return;
   }
 
-  tbody.innerHTML = risks.map((risk) => `
-    <tr>
-      <td>${escapeHtml(risk.riskId)} / ${escapeHtml(risk.riskName)}</td>
-      <td><span class="status-tag level-${levelClass(risk.riskLevel)}">${escapeHtml(risk.riskLevel)}</span></td>
-      <td>${formatPercent(risk.eficaciaFrenteAlRiesgo)}</td>
-      <td>${formatRatio(risk.eficienciaFrenteAlRiesgo)}</td>
-      <td>${formatCurrency(risk.costoAsignadoTotal)}</td>
-      <td>${formatCurrency(risk.beneficioMitigacionEstimado)}</td>
-      <td><span class="status-tag level-${levelClass(risk.nivelExposicionObservado)}">${escapeHtml(risk.nivelExposicionObservado)}</span></td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = risks.map((risk) => {
+    const totalWeight = risk.controls.reduce((sum, control) => sum + control.pesoMitigacion, 0);
+    const weightedScore = risk.controls.reduce((sum, control) => sum + (control.pesoMitigacion * control.scoreControl), 0);
+    const riskEfficacyLatex = `$$E_{${risk.riskId}} = \\frac{\\sum (w_i\\cdot s_i)}{\\sum w_i} = \\frac{${formatMathNumber(weightedScore)}}{${formatMathNumber(totalWeight)}} = ${formatMathNumber(risk.eficaciaFrenteAlRiesgo)}$$`;
+    const riskEfficiencyLatex = `$$\\eta_{${risk.riskId}} = \\frac{Beneficio}{Costo} = \\frac{${formatMathNumber(risk.beneficioMitigacionEstimado, 2)}}{${formatMathNumber(risk.costoAsignadoTotal, 2)}} = ${formatMathNumber(risk.eficienciaFrenteAlRiesgo)}$$`;
+
+    return `
+      <tr>
+        <td>${escapeHtml(risk.riskId)} / ${escapeHtml(risk.riskName)}</td>
+        <td><span class="status-tag level-${levelClass(risk.riskLevel)}">${escapeHtml(risk.riskLevel)}</span></td>
+        <td>${formatPercent(risk.eficaciaFrenteAlRiesgo)}</td>
+        <td>${formatRatio(risk.eficienciaFrenteAlRiesgo)}</td>
+        <td>${formatCurrency(risk.costoAsignadoTotal)}</td>
+        <td>${formatCurrency(risk.beneficioMitigacionEstimado)}</td>
+        <td><span class="status-tag level-${levelClass(risk.nivelExposicionObservado)}">${escapeHtml(risk.nivelExposicionObservado)}</span></td>
+      </tr>
+      <tr class="risk-math-row">
+        <td colspan="7">
+          <div class="muted"><strong>Paso a paso del riesgo ${escapeHtml(risk.riskId)}</strong></div>
+          <div class="math-block muted">${riskEfficacyLatex}${riskEfficiencyLatex}</div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  renderMath(tbody);
 }
 
 function xmlEscape(value) {

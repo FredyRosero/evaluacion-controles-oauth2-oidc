@@ -99,6 +99,37 @@
       font-size: 14px;
       display: none;
     }
+    .math-block {
+      margin-top: 8px;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #f8fafc;
+      overflow-x: auto;
+    }
+    .equation-summary {
+      margin-top: 12px;
+      padding: 12px;
+      border-left: 4px solid #60a5fa;
+      border-radius: 8px;
+      background: #eff6ff;
+    }
+    .equation-guide {
+      margin-top: 12px;
+      padding: 14px;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      background: #f8fbff;
+    }
+    .equation-guide p {
+      margin: 8px 0;
+    }
+    .equation-guide strong {
+      color: #1e3a8a;
+    }
+    .risk-math-row td {
+      background: #f8fafc;
+    }
     .demo-updated {
       background: #fff7cc !important;
       border-color: #f59e0b !important;
@@ -189,6 +220,48 @@
   </section>
 
   <section>
+    <h2>Cómo se calculan los resultados</h2>
+    <div class="equation-guide">
+      <p class="muted">Antes del detalle dinámico por control y por riesgo, esta es la fórmula general utilizada por la herramienta.</p>
+
+      <div class="math-block">
+        $$
+        E_r = \frac{\sum (w_i \cdot s_i)}{\sum w_i}
+        $$
+      </div>
+
+      <p><strong>Interpretación general:</strong> la eficacia cuantitativa de un riesgo se calcula como un promedio ponderado de los scores de sus controles asociados.</p>
+      <p><strong>Donde:</strong> $E_r$ es la eficacia frente al riesgo $r$.</p>
+      <p><strong>$w_i$:</strong> peso de mitigación del control $i$ respecto de ese riesgo.</p>
+      <p><strong>$s_i$:</strong> score cuantitativo del control $i$, obtenido a partir de su madurez, automatización, momento, periodicidad, alcance funcional y factor de evidencia.</p>
+      <p><strong>$\sum (w_i \cdot s_i)$:</strong> suma del aporte ponderado de todos los controles que mitigan el riesgo.</p>
+      <p><strong>$\sum w_i$:</strong> suma de los pesos de mitigación considerados para ese riesgo.</p>
+
+      <div class="math-block">
+        $$
+        \eta_r = \frac{Beneficio_r}{Costo_r}
+        $$
+      </div>
+
+      <p><strong>$\eta_r$:</strong> eficiencia cuantitativa frente al riesgo.</p>
+      <p><strong>$Beneficio_r$:</strong> beneficio de mitigación estimado, calculado como el impacto económico del riesgo multiplicado por su eficacia.</p>
+      <p><strong>$Costo_r$:</strong> costo total asignado a los controles que mitigan ese riesgo.</p>
+
+      <div class="math-block">
+        $$
+        S_{control} = S_{base} \times F_{ev}
+        $$
+      </div>
+
+      <p><strong>$S_{control}$:</strong> score final del control.</p>
+      <p><strong>$S_{base}$:</strong> score base del control, derivado de las dimensiones de diseño e implementación.</p>
+      <p><strong>$F_{ev}$:</strong> factor de evidencia, que ajusta el score base según la suficiencia de evidencia encontrada.</p>
+
+      <p class="muted">Más abajo, la aplicación renderiza el paso a paso con sustitución numérica real para cada control, cada riesgo y los resultados globales.</p>
+    </div>
+  </section>
+
+  <section>
     <h2>Resultados globales</h2>
     <table>
       <tbody>
@@ -198,6 +271,7 @@
         <tr><th>Eficacia cualitativa global</th><td id="metricEfficacyQl">-</td></tr>
       </tbody>
     </table>
+    <div id="metricEquations" class="equation-summary muted">Calcule resultados para visualizar el paso a paso de las ecuaciones globales.</div>
   </section>
 
   <section>
@@ -225,6 +299,17 @@
     <button id="exportBtn" type="button">Exportar informe Excel</button>
   </div>
 
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
