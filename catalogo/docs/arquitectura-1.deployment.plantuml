@@ -1,5 +1,5 @@
-锘緻startuml escenario_1_deployment
-title Escenario 1 - SPA est谩tica + BFF + IdP corporativo (OAuth 2.0/OIDC)
+@startuml arquitectura_1_deployment
+title Arquitectura 1 - SPA est醫ica + BFF + IdP corporativo (OAuth 2.0/OIDC)
 
 skinparam shadowing false
 skinparam componentStyle rectangle
@@ -7,17 +7,17 @@ skinparam componentStyle rectangle
 actor "Usuario" as User
 
 node "Navegador" as Browser {
-  component "SPA est谩tica" as SPA
+  component "SPA est醫ica" as SPA
   artifact "Cookie SESSION_ID" as Cookie
 }
 
-cloud "CDN / Hosting est谩tico" as CDN {
+cloud "CDN / Hosting est醫ico" as CDN {
   artifact "index.html / JS / CSS" as StaticFiles
 }
 
-node "Zona aplicaci贸n" as AppZone {
+node "Zona aplicaci髇" as AppZone {
   component "BFF\nCliente OAuth2/OIDC" as BFF
-  database "Store de sesi贸n y tokens" as SessionStore
+  database "Store de sesi髇 y tokens" as SessionStore
 }
 
 node "Plataforma IAM corporativa" as IAM {
@@ -36,7 +36,7 @@ node "Observabilidad" as OBS {
 
 User --> Browser
 Browser --> CDN : GET SPA
-CDN --> Browser : Archivos est谩ticos
+CDN --> Browser : Archivos est醫icos
 
 Browser --> BFF : HTTPS + SESSION_ID
 BFF --> AS : Auth Code + PKCE\nstate + nonce
@@ -46,9 +46,9 @@ BFF --> SessionStore : custodiar tokens server-side
 BFF --> API : Authorization: Bearer access_token
 API --> JWKS : validar firma / claves
 
-AS --> SIEM : log autenticaci贸n y emisi贸n
-BFF --> SIEM : log sesi贸n y consumo API
-API --> SIEM : log autorizaci贸n backend
+AS --> SIEM : log autenticaci髇 y emisi髇
+BFF --> SIEM : log sesi髇 y consumo API
+API --> SIEM : log autorizaci髇 backend
 
 note right of SPA
 La SPA no guarda tokens.
@@ -62,7 +62,7 @@ end note
 
 note right of API
 Validar issuer, audience,
-expiraci贸n y scopes.
+expiraci髇 y scopes.
 end note
 
 @enduml

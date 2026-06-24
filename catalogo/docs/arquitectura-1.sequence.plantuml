@@ -1,5 +1,5 @@
-﻿@startuml
-title Escenario 1 - Authorization Code + PKCE con BFF
+@startuml
+title Arquitectura 1 - Authorization Code + PKCE con BFF
 
 actor Usuario
 participant "SPA" as SPA

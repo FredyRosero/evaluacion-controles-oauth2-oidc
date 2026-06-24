@@ -1,5 +1,5 @@
-﻿@startuml
-title Escenario 3 - Gateway, validacion y token exchange
+@startuml
+title Arquitectura 3 - Gateway, validacion y token exchange
 
 participant "Cliente / Canal / BFF" as Client
 participant "API Gateway" as GW

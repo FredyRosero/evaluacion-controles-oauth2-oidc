@@ -1,5 +1,5 @@
-﻿@startuml escenario_3_deployment
-title Escenario 3 - API Gateway federado + Authorization Server corporativo
+@startuml arquitectura_3_deployment
+title Arquitectura 3 - API Gateway federado + Authorization Server corporativo
 
 skinparam shadowing false
 skinparam componentStyle rectangle

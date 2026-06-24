@@ -298,9 +298,9 @@ async function loadDiagramInto(targetNode, filePath, label) {
 }
 
 async function loadSequenceDiagramWithFallback(targetNode, diagramIndex) {
-  const preferredPath = `${DIAGRAM_DOCS_BASE}/escenario-${diagramIndex}.sequence.plantuml`;
-  const legacyPath = `${DIAGRAM_DOCS_BASE}/escenario-${diagramIndex}.secuence.plantuml`;
-  const label = `Diagrama de secuencia escenario ${diagramIndex}`;
+  const preferredPath = `${DIAGRAM_DOCS_BASE}/arquitectura-${diagramIndex}.sequence.plantuml`;
+  const legacyPath = `${DIAGRAM_DOCS_BASE}/arquitectura-${diagramIndex}.secuence.plantuml`;
+  const label = `Diagrama de secuencia arquitectura ${diagramIndex}`;
 
   try {
     await loadDiagramInto(targetNode, preferredPath, label);
@@ -324,20 +324,20 @@ async function renderScenarioDiagrams() {
     return;
   }
 
-  const deploymentPath = `${DIAGRAM_DOCS_BASE}/escenario-${diagramIndex}.deployment.plantuml`;
+  const deploymentPath = `${DIAGRAM_DOCS_BASE}/arquitectura-${diagramIndex}.deployment.plantuml`;
 
-  diagramStatus.textContent = `Cargando diagramas del escenario ${diagramIndex}...`;
+  diagramStatus.textContent = `Cargando diagramas de la arquitectura ${diagramIndex}...`;
   setDiagramPlaceholder(deploymentDiagram, 'Cargando diagrama de despliegue...');
   setDiagramPlaceholder(sequenceDiagram, 'Cargando diagrama de secuencia...');
 
   const results = await Promise.allSettled([
-    loadDiagramInto(deploymentDiagram, deploymentPath, `Diagrama de despliegue escenario ${diagramIndex}`),
+    loadDiagramInto(deploymentDiagram, deploymentPath, `Diagrama de despliegue arquitectura ${diagramIndex}`),
     loadSequenceDiagramWithFallback(sequenceDiagram, diagramIndex)
   ]);
 
   const hasErrors = results.some((result) => result.status === 'rejected');
   if (!hasErrors) {
-    diagramStatus.textContent = `Diagramas del escenario ${diagramIndex} cargados correctamente.`;
+    diagramStatus.textContent = `Diagramas de la arquitectura ${diagramIndex} cargados correctamente.`;
     return;
   }
 
@@ -351,7 +351,7 @@ async function renderScenarioDiagrams() {
     setDiagramPlaceholder(sequenceDiagram, `No se pudo renderizar el diagrama de secuencia. ${sequenceError}`);
   }
 
-  diagramStatus.textContent = `Se cargó parcialmente el escenario ${diagramIndex}. Revise los mensajes en cada panel.`;
+  diagramStatus.textContent = `Se cargó parcialmente la arquitectura ${diagramIndex}. Revise los mensajes en cada panel.`;
 }
 
 function buildControlCard(relation) {

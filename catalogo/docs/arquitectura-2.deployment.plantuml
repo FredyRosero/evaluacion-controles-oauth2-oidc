@@ -1,5 +1,5 @@
-﻿@startuml escenario_2_deployment
-title Escenario 2 - M2M con Authorization Server como Resource Server
+@startuml arquitectura_2_deployment
+title Arquitectura 2 - M2M con Authorization Server como Resource Server
 
 skinparam shadowing false
 skinparam componentStyle rectangle
