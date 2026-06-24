@@ -1,4 +1,4 @@
-@startuml
+@startuml arquitectura-2.sequence
 title Arquitectura 2 - Client Credentials contra API del propio AS
 
 participant "Servicio tecnico" as Client

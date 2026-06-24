@@ -1,4 +1,4 @@
-@startuml
+@startuml arquitectura-3.sequence
 title Arquitectura 3 - Gateway, validacion y token exchange
 
 participant "Cliente / Canal / BFF" as Client
