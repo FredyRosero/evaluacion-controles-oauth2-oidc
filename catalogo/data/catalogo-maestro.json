@@ -1,7 +1,7 @@
 {
   "catalogoEvaluacion": {
     "id": "CAT-OAUTH2-OIDC-2026-01",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "idioma": "es",
     "fechaBase": "2026-06-04",
     "alcance": "Catálogo maestro de riesgos y controles para SPA_BFF_IDP, M2M_AS_RS y API_GATEWAY_FEDERADO",
@@ -1381,39 +1381,35 @@
   ],
   "mapeoScoreInicial": {
     "madurez": {
-      "declarado": 0.25,
-      "diseniado": 0.5,
-      "implementado": 0.75,
-      "auditado": 1.0
+      "diseniada": 0,
+      "declarada": 25,
+      "implementada": 75,
+      "auditada": 100
     },
     "automatizacion": {
-      "manual": 0.4,
-      "semiautomatico": 0.7,
-      "automatico": 1.0
+      "manual": 0,
+      "semiautomatico": 50,
+      "automatico": 100
     },
     "momento": {
-      "correctivo": 0.4,
-      "detectivo": 0.7,
-      "preventivo": 1.0
+      "correctivo": 0,
+      "detectivo": 50,
+      "preventivo": 100
     },
     "periodicidad": {
-      "ocasional": 0.4,
-      "periodico": 0.7,
-      "permanente": 1.0
+      "ocasional": 25,
+      "periodico": 75,
+      "permanente": 100
     },
     "alcance": {
-      "especifico": 0.7,
-      "general": 1.0
+      "especifico": 25,
+      "general": 100
     },
-    "factorEvidencia": {
-      "sinEvidencia": 0.0,
-      "parcial": 0.5,
-      "suficiente": 0.8,
-      "independienteOAditada": 1.0
-    },
-    "formulaScoreControl": "(0.35*madurez + 0.15*automatizacion + 0.15*momento + 0.15*periodicidad + 0.20*alcance) * factorEvidencia",
-    "formulaEficaciaFrenteAlRiesgo": "sum(pesoMitigacion * scoreControl) / sum(pesoMitigacion)",
-    "formulaCostoAsignado": "costoMedio(control) * pesoMitigacion(r,c) / sum(pesoMitigacion(x,c) para riesgos activos x del escenario)"
+    "formulaScoreControl": "0.40*madurez + 0.20*automatizacion + 0.10*momento + 0.20*periodicidad + 0.10*alcance",
+    "formulaScoreControlNormalizado": "scoreControl / 100",
+    "formulaEficaciaFrenteAlRiesgo": "sum(pesoMitigacion * scoreControlNormalizado) / sum(pesoMitigacion)",
+    "formulaCostoAsignado": "costoMedio(control) * pesoMitigacion(r,c) / sum(pesoMitigacion(x,c) para riesgos activos x del escenario)",
+    "notaMoneda": "costos e impactos deben estar expresados en una misma moneda antes de calcular eficiencia"
   },
   "filtros": {
     "SPA_BFF_IDP": {
