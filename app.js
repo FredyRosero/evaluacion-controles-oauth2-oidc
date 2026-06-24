@@ -16,30 +16,30 @@ const IMPACT_OPTIONS = [
   { value: 'bajo', label: 'Bajo' },
   { value: 'medio', label: 'Medio' },
   { value: 'alto', label: 'Alto' },
-  { value: 'critico', label: 'CrÃ­tico' }
+  { value: 'critico', label: 'Crítico' }
 ];
 const ENVIRONMENT_OPTIONS = [
-  { value: 'ProducciÃ³n', label: 'ProducciÃ³n' },
-  { value: 'PreproducciÃ³n', label: 'PreproducciÃ³n' },
+  { value: 'Producción', label: 'Producción' },
+  { value: 'Preproducción', label: 'Preproducción' },
   { value: 'Desarrollo', label: 'Desarrollo' },
   { value: 'Otro', label: 'Otro' }
 ];
 
-const DEMO_SOURCE_MESSAGE = 'Datos de demostraciÃ³n basados en el CapÃ­tulo 6 de la tesis (VersiÃ³n 15), secciones 6.1-6.3 y catÃ¡logo maestro v1.1.0.';
+const DEMO_SOURCE_MESSAGE = 'Datos de demostración basados en el Capítulo 6 de la tesis (Versión 15), secciones 6.1-6.3 y catálogo maestro v1.1.0.';
 
 const DEMO_PAYLOADS_URL = 'catalogo/data/demo-prediligenciamiento.json';
 const DEMO_PAYLOADS = {};
 
 const RISK_LEVEL_MATRIX = {
   baja: { bajo: 'Bajo', medio: 'Bajo', alto: 'Medio', critico: 'Alto' },
-  media: { bajo: 'Bajo', medio: 'Medio', alto: 'Alto', critico: 'CrÃ­tico' },
-  alta: { bajo: 'Medio', medio: 'Alto', alto: 'CrÃ­tico', critico: 'CrÃ­tico' }
+  media: { bajo: 'Bajo', medio: 'Medio', alto: 'Alto', critico: 'Crítico' },
+  alta: { bajo: 'Medio', medio: 'Alto', alto: 'Crítico', critico: 'Crítico' }
 };
 const EXPOSURE_THRESHOLDS = [
   { min: 0.75, label: 'Bajo' },
   { min: 0.5, label: 'Medio' },
   { min: 0.25, label: 'Alto' },
-  { min: 0, label: 'CrÃ­tico' }
+  { min: 0, label: 'Crítico' }
 ];
 const QUALITATIVE_THRESHOLDS = [
   { min: 0.75, label: 'Alta' },
@@ -58,7 +58,7 @@ const CONTROL_DIMENSIONS = [
     label: 'Madurez',
     options: [
       { value: 'declarado', label: 'Declarado' },
-      { value: 'diseniado', label: 'DiseÃ±ado' },
+      { value: 'diseniado', label: 'Diseñado' },
       { value: 'implementado', label: 'Implementado' },
       { value: 'auditado', label: 'Auditado' }
     ]
@@ -66,11 +66,11 @@ const CONTROL_DIMENSIONS = [
   {
     key: 'automatizacion',
     field: 'automation',
-    label: 'AutomatizaciÃ³n',
+    label: 'Automatización',
     options: [
       { value: 'manual', label: 'Manual' },
-      { value: 'semiautomatico', label: 'SemiautomÃ¡tico' },
-      { value: 'automatico', label: 'AutomÃ¡tico' }
+      { value: 'semiautomatico', label: 'Semiautomático' },
+      { value: 'automatico', label: 'Automático' }
     ]
   },
   {
@@ -89,7 +89,7 @@ const CONTROL_DIMENSIONS = [
     label: 'Periodicidad',
     options: [
       { value: 'ocasional', label: 'Ocasional' },
-      { value: 'periodico', label: 'PeriÃ³dico' },
+      { value: 'periodico', label: 'Periódico' },
       { value: 'permanente', label: 'Permanente' }
     ]
   },
@@ -98,7 +98,7 @@ const CONTROL_DIMENSIONS = [
     field: 'scope',
     label: 'Alcance funcional',
     options: [
-      { value: 'especifico', label: 'EspecÃ­fico' },
+      { value: 'especifico', label: 'Específico' },
       { value: 'general', label: 'General' }
     ]
   }
@@ -170,7 +170,7 @@ function formatPercent(value) {
 }
 
 function formatRatio(value) {
-  return Number.isFinite(value) ? value.toFixed(2) : 'âˆž';
+  return Number.isFinite(value) ? value.toFixed(2) : '∞';
 }
 
 function formatCurrency(value) {
@@ -196,7 +196,7 @@ function getRiskLevel(probability, impact) {
 }
 
 function getExposureLevel(efficacy) {
-  return EXPOSURE_THRESHOLDS.find((threshold) => efficacy >= threshold.min)?.label || 'CrÃ­tico';
+  return EXPOSURE_THRESHOLDS.find((threshold) => efficacy >= threshold.min)?.label || 'Crítico';
 }
 
 function getReferenceText(referenceIds) {
@@ -236,11 +236,11 @@ function buildControlCard(relation) {
     <div class="control-card" data-relation-id="${escapeHtml(relation.id)}" data-control-id="${escapeHtml(control.id)}">
       <div class="card-header">
         <h4>${escapeHtml(control.id)} - ${escapeHtml(control.nombre)}</h4>
-        <span class="badge ${control.tipo === 'GLOBAL' ? 'badge-global' : 'badge-specific'}">${control.tipo === 'GLOBAL' ? 'Global' : 'EspecÃ­fico'}</span>
+        <span class="badge ${control.tipo === 'GLOBAL' ? 'badge-global' : 'badge-specific'}">${control.tipo === 'GLOBAL' ? 'Global' : 'Específico'}</span>
       </div>
-      <p class="muted">Peso de mitigaciÃ³n: ${formatPercent(relation.pesoMitigacion)} Â· ${relation.obligatorio ? 'Control obligatorio' : 'Control complementario'}</p>
+      <p class="muted">Peso de mitigación: ${formatPercent(relation.pesoMitigacion)} · ${relation.obligatorio ? 'Control obligatorio' : 'Control complementario'}</p>
       <div class="readonly-block">
-        <strong>DescripciÃ³n del control:</strong><br />${escapeHtml(control.descripcion)}
+        <strong>Descripción del control:</strong><br />${escapeHtml(control.descripcion)}
       </div>
       <div class="readonly-block compact">
         <strong>Referencia normativa:</strong><br />${escapeHtml(referenceText)}
@@ -274,7 +274,7 @@ function buildControlCard(relation) {
         </label>
       </div>
       <p class="muted" data-kind="controlScore">Score del control: ${formatPercent(0)}</p>
-      <p class="muted" data-kind="controlQualitative">Eficiencia: Baja Â· Eficacia: Baja Â· Efectividad: Baja</p>
+      <p class="muted" data-kind="controlQualitative">Eficiencia: Baja · Eficacia: Baja · Efectividad: Baja</p>
     </div>
   `;
 }
@@ -287,10 +287,10 @@ function buildRiskCard(risk) {
     <article class="risk-card" data-risk-id="${escapeHtml(risk.id)}">
       <div class="card-header">
         <h3>${escapeHtml(risk.id)} - ${escapeHtml(risk.nombre)}</h3>
-        <span class="badge ${risk.tipo === 'GLOBAL' ? 'badge-global' : 'badge-specific'}">${risk.tipo === 'GLOBAL' ? 'Global' : 'EspecÃ­fico'}</span>
+        <span class="badge ${risk.tipo === 'GLOBAL' ? 'badge-global' : 'badge-specific'}">${risk.tipo === 'GLOBAL' ? 'Global' : 'Específico'}</span>
       </div>
       <div class="readonly-block">
-        <strong>DescripciÃ³n del riesgo:</strong><br />${escapeHtml(risk.descripcion)}
+        <strong>Descripción del riesgo:</strong><br />${escapeHtml(risk.descripcion)}
       </div>
       <div class="inline">
         <label>
@@ -299,10 +299,10 @@ function buildRiskCard(risk) {
         </label>
         <label>
           Amenaza / causa
-          <input type="text" name="threat" placeholder="CondiciÃ³n que puede materializar el riesgo" />
+          <input type="text" name="threat" placeholder="Condición que puede materializar el riesgo" />
         </label>
         <label>
-          Vulnerabilidad / condiciÃ³n habilitante
+          Vulnerabilidad / condición habilitante
           <input type="text" name="vulnerability" placeholder="Debilidad observada" />
         </label>
         <label>
@@ -327,8 +327,8 @@ function buildRiskCard(risk) {
         </label>
       </div>
       <label>
-        Hallazgo / brecha / observaciÃ³n
-        <textarea name="finding" placeholder="ConclusiÃ³n evaluativa del riesgo"></textarea>
+        Hallazgo / brecha / observación
+        <textarea name="finding" placeholder="Conclusión evaluativa del riesgo"></textarea>
       </label>
       <div class="controls-group">
         ${relations.map((relation) => buildControlCard(relation)).join('')}
@@ -340,7 +340,7 @@ function buildRiskCard(risk) {
 function updateScenarioSummary() {
   const filter = getActiveFilter();
   if (!filter) {
-    scenarioSummary.textContent = 'Seleccione una arquitectura para cargar el catÃ¡logo.';
+    scenarioSummary.textContent = 'Seleccione una arquitectura para cargar el catálogo.';
     return;
   }
 
@@ -348,7 +348,7 @@ function updateScenarioSummary() {
   scenarioSummary.innerHTML = `
     <strong>Escenario activo:</strong> ${escapeHtml(scenario.nombre)}<br />
     ${escapeHtml(scenario.descripcion)}<br />
-    <span class="muted">Riesgos activos: ${filter.riesgosCatalogoIds.length} Â· Controles activos: ${filter.controlesEsperadosIds.length} Â· Relaciones: ${filter.riesgoControlIds.length}</span>
+    <span class="muted">Riesgos activos: ${filter.riesgosCatalogoIds.length} · Controles activos: ${filter.controlesEsperadosIds.length} · Relaciones: ${filter.riesgoControlIds.length}</span>
   `;
 }
 
@@ -429,7 +429,7 @@ function getControlEvaluationFromCard(controlCard) {
 function updateControlScore(controlCard) {
   const evaluation = getControlEvaluationFromCard(controlCard);
   controlCard.querySelector('[data-kind="controlScore"]').textContent = `Score del control: ${formatPercent(evaluation.scoreControl)}`;
-  controlCard.querySelector('[data-kind="controlQualitative"]').textContent = `Eficiencia: ${evaluation.efficiencyQl} Â· Eficacia: ${evaluation.efficacyQl} Â· Efectividad: ${evaluation.effectivenessQl}`;
+  controlCard.querySelector('[data-kind="controlQualitative"]').textContent = `Eficiencia: ${evaluation.efficiencyQl} · Eficacia: ${evaluation.efficacyQl} · Efectividad: ${evaluation.effectivenessQl}`;
 }
 
 function refreshDerivedState() {
@@ -499,8 +499,8 @@ function buildDefaultControlDemoValues(controlId) {
     periodicity: 'periodico',
     scope: 'general',
     evidenceFactor: 'parcial',
-    evidenceFound: `Evidencia demostrativa para ${controlId}: implementaciÃ³n parcial verificada por revisiÃ³n tÃ©cnica.`,
-    evidenceSource: `Fuentes demo: bitÃ¡coras tÃ©cnicas y revisiÃ³n de configuraciÃ³n de ${controlId}`
+    evidenceFound: `Evidencia demostrativa para ${controlId}: implementación parcial verificada por revisión técnica.`,
+    evidenceSource: `Fuentes demo: bitácoras técnicas y revisión de configuración de ${controlId}`
   };
 }
 
@@ -843,15 +843,15 @@ function rowsToWorksheetXml(rows) {
 
 function exportToExcel(data) {
   const summaryRows = [
-    ['OrganizaciÃ³n', data.context.organization],
+    ['Organización', data.context.organization],
     ['Evaluador', data.context.evaluator],
     ['Ambiente', data.context.environment],
     ['Sistema evaluado', data.context.systemName],
     ['Arquitectura', data.context.architecture],
     ['Notas de alcance', data.context.scopeNotes],
     ['Fecha', data.context.date],
-    ['CatÃ¡logo', data.context.catalogId],
-    ['VersiÃ³n del catÃ¡logo', data.context.catalogVersion],
+    ['Catálogo', data.context.catalogId],
+    ['Versión del catálogo', data.context.catalogVersion],
     ['Eficiencia cuantitativa global (ratio)', formatRatio(data.metrics.eficienciaCuantitativa)],
     ['Eficacia cuantitativa global', formatPercent(data.metrics.eficaciaCuantitativa)],
     ['Eficiencia cualitativa global', data.metrics.eficienciaCualitativa],
@@ -868,7 +868,7 @@ function exportToExcel(data) {
     'Impacto',
     'Nivel de riesgo identificado',
     'Lucro cesante',
-    'Hallazgo / brecha / observaciÃ³n'
+    'Hallazgo / brecha / observación'
   ]];
 
   data.risks.forEach((risk) => {
@@ -893,7 +893,7 @@ function exportToExcel(data) {
     'Costo ingresado',
     'Costo asignado',
     'Madurez',
-    'AutomatizaciÃ³n',
+    'Automatización',
     'Momento',
     'Periodicidad',
     'Alcance funcional',
@@ -939,8 +939,8 @@ function exportToExcel(data) {
     'Eficacia frente al riesgo',
     'Eficiencia frente al riesgo',
     'Costo asignado total',
-    'Beneficio de mitigaciÃ³n estimado',
-    'Nivel de exposiciÃ³n observado'
+    'Beneficio de mitigación estimado',
+    'Nivel de exposición observado'
   ]];
 
   data.risks.forEach((risk) => {
@@ -1026,12 +1026,12 @@ async function initializeApp() {
     state.catalog.escenarios.forEach((scenario) => createOption(architectureSelect, scenario.id, scenario.nombre));
     renderRisks();
     demoNotice.style.display = 'none';
-    loadStatus.textContent = `CatÃ¡logo ${state.catalog.catalogoEvaluacion.id} v${state.catalog.catalogoEvaluacion.version} cargado.`;
+    loadStatus.textContent = `Catálogo ${state.catalog.catalogoEvaluacion.id} v${state.catalog.catalogoEvaluacion.version} cargado.`;
     setButtonsEnabled(true);
   } catch (error) {
     console.error(error);
-    loadStatus.textContent = `Error cargando catÃ¡logo: ${error.message}`;
-    scenarioSummary.textContent = 'No se pudo inicializar la evaluaciÃ³n.';
+    loadStatus.textContent = `Error cargando catálogo: ${error.message}`;
+    scenarioSummary.textContent = 'No se pudo inicializar la evaluación.';
   }
 }
 
@@ -1099,4 +1099,5 @@ demoGatewayGoodBtn.addEventListener('click', () => loadDemoData('API_GATEWAY_FED
 demoGatewayBadBtn.addEventListener('click', () => loadDemoData('API_GATEWAY_FEDERADO_MALO'));
 
 initializeApp();
+
 
