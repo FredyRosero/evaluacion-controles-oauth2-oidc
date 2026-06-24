@@ -136,6 +136,7 @@ const demoM2mGoodBtn = document.getElementById('demoM2mGoodBtn');
 const demoM2mBadBtn = document.getElementById('demoM2mBadBtn');
 const demoGatewayGoodBtn = document.getElementById('demoGatewayGoodBtn');
 const demoGatewayBadBtn = document.getElementById('demoGatewayBadBtn');
+const demoClearBtn = document.getElementById('demoClearBtn');
 const demoNotice = document.getElementById('demoNotice');
 
 function escapeHtml(value) {
@@ -659,6 +660,30 @@ function loadDemoData(demoKey) {
   requestAnimationFrame(applyWithRetry);
 }
 
+function clearEvaluationForm() {
+  clearDemoUpdatedMarks();
+
+  setFieldValue(document, '#organization', '');
+  setFieldValue(document, '#evaluator', '');
+  setFieldValue(document, '#systemName', '');
+  setFieldValue(document, '#scopeNotes', '');
+  if (environmentSelect.options.length > 0) {
+    environmentSelect.selectedIndex = 0;
+  }
+
+  renderRisks();
+  state.lastEvaluation = null;
+  drawRiskResults([]);
+  drawMetrics({
+    eficienciaCuantitativa: 0,
+    eficaciaCuantitativa: 0,
+    eficienciaCualitativa: '-',
+    eficaciaCualitativa: '-'
+  });
+
+  showDemoMessage('Formulario limpiado. Puede cargar un demo o diligenciar manualmente.');
+}
+
 function syncControlField(sourceElement) {
   const controlCard = sourceElement.closest('.control-card');
   if (!controlCard) return;
@@ -990,6 +1015,7 @@ function setButtonsEnabled(enabled) {
   demoM2mBadBtn.disabled = !enabled;
   demoGatewayGoodBtn.disabled = !enabled;
   demoGatewayBadBtn.disabled = !enabled;
+  demoClearBtn.disabled = !enabled;
 }
 
 async function initializeApp() {
@@ -1097,6 +1123,7 @@ demoM2mGoodBtn.addEventListener('click', () => loadDemoData('M2M_AS_RS_BUENO'));
 demoM2mBadBtn.addEventListener('click', () => loadDemoData('M2M_AS_RS_MALO'));
 demoGatewayGoodBtn.addEventListener('click', () => loadDemoData('API_GATEWAY_FEDERADO_BUENO'));
 demoGatewayBadBtn.addEventListener('click', () => loadDemoData('API_GATEWAY_FEDERADO_MALO'));
+demoClearBtn.addEventListener('click', clearEvaluationForm);
 
 initializeApp();
 
