@@ -132,6 +132,7 @@ const scenarioSummary = document.getElementById('scenarioSummary');
 const loadStatus = document.getElementById('loadStatus');
 const calculateBtn = document.getElementById('calculateBtn');
 const exportBtn = document.getElementById('exportBtn');
+const exportJsonBtn = document.getElementById('exportJsonBtn');
 const demoSpaGoodBtn = document.getElementById('demoSpaGoodBtn');
 const demoSpaBadBtn = document.getElementById('demoSpaBadBtn');
 const demoM2mGoodBtn = document.getElementById('demoM2mGoodBtn');
@@ -1217,9 +1218,25 @@ function exportToExcel(data) {
   URL.revokeObjectURL(url);
 }
 
+function exportToJson(data) {
+  const safeOrganization = (data.context.organization || 'organizacion').replace(/[^a-zA-Z0-9_-]/g, '_');
+  const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:]/g, '').replace('T', '-');
+  const jsonText = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonText], { type: 'application/json;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `informe-evaluacion-oauth2-oidc-${safeOrganization}-${timestamp}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 function setButtonsEnabled(enabled) {
   calculateBtn.disabled = !enabled;
   exportBtn.disabled = !enabled;
+  exportJsonBtn.disabled = !enabled;
   demoSpaGoodBtn.disabled = !enabled;
   demoSpaBadBtn.disabled = !enabled;
   demoM2mGoodBtn.disabled = !enabled;
@@ -1326,6 +1343,14 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   drawMetrics(evaluation.metrics);
   drawRiskResults(evaluation.risks);
   exportToExcel(evaluation);
+});
+
+document.getElementById('exportJsonBtn').addEventListener('click', () => {
+  const evaluation = collectEvaluation();
+  state.lastEvaluation = evaluation;
+  drawMetrics(evaluation.metrics);
+  drawRiskResults(evaluation.risks);
+  exportToJson(evaluation);
 });
 
 demoSpaGoodBtn.addEventListener('click', () => loadDemoData('SPA_BFF_IDP_BUENO'));
