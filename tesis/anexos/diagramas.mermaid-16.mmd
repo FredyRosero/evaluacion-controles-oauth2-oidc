@@ -1,0 +1,10 @@
+sequenceDiagram
+    participant C as Cliente
+    participant AS as Authorization Server
+    participant RS as Resource Server
+
+    C->>AS: solicitud de autorizacion
+    AS-->>C: authorization_code
+    C->>AS: authorization_code + credenciales del cliente
+    AS-->>C: access_token
+    C->>RS: access_token

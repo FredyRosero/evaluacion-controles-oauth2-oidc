@@ -1,0 +1,10 @@
+graph TD
+    A[Evaluador selecciona arquitectura] --> B[Aplicación carga filtro JSON del escenario]
+    B --> C[Se activan riesgos globales y específicos]
+    C --> D[Se activan controles globales y específicos]
+    D --> E[Se cruzan relaciones riesgo-control]
+    E --> F[Evaluador diligencia evidencia, probabilidad, impacto y dimensiones]
+    F --> G[Sistema calcula score de control]
+    G --> H[Sistema calcula eficacia y eficiencia por riesgo]
+    H --> I[Sistema calcula evaluación global]
+    I --> J[Exportación Excel o JSON]

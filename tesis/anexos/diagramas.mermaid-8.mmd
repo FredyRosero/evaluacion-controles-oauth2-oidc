@@ -1,0 +1,16 @@
+graph TD
+    A[Seleccionar catálogo aplicable] --> B[Seleccionar arquitectura evaluada]
+    B --> C[Activar riesgos globales OAuth 2.0/OIDC]
+    B --> D[Activar riesgos específicos de la arquitectura]
+    C --> E[Activar controles globales]
+    D --> F[Activar controles específicos]
+    E --> G[Caracterizar riesgo]
+    F --> G
+    G --> H[Activo, amenaza, vulnerabilidad, probabilidad e impacto]
+    H --> I[Evaluar cada relación riesgo-control]
+    I --> J[Costo, evidencia y cinco dimensiones]
+    J --> K[Homologación cuantitativa]
+    K --> L[Score ponderado del control]
+    L --> M[Evaluación por riesgo]
+    M --> N[Evaluación global del sistema]
+    N --> O[Exposición observada, hallazgos y observaciones]

@@ -1,0 +1,9 @@
+flowchart LR
+    A[Riesgo] --> B[Relación riesgo-control]
+    C[Control esperado] --> B
+    B --> D[Peso de mitigación]
+    B --> E[Evaluación del control]
+    F[Evidencia encontrada] --> E
+    E --> G[Score del control]
+    D --> H[Eficacia frente al riesgo]
+    G --> H

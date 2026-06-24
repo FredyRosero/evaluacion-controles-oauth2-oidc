@@ -1,0 +1,11 @@
+sequenceDiagram
+    participant U as Usuario
+    participant N as Navegador
+    participant A as Aplicacion
+    participant BD as Base de usuarios
+
+    U->>A: usuario + contraseña
+    A->>BD: validar credenciales
+    BD-->>A: usuario valido
+    A-->>N: Set-Cookie: SESSION_ID
+    N->>A: Cookie: SESSION_ID

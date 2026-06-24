@@ -1,0 +1,8 @@
+flowchart TD
+    R[RE1-001<br/>Intercepción o sustitución del authorization_code]
+    R --> C1[CE1-001<br/>PKCE con S256<br/>peso 0.70]
+    R --> C2[CE1-002<br/>state y nonce<br/>peso 0.15]
+    R --> C3[CG-006<br/>transporte seguro y no tokens en URI<br/>peso 0.15]
+    C1 --> T[Total esperado del riesgo = 1.00]
+    C2 --> T
+    C3 --> T

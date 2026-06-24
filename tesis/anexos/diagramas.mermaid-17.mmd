@@ -1,0 +1,11 @@
+sequenceDiagram
+    participant C as Cliente
+    participant AS as Authorization Server
+
+    C->>C: generar code_verifier
+    C->>C: calcular code_challenge = BASE64URL(SHA-256(code_verifier))
+    C->>AS: /authorize + code_challenge + method=S256
+    AS-->>C: authorization_code
+    C->>AS: /token + authorization_code + code_verifier
+    AS->>AS: validar code_verifier contra code_challenge
+    AS-->>C: tokens

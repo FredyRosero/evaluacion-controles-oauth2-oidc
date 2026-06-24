@@ -1,8 +1,12 @@
-@startuml arquitectura_3_deployment
+@startuml arquitectura-3.deployment
 title Arquitectura 3 - API Gateway federado + Authorization Server corporativo
 
 skinparam shadowing false
 skinparam componentStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 150
+skinparam ranksep 150
+
 
 node "Canal digital" as Channel {
   component "SPA / Mobile / BFF / Partner" as Client

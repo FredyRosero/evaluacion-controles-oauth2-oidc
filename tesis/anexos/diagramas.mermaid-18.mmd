@@ -1,0 +1,9 @@
+sequenceDiagram
+    participant C as Cliente
+    participant RS as Resource Server
+    participant AS as Authorization Server
+
+    C->>RS: access_token opaco
+    RS->>AS: Introspección del token
+    AS-->>RS: active, scope, sub, client_id, exp
+    RS-->>C: Respuesta si el token está activo y autorizado

@@ -1,8 +1,8 @@
----
+﻿---
 title: "Diseño de un modelo de evaluación de controles de seguridad para arquitecturas de identidad federada basadas en OAuth 2.0 y OpenID Connect"
 author: "Fredy Andres Rosero Cristancho"
 date: "Bogotá D.C., Colombia — 2026"
-version: "20"
+version: 20
 header-includes:
   - |
     \makeatletter
@@ -392,44 +392,31 @@ Elementos clave que suma OIDC:
 
 #### 2.4.2. OAuth 2.0 no es lo mismo que OIDC
 
-La tesis trata explícitamente esta diferencia porque la confusión entre OAuth 2.0 y OIDC genera riesgos de diseño. Una forma práctica de explicarlo es separar tres momentos: la comprobación de credenciales o identidad ante el Authorization Server, el artefacto que se emite y el componente que consume ese artefacto.
+La tesis trata explícitamente esta diferencia porque la confusión entre OAuth 2.0 y OIDC genera riesgos de diseño.
 
 #### Registro 1: Propósito
 
-- **OAuth 2.0:** autorización delegada. Permite obtener un `access_token` para acceder a recursos protegidos bajo ciertos scopes, audiencia y vigencia.
-- **OIDC:** autenticación federada del usuario sobre OAuth 2.0. Permite obtener un `id_token` que representa quién fue autenticado y bajo qué contexto.
+- **OAuth 2.0:** autorización delegada.
+- **OIDC:** autenticación federada del usuario sobre OAuth 2.0.
 
-#### Registro 2: Autenticación ante el Authorization Server
+#### Registro 2: Token principal
 
-En ambos casos puede existir autenticación contra el Authorization Server o Identity Provider. En OAuth 2.0, el usuario puede autenticarse ante el Authorization Server para aprobar una autorización, o el cliente puede autenticarse en el endpoint de token. En OIDC también existe autenticación del usuario ante el proveedor de identidad.
+- **OAuth 2.0:** `access_token`, usado para consumir APIs protegidas.
+- **OIDC:** `id_token`, usado para representar el login del usuario.
 
-La diferencia no está en que uno autentique y el otro no autentique nunca. La diferencia está en el significado del artefacto resultante.
-
-#### Registro 3: Artefacto principal emitido
-
-- **OAuth 2.0:** entrega principalmente un `access_token`. Ese artefacto representa autorización: qué acceso fue concedido, para qué recurso, con qué scopes, durante cuánto tiempo y bajo qué cliente o sujeto.
-- **OIDC:** agrega un `id_token`. Ese artefacto representa autenticación: quién fue autenticado, por qué emisor, para qué cliente, en qué momento y con qué claims de identidad.
-
-#### Registro 4: Consumidor del artefacto
-
-- **`access_token`:** está destinado al Resource Server o API protegida. La API lo usa para decidir si permite una operación.
-- **`id_token`:** está destinado al cliente OIDC, por ejemplo un BFF o aplicación cliente. Sirve para establecer o validar la sesión de usuario en el cliente, no para autorizar APIs de negocio.
-
-Por tanto, una explicación precisa es: OAuth 2.0 puede implicar autenticación ante el Authorization Server, pero el artefacto que entrega para el Resource Server es una autorización. OIDC también implica autenticación ante el proveedor de identidad, pero además estandariza un artefacto de autenticación, el `id_token`, que le dice al cliente quién fue autenticado.
-
-#### Registro 5: Pregunta que responde
+#### Registro 3: Pregunta que responde
 
 - **OAuth 2.0:** ¿qué acceso fue autorizado?
 - **OIDC:** ¿quién fue autenticado y bajo qué contexto?
 
-#### Registro 6: Error frecuente
+#### Registro 4: Error frecuente
 
-- Usar OAuth 2.0 como si fuera autenticación completa de usuario.
+- Usar OAuth 2.0 como si fuera autenticación completa.
 - Usar el `id_token` para consumir APIs de negocio.
 - Aceptar claims sin validar emisor, audiencia, firma, expiración o contexto.
 - Asumir que login federado implica autorización automática sobre recursos de negocio.
 
-La matriz de evaluación debe verificar que cada token se use para el propósito correcto: el `access_token` para autorización ante Resource Servers y el `id_token` para identidad/autenticación ante el cliente OIDC.
+La matriz de evaluación debe verificar que cada token se use para el propósito correcto.
 
 ---
 
@@ -630,7 +617,16 @@ El token no contiene información visible para el cliente ni para el Resource Se
 
 Flujo conceptual:
 
-![Token opaco validado mediante introspección](./anexos/diagramas.mermaid-18.png)
+```mermaid
+sequenceDiagram
+    participant C as Cliente
+    participant RS as Resource Server
+    participant AS as Authorization Server
+
+    C->>RS: access_token opaco
+    RS->>AS: introspection
+    AS-->>RS: active, scope, sub, client_id, exp
+```
 
 Ventajas:
 
@@ -750,7 +746,15 @@ De forma simplificada, el Authorization Server firma y el Resource Server verifi
 
 Ejemplo conceptual:
 
-![Firma de JWT mediante JWS](./anexos/diagramas.mermaid-19.png)
+```mermaid
+flowchart TD
+    A[base64url header + . + base64url payload] --> B[Datos firmados]
+    B --> C[SHA-256 de los datos firmados]
+    C --> D[Hash]
+    D --> E[Firma con clave privada del Authorization Server]
+    E --> F[signature]
+    F --> G[JWT final: header.payload.signature]
+```
 
 #### Resource Server: validación
 
@@ -4939,3 +4943,5 @@ Los anexos de esta tesis se referencian como archivos externos del repositorio. 
 - [Sitio publicado en GitHub Pages](./docs/index.html)
 
 Los enlaces anteriores apuntan a rutas relativas reales de la versión actual del proyecto (`./anexos/*`). Si la estructura de carpetas cambia, esta sección debe actualizarse en la misma revisión del repositorio.
+
+

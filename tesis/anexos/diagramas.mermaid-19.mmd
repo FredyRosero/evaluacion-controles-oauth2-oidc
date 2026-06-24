@@ -1,0 +1,7 @@
+flowchart TD
+    A["base64url(header) + '.' + base64url(payload)"] --> B["Datos firmados"]
+    B --> C["SHA-256(datos firmados)"]
+    C --> D["Hash"]
+    D --> E["Firma con clave privada del Authorization Server"]
+    E --> F["signature"]
+    F --> G["JWT final: header.payload.signature"]

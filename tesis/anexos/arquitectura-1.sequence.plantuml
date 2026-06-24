@@ -1,4 +1,4 @@
-@startuml arquitectura_1_sequence
+@startuml arquitectura-1.sequence
 title Arquitectura 1 - Authorization Code + PKCE (S256) con BFF
 
 actor Usuario

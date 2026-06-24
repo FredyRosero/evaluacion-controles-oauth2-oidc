@@ -1,8 +1,11 @@
-﻿@startuml escenario-2.deployment
-title Escenario 2 - M2M con Authorization Server como Resource Server
+@startuml arquitectura-2.deployment
+title Arquitectura 2 - M2M con Authorization Server como Resource Server
 
 skinparam shadowing false
 skinparam componentStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 150
+skinparam ranksep 150
 
 ' Anclas de layout para estabilizar el render en web
 Automation -[hidden]right-> Vault

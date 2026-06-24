@@ -1,0 +1,14 @@
+graph TD
+    A[Catálogo maestro] --> B[Selección de arquitectura]
+    B --> C[Riesgos globales]
+    B --> D[Riesgos específicos]
+    C --> E[Controles globales]
+    D --> F[Controles específicos]
+    E --> G[Registro de matriz]
+    F --> G
+    G --> H[Evaluación de control]
+    H --> I[Score del control]
+    I --> J[Eficacia frente al riesgo]
+    J --> K[Eficiencia frente al riesgo]
+    K --> L[Evaluación global]
+    L --> M[Reporte Excel o JSON]

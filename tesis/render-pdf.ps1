@@ -1,0 +1,11 @@
+pandoc README.md `
+  -o Tesis.Fredy_Rosero.pdf `
+  --toc `
+  --pdf-engine=xelatex `
+  -V toc-title="Tabla de contenido" `
+  -V mainfont="Times New Roman" `
+  -V sansfont="Arial" `
+  -V monofont="Consolas" `
+  -V mathfont="Cambria Math" `
+  -V lang=es-CO `
+  -V geometry:margin=2.5cm
