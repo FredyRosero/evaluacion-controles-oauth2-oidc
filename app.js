@@ -219,6 +219,22 @@ function getReferenceText(referenceIds) {
   }).join(' | ');
 }
 
+function getReferenceHtml(referenceIds) {
+  return (referenceIds || []).map((id) => {
+    const reference = state.lookups.references.get(id);
+    if (!reference) return escapeHtml(id);
+
+    const label = `${reference.nombre} (${reference.id})`;
+    const extra = reference.seccion ? `, sección: ${reference.seccion}` : '';
+
+    if (!reference.url) {
+      return escapeHtml(`${label}${extra}`);
+    }
+
+    return `<a href="${escapeHtml(reference.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>${escapeHtml(extra)}`;
+  }).join('<br />');
+}
+
 function buildLookups(catalog) {
   const escenarios = new Map(catalog.escenarios.map((item) => [item.id, item]));
   const riesgos = new Map(catalog.riesgosCatalogo.map((item) => [item.id, item]));
@@ -243,7 +259,7 @@ function getRiskRelations(filter, riskId) {
 function buildControlCard(relation) {
   const control = state.lookups.controles.get(relation.controlId);
   const scoreMap = state.catalog.mapeoScoreInicial;
-  const referenceText = getReferenceText(control.referencias);
+  const referenceHtml = getReferenceHtml(control.referencias);
 
   return `
     <div class="control-card" data-relation-id="${escapeHtml(relation.id)}" data-control-id="${escapeHtml(control.id)}" data-weight="${escapeHtml(String(relation.pesoMitigacion))}">
@@ -256,7 +272,7 @@ function buildControlCard(relation) {
         <strong>Descripción del control:</strong><br />${escapeHtml(control.descripcion)}
       </div>
       <div class="readonly-block compact">
-        <strong>Referencia normativa:</strong><br />${escapeHtml(referenceText)}
+        <strong>Referencia normativa:</strong><br />${referenceHtml}
       </div>
       <div class="inline">
         <label>
