@@ -1,4 +1,4 @@
-const CATALOG_URL = 'catalogo/data/catalogo-maestro.json';
+﻿const CATALOG_URL = 'catalogo/data/catalogo-maestro.json';
 const SCORE_WEIGHTS = {
   madurez: 0.35,
   automatizacion: 0.15,
@@ -16,25 +16,30 @@ const IMPACT_OPTIONS = [
   { value: 'bajo', label: 'Bajo' },
   { value: 'medio', label: 'Medio' },
   { value: 'alto', label: 'Alto' },
-  { value: 'critico', label: 'Crítico' }
+  { value: 'critico', label: 'CrÃ­tico' }
 ];
 const ENVIRONMENT_OPTIONS = [
-  { value: 'Producción', label: 'Producción' },
-  { value: 'Preproducción', label: 'Preproducción' },
+  { value: 'ProducciÃ³n', label: 'ProducciÃ³n' },
+  { value: 'PreproducciÃ³n', label: 'PreproducciÃ³n' },
   { value: 'Desarrollo', label: 'Desarrollo' },
   { value: 'Otro', label: 'Otro' }
 ];
 
+const DEMO_SOURCE_MESSAGE = 'Datos de demostraciÃ³n basados en el CapÃ­tulo 6 de la tesis (VersiÃ³n 15), secciones 6.1-6.3 y catÃ¡logo maestro v1.1.0.';
+
+const DEMO_PAYLOADS_URL = 'catalogo/data/demo-prediligenciamiento.json';
+const DEMO_PAYLOADS = {};
+
 const RISK_LEVEL_MATRIX = {
   baja: { bajo: 'Bajo', medio: 'Bajo', alto: 'Medio', critico: 'Alto' },
-  media: { bajo: 'Bajo', medio: 'Medio', alto: 'Alto', critico: 'Crítico' },
-  alta: { bajo: 'Medio', medio: 'Alto', alto: 'Crítico', critico: 'Crítico' }
+  media: { bajo: 'Bajo', medio: 'Medio', alto: 'Alto', critico: 'CrÃ­tico' },
+  alta: { bajo: 'Medio', medio: 'Alto', alto: 'CrÃ­tico', critico: 'CrÃ­tico' }
 };
 const EXPOSURE_THRESHOLDS = [
   { min: 0.75, label: 'Bajo' },
   { min: 0.5, label: 'Medio' },
   { min: 0.25, label: 'Alto' },
-  { min: 0, label: 'Crítico' }
+  { min: 0, label: 'CrÃ­tico' }
 ];
 const QUALITATIVE_THRESHOLDS = [
   { min: 0.75, label: 'Alta' },
@@ -53,7 +58,7 @@ const CONTROL_DIMENSIONS = [
     label: 'Madurez',
     options: [
       { value: 'declarado', label: 'Declarado' },
-      { value: 'diseniado', label: 'Diseñado' },
+      { value: 'diseniado', label: 'DiseÃ±ado' },
       { value: 'implementado', label: 'Implementado' },
       { value: 'auditado', label: 'Auditado' }
     ]
@@ -61,11 +66,11 @@ const CONTROL_DIMENSIONS = [
   {
     key: 'automatizacion',
     field: 'automation',
-    label: 'Automatización',
+    label: 'AutomatizaciÃ³n',
     options: [
       { value: 'manual', label: 'Manual' },
-      { value: 'semiautomatico', label: 'Semiautomático' },
-      { value: 'automatico', label: 'Automático' }
+      { value: 'semiautomatico', label: 'SemiautomÃ¡tico' },
+      { value: 'automatico', label: 'AutomÃ¡tico' }
     ]
   },
   {
@@ -84,7 +89,7 @@ const CONTROL_DIMENSIONS = [
     label: 'Periodicidad',
     options: [
       { value: 'ocasional', label: 'Ocasional' },
-      { value: 'periodico', label: 'Periódico' },
+      { value: 'periodico', label: 'PeriÃ³dico' },
       { value: 'permanente', label: 'Permanente' }
     ]
   },
@@ -93,7 +98,7 @@ const CONTROL_DIMENSIONS = [
     field: 'scope',
     label: 'Alcance funcional',
     options: [
-      { value: 'especifico', label: 'Específico' },
+      { value: 'especifico', label: 'EspecÃ­fico' },
       { value: 'general', label: 'General' }
     ]
   }
@@ -104,6 +109,13 @@ const EVIDENCE_OPTIONS = [
   { value: 'suficiente', label: 'Suficiente' },
   { value: 'independienteOAditada', label: 'Independiente o auditada' }
 ];
+
+const DEFAULT_FACTOR_EVIDENCIA = {
+  sinEvidencia: 0,
+  parcial: 0.5,
+  suficiente: 0.85,
+  independienteOAditada: 1
+};
 
 const state = {
   catalog: null,
@@ -118,6 +130,10 @@ const scenarioSummary = document.getElementById('scenarioSummary');
 const loadStatus = document.getElementById('loadStatus');
 const calculateBtn = document.getElementById('calculateBtn');
 const exportBtn = document.getElementById('exportBtn');
+const demoSpaBtn = document.getElementById('demoSpaBtn');
+const demoM2mBtn = document.getElementById('demoM2mBtn');
+const demoGatewayBtn = document.getElementById('demoGatewayBtn');
+const demoNotice = document.getElementById('demoNotice');
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -151,7 +167,7 @@ function formatPercent(value) {
 }
 
 function formatRatio(value) {
-  return Number.isFinite(value) ? value.toFixed(2) : '∞';
+  return Number.isFinite(value) ? value.toFixed(2) : 'âˆž';
 }
 
 function formatCurrency(value) {
@@ -177,7 +193,7 @@ function getRiskLevel(probability, impact) {
 }
 
 function getExposureLevel(efficacy) {
-  return EXPOSURE_THRESHOLDS.find((threshold) => efficacy >= threshold.min)?.label || 'Crítico';
+  return EXPOSURE_THRESHOLDS.find((threshold) => efficacy >= threshold.min)?.label || 'CrÃ­tico';
 }
 
 function getReferenceText(referenceIds) {
@@ -217,11 +233,11 @@ function buildControlCard(relation) {
     <div class="control-card" data-relation-id="${escapeHtml(relation.id)}" data-control-id="${escapeHtml(control.id)}">
       <div class="card-header">
         <h4>${escapeHtml(control.id)} - ${escapeHtml(control.nombre)}</h4>
-        <span class="badge ${control.tipo === 'GLOBAL' ? 'badge-global' : 'badge-specific'}">${control.tipo === 'GLOBAL' ? 'Global' : 'Específico'}</span>
+        <span class="badge ${control.tipo === 'GLOBAL' ? 'badge-global' : 'badge-specific'}">${control.tipo === 'GLOBAL' ? 'Global' : 'EspecÃ­fico'}</span>
       </div>
-      <p class="muted">Peso de mitigación: ${formatPercent(relation.pesoMitigacion)} · ${relation.obligatorio ? 'Control obligatorio' : 'Control complementario'}</p>
+      <p class="muted">Peso de mitigaciÃ³n: ${formatPercent(relation.pesoMitigacion)} Â· ${relation.obligatorio ? 'Control obligatorio' : 'Control complementario'}</p>
       <div class="readonly-block">
-        <strong>Descripción del control:</strong><br />${escapeHtml(control.descripcion)}
+        <strong>DescripciÃ³n del control:</strong><br />${escapeHtml(control.descripcion)}
       </div>
       <div class="readonly-block compact">
         <strong>Referencia normativa:</strong><br />${escapeHtml(referenceText)}
@@ -255,7 +271,7 @@ function buildControlCard(relation) {
         </label>
       </div>
       <p class="muted" data-kind="controlScore">Score del control: ${formatPercent(0)}</p>
-      <p class="muted" data-kind="controlQualitative">Eficiencia: Baja · Eficacia: Baja · Efectividad: Baja</p>
+      <p class="muted" data-kind="controlQualitative">Eficiencia: Baja Â· Eficacia: Baja Â· Efectividad: Baja</p>
     </div>
   `;
 }
@@ -268,10 +284,10 @@ function buildRiskCard(risk) {
     <article class="risk-card" data-risk-id="${escapeHtml(risk.id)}">
       <div class="card-header">
         <h3>${escapeHtml(risk.id)} - ${escapeHtml(risk.nombre)}</h3>
-        <span class="badge ${risk.tipo === 'GLOBAL' ? 'badge-global' : 'badge-specific'}">${risk.tipo === 'GLOBAL' ? 'Global' : 'Específico'}</span>
+        <span class="badge ${risk.tipo === 'GLOBAL' ? 'badge-global' : 'badge-specific'}">${risk.tipo === 'GLOBAL' ? 'Global' : 'EspecÃ­fico'}</span>
       </div>
       <div class="readonly-block">
-        <strong>Descripción del riesgo:</strong><br />${escapeHtml(risk.descripcion)}
+        <strong>DescripciÃ³n del riesgo:</strong><br />${escapeHtml(risk.descripcion)}
       </div>
       <div class="inline">
         <label>
@@ -280,10 +296,10 @@ function buildRiskCard(risk) {
         </label>
         <label>
           Amenaza / causa
-          <input type="text" name="threat" placeholder="Condición que puede materializar el riesgo" />
+          <input type="text" name="threat" placeholder="CondiciÃ³n que puede materializar el riesgo" />
         </label>
         <label>
-          Vulnerabilidad / condición habilitante
+          Vulnerabilidad / condiciÃ³n habilitante
           <input type="text" name="vulnerability" placeholder="Debilidad observada" />
         </label>
         <label>
@@ -308,8 +324,8 @@ function buildRiskCard(risk) {
         </label>
       </div>
       <label>
-        Hallazgo / brecha / observación
-        <textarea name="finding" placeholder="Conclusión evaluativa del riesgo"></textarea>
+        Hallazgo / brecha / observaciÃ³n
+        <textarea name="finding" placeholder="ConclusiÃ³n evaluativa del riesgo"></textarea>
       </label>
       <div class="controls-group">
         ${relations.map((relation) => buildControlCard(relation)).join('')}
@@ -321,7 +337,7 @@ function buildRiskCard(risk) {
 function updateScenarioSummary() {
   const filter = getActiveFilter();
   if (!filter) {
-    scenarioSummary.textContent = 'Seleccione una arquitectura para cargar el catálogo.';
+    scenarioSummary.textContent = 'Seleccione una arquitectura para cargar el catÃ¡logo.';
     return;
   }
 
@@ -329,7 +345,7 @@ function updateScenarioSummary() {
   scenarioSummary.innerHTML = `
     <strong>Escenario activo:</strong> ${escapeHtml(scenario.nombre)}<br />
     ${escapeHtml(scenario.descripcion)}<br />
-    <span class="muted">Riesgos activos: ${filter.riesgosCatalogoIds.length} · Controles activos: ${filter.controlesEsperadosIds.length} · Relaciones: ${filter.riesgoControlIds.length}</span>
+    <span class="muted">Riesgos activos: ${filter.riesgosCatalogoIds.length} Â· Controles activos: ${filter.controlesEsperadosIds.length} Â· Relaciones: ${filter.riesgoControlIds.length}</span>
   `;
 }
 
@@ -347,14 +363,35 @@ function getControlEvaluationFromCard(controlCard) {
   const dimensionValues = {};
   const dimensionLabels = {};
 
+  const resolveDimensionScore = (dimensionKey, selectedValue) => {
+    const map = scoreMap?.[dimensionKey] || {};
+    if (Number.isFinite(map[selectedValue])) return map[selectedValue];
+
+    // Handle catalogs that use feminine labels (declarada/diseniada/implementada).
+    const normalized = String(selectedValue || '');
+    if (normalized.endsWith('o')) {
+      const alt = `${normalized.slice(0, -1)}a`;
+      if (Number.isFinite(map[alt])) return map[alt];
+    }
+    if (normalized.endsWith('a')) {
+      const alt = `${normalized.slice(0, -1)}o`;
+      if (Number.isFinite(map[alt])) return map[alt];
+    }
+
+    return 0;
+  };
+
   CONTROL_DIMENSIONS.forEach((dimension) => {
     const select = controlCard.querySelector(`select[name="${dimension.field}"]`);
-    dimensionValues[dimension.key] = scoreMap[dimension.key][select.value];
+    dimensionValues[dimension.key] = resolveDimensionScore(dimension.key, select.value);
     dimensionLabels[dimension.key] = select.options[select.selectedIndex].text;
   });
 
   const evidenceSelect = controlCard.querySelector('select[name="evidenceFactor"]');
-  const evidenceFactor = scoreMap.factorEvidencia[evidenceSelect.value];
+  const evidenceMap = scoreMap?.factorEvidencia || DEFAULT_FACTOR_EVIDENCIA;
+  const evidenceFactor = Number.isFinite(evidenceMap[evidenceSelect.value])
+    ? evidenceMap[evidenceSelect.value]
+    : DEFAULT_FACTOR_EVIDENCIA[evidenceSelect.value] ?? 0;
   const baseScore = (
     SCORE_WEIGHTS.madurez * dimensionValues.madurez +
     SCORE_WEIGHTS.automatizacion * dimensionValues.automatizacion +
@@ -381,7 +418,7 @@ function getControlEvaluationFromCard(controlCard) {
 function updateControlScore(controlCard) {
   const evaluation = getControlEvaluationFromCard(controlCard);
   controlCard.querySelector('[data-kind="controlScore"]').textContent = `Score del control: ${formatPercent(evaluation.scoreControl)}`;
-  controlCard.querySelector('[data-kind="controlQualitative"]').textContent = `Eficiencia: ${evaluation.efficiencyQl} · Eficacia: ${evaluation.efficacyQl} · Efectividad: ${evaluation.effectivenessQl}`;
+  controlCard.querySelector('[data-kind="controlQualitative"]').textContent = `Eficiencia: ${evaluation.efficiencyQl} Â· Eficacia: ${evaluation.efficacyQl} Â· Efectividad: ${evaluation.effectivenessQl}`;
 }
 
 function refreshDerivedState() {
@@ -402,6 +439,173 @@ function renderRisks() {
   const risksHtml = getActiveRisks(filter).map((risk) => buildRiskCard(risk)).join('');
   riskContainer.innerHTML = risksHtml;
   refreshDerivedState();
+}
+
+function markDemoUpdatedField(field) {
+  field.classList.add('demo-updated');
+}
+
+function clearDemoUpdatedMarks() {
+  document.querySelectorAll('.demo-updated').forEach((field) => field.classList.remove('demo-updated'));
+}
+
+function setFieldValue(scopeNode, selector, value) {
+  if (value === undefined || value === null) return;
+  const field = scopeNode.querySelector(selector);
+  if (!field) return;
+  const nextValue = String(value);
+  const previousValue = field.value;
+  field.value = nextValue;
+  if (previousValue !== nextValue) {
+    markDemoUpdatedField(field);
+    return;
+  }
+  markDemoUpdatedField(field);
+}
+
+function buildDefaultRiskDemoValues(riskId) {
+  const riskMeta = state.lookups.riesgos.get(riskId);
+  const isSpecific = riskMeta?.tipo === 'ESPECIFICO';
+  return {
+    asset: `Activo asociado a ${riskId}`,
+    threat: `Amenaza principal identificada para ${riskMeta?.nombre || riskId}`,
+    vulnerability: `Vulnerabilidad habilitante observada en ${riskId}`,
+    probability: isSpecific ? 'media' : 'baja',
+    impact: isSpecific ? 'alto' : 'medio',
+    businessLoss: isSpecific ? 90000 : 60000,
+    finding: `Hallazgo demostrativo para ${riskId}: se requiere fortalecer controles y evidencia operativa.`
+  };
+}
+
+function buildDefaultControlDemoValues(controlId) {
+  const controlMeta = state.lookups.controles.get(controlId);
+  const suggestedCost = Number(controlMeta?.costoTotal?.medio || 0);
+  return {
+    controlCost: suggestedCost > 0 ? Math.round(suggestedCost * 1.1) : 1000,
+    maturity: 'implementado',
+    automation: 'semiautomatico',
+    timing: 'detectivo',
+    periodicity: 'periodico',
+    scope: 'general',
+    evidenceFactor: 'parcial',
+    evidenceFound: `Evidencia demostrativa para ${controlId}: implementaciÃ³n parcial verificada por revisiÃ³n tÃ©cnica.`,
+    evidenceSource: `Fuentes demo: bitÃ¡coras tÃ©cnicas y revisiÃ³n de configuraciÃ³n de ${controlId}`
+  };
+}
+
+function applyRiskDemoValues(riskCard, values) {
+  if (!values) return;
+  const riskId = riskCard.dataset.riskId || 'RIESGO';
+  const safeAsset = String(values.asset ?? '').trim() || `Activo asociado a ${riskId}`;
+  setFieldValue(riskCard, 'input[name="asset"]', safeAsset);
+  setFieldValue(riskCard, 'input[name="threat"]', values.threat);
+  setFieldValue(riskCard, 'input[name="vulnerability"]', values.vulnerability);
+  setFieldValue(riskCard, 'select[name="probability"]', values.probability);
+  setFieldValue(riskCard, 'select[name="impact"]', values.impact);
+  setFieldValue(riskCard, 'input[name="businessLoss"]', values.businessLoss);
+  setFieldValue(riskCard, 'textarea[name="finding"]', values.finding);
+  updateRiskLevelTag(riskCard);
+}
+
+function applyControlDemoValues(controlCard, values) {
+  if (!values) return;
+  setFieldValue(controlCard, 'input[name="controlCost"]', values.controlCost);
+  setFieldValue(controlCard, 'select[name="maturity"]', values.maturity);
+  setFieldValue(controlCard, 'select[name="automation"]', values.automation);
+  setFieldValue(controlCard, 'select[name="timing"]', values.timing);
+  setFieldValue(controlCard, 'select[name="periodicity"]', values.periodicity);
+  setFieldValue(controlCard, 'select[name="scope"]', values.scope);
+  setFieldValue(controlCard, 'select[name="evidenceFactor"]', values.evidenceFactor);
+  setFieldValue(controlCard, 'textarea[name="evidenceFound"]', values.evidenceFound);
+  setFieldValue(controlCard, 'input[name="evidenceSource"]', values.evidenceSource);
+  updateControlScore(controlCard);
+}
+
+function showDemoMessage(message) {
+  demoNotice.textContent = message;
+  demoNotice.style.display = 'block';
+}
+
+function applyDemoToRenderedForm(architectureId, payload) {
+  const activeFilter = getActiveFilter();
+  if (!activeFilter) return { applied: false, filledFields: 0 };
+
+  const riskCards = Array.from(document.querySelectorAll('.risk-card'));
+  if (!riskCards.length) return { applied: false, filledFields: 0 };
+
+  const allowedRiskIds = new Set(activeFilter.riesgosCatalogoIds || []);
+  const riskValues = payload.risks || {};
+  const controlValues = payload.controls || {};
+
+  const updatedBefore = document.querySelectorAll('.demo-updated').length;
+
+  riskCards.forEach((riskCard) => {
+    const riskId = riskCard.dataset.riskId;
+    if (allowedRiskIds.has(riskId)) {
+      const mergedRiskValues = {
+        ...buildDefaultRiskDemoValues(riskId),
+        ...(riskValues[riskId] || {})
+      };
+      applyRiskDemoValues(riskCard, mergedRiskValues);
+    }
+
+    riskCard.querySelectorAll('.control-card').forEach((controlCard) => {
+      const controlId = controlCard.dataset.controlId;
+      const mergedControlValues = {
+        ...buildDefaultControlDemoValues(controlId),
+        ...(controlValues[controlId] || {})
+      };
+      applyControlDemoValues(controlCard, mergedControlValues);
+    });
+  });
+
+  const updatedAfter = document.querySelectorAll('.demo-updated').length;
+  return {
+    applied: true,
+    filledFields: Math.max(0, updatedAfter - updatedBefore)
+  };
+}
+
+function loadDemoData(architectureId) {
+  if (!state.catalog || !state.lookups) return;
+  const payload = DEMO_PAYLOADS[architectureId];
+  if (!payload) return;
+
+  clearDemoUpdatedMarks();
+  setFieldValue(document, '#organization', payload.context.organization);
+  setFieldValue(document, '#evaluator', payload.context.evaluator);
+  setFieldValue(document, '#environment', payload.context.environment);
+  setFieldValue(document, '#systemName', payload.context.systemName);
+  setFieldValue(document, '#scopeNotes', payload.context.scopeNotes);
+
+  architectureSelect.value = architectureId;
+  architectureSelect.dispatchEvent(new Event('change'));
+
+  let attempts = 0;
+  const maxAttempts = 6;
+
+  const applyWithRetry = () => {
+    attempts += 1;
+    const result = applyDemoToRenderedForm(architectureId, payload);
+    if (!result.applied && attempts < maxAttempts) {
+      requestAnimationFrame(applyWithRetry);
+      return;
+    }
+
+    refreshDerivedState();
+    const evaluation = collectEvaluation();
+    state.lastEvaluation = evaluation;
+    drawMetrics(evaluation.metrics);
+    drawRiskResults(evaluation.risks);
+
+    const scenarioName = state.lookups.escenarios.get(architectureId)?.nombre || architectureId;
+    const suffix = result.applied
+      ? `Campos diligenciados y resaltados: ${result.filledFields}.`
+      : 'No fue posible aplicar el demo en esta carga; intente nuevamente.';
+    showDemoMessage(`${DEMO_SOURCE_MESSAGE} Escenario cargado: ${scenarioName}. ${suffix}`);
+  };
+
+  requestAnimationFrame(applyWithRetry);
 }
 
 function syncControlField(sourceElement) {
@@ -588,15 +792,15 @@ function rowsToWorksheetXml(rows) {
 
 function exportToExcel(data) {
   const summaryRows = [
-    ['Organización', data.context.organization],
+    ['OrganizaciÃ³n', data.context.organization],
     ['Evaluador', data.context.evaluator],
     ['Ambiente', data.context.environment],
     ['Sistema evaluado', data.context.systemName],
     ['Arquitectura', data.context.architecture],
     ['Notas de alcance', data.context.scopeNotes],
     ['Fecha', data.context.date],
-    ['Catálogo', data.context.catalogId],
-    ['Versión del catálogo', data.context.catalogVersion],
+    ['CatÃ¡logo', data.context.catalogId],
+    ['VersiÃ³n del catÃ¡logo', data.context.catalogVersion],
     ['Eficiencia cuantitativa global (ratio)', formatRatio(data.metrics.eficienciaCuantitativa)],
     ['Eficacia cuantitativa global', formatPercent(data.metrics.eficaciaCuantitativa)],
     ['Eficiencia cualitativa global', data.metrics.eficienciaCualitativa],
@@ -613,7 +817,7 @@ function exportToExcel(data) {
     'Impacto',
     'Nivel de riesgo identificado',
     'Lucro cesante',
-    'Hallazgo / brecha / observación'
+    'Hallazgo / brecha / observaciÃ³n'
   ]];
 
   data.risks.forEach((risk) => {
@@ -638,7 +842,7 @@ function exportToExcel(data) {
     'Costo ingresado',
     'Costo asignado',
     'Madurez',
-    'Automatización',
+    'AutomatizaciÃ³n',
     'Momento',
     'Periodicidad',
     'Alcance funcional',
@@ -684,8 +888,8 @@ function exportToExcel(data) {
     'Eficacia frente al riesgo',
     'Eficiencia frente al riesgo',
     'Costo asignado total',
-    'Beneficio de mitigación estimado',
-    'Nivel de exposición observado'
+    'Beneficio de mitigaciÃ³n estimado',
+    'Nivel de exposiciÃ³n observado'
   ]];
 
   data.risks.forEach((risk) => {
@@ -729,37 +933,58 @@ function exportToExcel(data) {
 function setButtonsEnabled(enabled) {
   calculateBtn.disabled = !enabled;
   exportBtn.disabled = !enabled;
+  demoSpaBtn.disabled = !enabled;
+  demoM2mBtn.disabled = !enabled;
+  demoGatewayBtn.disabled = !enabled;
 }
 
 async function initializeApp() {
   setButtonsEnabled(false);
-  loadStatus.textContent = 'Cargando catálogo maestro...';
+  loadStatus.textContent = 'Cargando catálogo maestro y datos demo...';
   environmentSelect.innerHTML = '';
   ENVIRONMENT_OPTIONS.forEach((option) => createOption(environmentSelect, option.value, option.label));
 
   try {
-    const response = await fetch(CATALOG_URL);
-    if (!response.ok) {
-      throw new Error(`No fue posible cargar ${CATALOG_URL} (${response.status} ${response.statusText})`);
+    const [catalogResponse, demoPayloadsResponse] = await Promise.all([
+      fetch(CATALOG_URL),
+      fetch(DEMO_PAYLOADS_URL)
+    ]);
+
+    if (!catalogResponse.ok) {
+      throw new Error(`No fue posible cargar ${CATALOG_URL} (${catalogResponse.status} ${catalogResponse.statusText})`);
     }
 
-    state.catalog = await response.json();
+    if (!demoPayloadsResponse.ok) {
+      throw new Error(`No fue posible cargar ${DEMO_PAYLOADS_URL} (${demoPayloadsResponse.status} ${demoPayloadsResponse.statusText})`);
+    }
+
+    state.catalog = await catalogResponse.json();
+    const demoPayloadData = await demoPayloadsResponse.json();
+    const demoPayloadMap = demoPayloadData?.demos || demoPayloadData;
+    if (!demoPayloadMap || typeof demoPayloadMap !== 'object') {
+      throw new Error(`Estructura inválida en ${DEMO_PAYLOADS_URL}: se esperaba un objeto de escenarios demo.`);
+    }
+    Object.keys(DEMO_PAYLOADS).forEach((key) => delete DEMO_PAYLOADS[key]);
+    Object.assign(DEMO_PAYLOADS, demoPayloadMap);
+
     state.lookups = buildLookups(state.catalog);
     architectureSelect.innerHTML = '';
     state.catalog.escenarios.forEach((scenario) => createOption(architectureSelect, scenario.id, scenario.nombre));
     renderRisks();
-    loadStatus.textContent = `Catálogo ${state.catalog.catalogoEvaluacion.id} v${state.catalog.catalogoEvaluacion.version} cargado.`;
+    demoNotice.style.display = 'none';
+    loadStatus.textContent = `CatÃ¡logo ${state.catalog.catalogoEvaluacion.id} v${state.catalog.catalogoEvaluacion.version} cargado.`;
     setButtonsEnabled(true);
   } catch (error) {
     console.error(error);
-    loadStatus.textContent = `Error cargando catálogo: ${error.message}`;
-    scenarioSummary.textContent = 'No se pudo inicializar la evaluación.';
+    loadStatus.textContent = `Error cargando catÃ¡logo: ${error.message}`;
+    scenarioSummary.textContent = 'No se pudo inicializar la evaluaciÃ³n.';
   }
 }
 
 architectureSelect.addEventListener('change', () => {
   renderRisks();
   state.lastEvaluation = null;
+  demoNotice.style.display = 'none';
   drawRiskResults([]);
   drawMetrics({
     eficienciaCuantitativa: 0,
@@ -812,4 +1037,9 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   exportToExcel(evaluation);
 });
 
+demoSpaBtn.addEventListener('click', () => loadDemoData('SPA_BFF_IDP'));
+demoM2mBtn.addEventListener('click', () => loadDemoData('M2M_AS_RS'));
+demoGatewayBtn.addEventListener('click', () => loadDemoData('API_GATEWAY_FEDERADO'));
+
 initializeApp();
+

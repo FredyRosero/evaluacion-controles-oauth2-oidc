@@ -74,6 +74,37 @@
       border-radius: 8px;
     }
     .readonly-block.compact { margin-top: 8px; }
+    .demo-panel {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px dashed #93c5fd;
+      border-radius: 10px;
+      background: #eff6ff;
+    }
+    .demo-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .demo-btn {
+      background: #1d4ed8;
+    }
+    .demo-notice {
+      margin-top: 10px;
+      padding: 10px;
+      border-left: 4px solid #1d4ed8;
+      border-radius: 8px;
+      background: #dbeafe;
+      color: #1e3a8a;
+      font-size: 14px;
+      display: none;
+    }
+    .demo-updated {
+      background: #fff7cc !important;
+      border-color: #f59e0b !important;
+      box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+      transition: background 0.35s ease, border-color 0.35s ease;
+    }
     .badge, .status-tag {
       display: inline-flex;
       align-items: center;
@@ -135,6 +166,17 @@
     </label>
 
     <div id="scenarioSummary" class="readonly-block compact">Seleccione una arquitectura para cargar el catálogo.</div>
+
+    <div class="demo-panel">
+      <strong>Demos por arquitectura</strong>
+      <p class="muted">Use un botón para cargar datos demostrativos consistentes con el catálogo activo.</p>
+      <div class="demo-actions">
+        <button id="demoSpaBtn" type="button" class="demo-btn">Demo SPA + BFF + IdP</button>
+        <button id="demoM2mBtn" type="button" class="demo-btn">Demo M2M AS=RS</button>
+        <button id="demoGatewayBtn" type="button" class="demo-btn">Demo API Gateway federado</button>
+      </div>
+      <div id="demoNotice" class="demo-notice"></div>
+    </div>
   </fieldset>
 
   <section>

@@ -1,0 +1,631 @@
+{
+  "metadata": {
+    "id": "DEMO-PREDILIGENCIAMIENTO-OAUTH2-OIDC-V15",
+    "version": "1.0.0",
+    "descripcion": "Datos de demostración para prediligenciar el formulario de evaluación de controles OAuth2/OIDC en los tres escenarios de la tesis.",
+    "base": "Tesis.v15.md, app.js y catálogo maestro de riesgos/controles.",
+    "moneda": "USD",
+    "nota": "businessLoss representa el lucro cesante o impacto económico estimado del activo en la misma moneda usada por el formulario."
+  },
+  "fieldLabels": {
+    "context.organization": "Organización",
+    "context.evaluator": "Evaluador",
+    "context.environment": "Ambiente",
+    "context.systemName": "Sistema evaluado",
+    "context.scopeNotes": "Notas de alcance",
+    "risks.*.asset": "Activo en riesgo",
+    "risks.*.threat": "Amenaza / causa",
+    "risks.*.vulnerability": "Vulnerabilidad / condición habilitante",
+    "risks.*.probability": "Probabilidad",
+    "risks.*.impact": "Impacto",
+    "risks.*.businessLoss": "Lucro cesante estimado del activo / impacto económico estimado",
+    "risks.*.finding": "Hallazgo / brecha / observación",
+    "controls.*.controlCost": "Costo del control",
+    "controls.*.maturity": "Madurez",
+    "controls.*.automation": "Automatización",
+    "controls.*.timing": "Momento",
+    "controls.*.periodicity": "Periodicidad",
+    "controls.*.scope": "Alcance funcional",
+    "controls.*.evidenceFactor": "Suficiencia / factor de evidencia",
+    "controls.*.evidenceFound": "Evidencia encontrada",
+    "controls.*.evidenceSource": "Fuente de evidencia"
+  },
+  "demos": {
+    "SPA_BFF_IDP": {
+      "context": {
+        "organization": "Banco Demo OAuth",
+        "evaluator": "Equipo de seguridad de identidad",
+        "environment": "Preproducción",
+        "systemName": "Portal SPA con BFF",
+        "scopeNotes": "Demo académico del escenario SPA + BFF + IdP con evidencias de sesión y callback OIDC."
+      },
+      "risks": {
+        "RG-001": {
+          "asset": "access_token en tránsito API",
+          "threat": "intercepción o replay de bearer token",
+          "vulnerability": "rotación parcial y ventanas de vigencia altas",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 65000,
+          "finding": "Riesgo contenido parcialmente por TLS y política de vigencia."
+        },
+        "RG-002": {
+          "asset": "API protegida por BFF",
+          "threat": "aceptación de token fuera de contexto",
+          "vulnerability": "validaciones incompletas en capas internas",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 80000,
+          "finding": "El BFF valida bien, pero existen rutas internas con validación parcial."
+        },
+        "RG-003": {
+          "asset": "scopes de acceso de usuario",
+          "threat": "sobreasignación de permisos",
+          "vulnerability": "catálogo de scopes sin depuración completa",
+          "probability": "media",
+          "impact": "medio",
+          "businessLoss": 50000,
+          "finding": "Se observan scopes heredados con mayor alcance del requerido."
+        },
+        "RG-004": {
+          "asset": "secretos y claves del cliente OAuth",
+          "threat": "exposición accidental de secretos",
+          "vulnerability": "rotación no uniforme entre ambientes",
+          "probability": "baja",
+          "impact": "alto",
+          "businessLoss": 45000,
+          "finding": "Gobierno de secretos en progreso con cobertura parcial."
+        },
+        "RG-005": {
+          "asset": "telemetría de autenticación y autorización",
+          "threat": "detección tardía de abuso de token",
+          "vulnerability": "correlación incompleta entre BFF e IdP",
+          "probability": "media",
+          "impact": "medio",
+          "businessLoss": 40000,
+          "finding": "Se requiere consolidar correlación de eventos extremo a extremo."
+        },
+        "RE1-001": {
+          "asset": "authorization_code en callback OIDC",
+          "threat": "sustitución o interceptación de código",
+          "vulnerability": "flujo de callback expuesto sin controles consistentes",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 100000,
+          "finding": "PKCE y state/nonce reducen fuertemente la probabilidad de canje indebido."
+        },
+        "RE1-002": {
+          "asset": "material de sesión en navegador",
+          "threat": "exfiltración vía XSS o extensión",
+          "vulnerability": "persistencia indebida de material sensible en cliente",
+          "probability": "alta",
+          "impact": "alto",
+          "businessLoss": 150000,
+          "finding": "Persisten prácticas de exposición del lado navegador; riesgo alto."
+        },
+        "RE1-003": {
+          "asset": "integridad de transacción OAuth/OIDC",
+          "threat": "CSRF o login mix-up",
+          "vulnerability": "validaciones parciales de nonce y state",
+          "probability": "media",
+          "impact": "medio",
+          "businessLoss": 90000,
+          "finding": "La ligadura transaccional está implementada pero requiere endurecimiento operativo."
+        }
+      },
+      "controls": {
+        "CG-001": {
+          "controlCost": 2500,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "Validación de firma, issuer, aud y exp en BFF.",
+          "evidenceSource": "Repositorio BFF y pruebas de integración"
+        },
+        "CG-002": {
+          "controlCost": 1900,
+          "maturity": "implementado",
+          "automation": "semiautomatico",
+          "timing": "preventivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Scopes mínimos en endpoints críticos, pendiente normalización total.",
+          "evidenceSource": "Consola IdP y matriz de permisos"
+        },
+        "CG-003": {
+          "controlCost": 1600,
+          "maturity": "diseniado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Vigencias definidas con excepciones en algunos clientes legacy.",
+          "evidenceSource": "Política IAM y ticket de arquitectura"
+        },
+        "CG-004": {
+          "controlCost": 1250,
+          "maturity": "diseniado",
+          "automation": "semiautomatico",
+          "timing": "preventivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Inventario de clientes con responsables en actualización.",
+          "evidenceSource": "CMDB IAM y reportes mensuales"
+        },
+        "CG-005": {
+          "controlCost": 2200,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "Secretos centralizados en vault con control de acceso.",
+          "evidenceSource": "Vault audit logs"
+        },
+        "CG-006": {
+          "controlCost": 1150,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "TLS obligado y sin tokens en URI.",
+          "evidenceSource": "Gateway policies y escaneo de logs"
+        },
+        "CG-007": {
+          "controlCost": 3100,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "detectivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Correlación parcial de eventos entre IdP y BFF.",
+          "evidenceSource": "SIEM y dashboard de observabilidad"
+        },
+        "CG-008": {
+          "controlCost": 5000,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "preventivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "No se aplica sender-constrained en este alcance demo.",
+          "evidenceSource": "Acta de alcance"
+        },
+        "CE1-001": {
+          "controlCost": 1650,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "PKCE S256 en todos los clientes SPA/BFF activos.",
+          "evidenceSource": "Consola IdP y pruebas de canje"
+        },
+        "CE1-002": {
+          "controlCost": 950,
+          "maturity": "implementado",
+          "automation": "semiautomatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "State y nonce ligados a sesión con cobertura casi total.",
+          "evidenceSource": "Repositorio callback handler"
+        },
+        "CE1-003": {
+          "controlCost": 3750,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Persisten trazas de material de sesión en cliente.",
+          "evidenceSource": "Inspección de navegador y pruebas QA"
+        },
+        "CE1-004": {
+          "controlCost": 1450,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "Cookie Secure/HttpOnly/SameSite con anti-CSRF activo.",
+          "evidenceSource": "Configuración BFF y pruebas de seguridad"
+        }
+      }
+    },
+    "M2M_AS_RS": {
+      "context": {
+        "organization": "Fintech Demo M2M",
+        "evaluator": "Auditor de identidad no humana",
+        "environment": "Producción",
+        "systemName": "Servicios machine-to-machine IAM",
+        "scopeNotes": "Demo académico para clientes técnicos con client_credentials en AS que también expone APIs administrativas."
+      },
+      "risks": {
+        "RG-001": {
+          "asset": "access_token de servicio",
+          "threat": "replay de token técnico",
+          "vulnerability": "caducidades amplias en integraciones legadas",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 70000,
+          "finding": "Riesgo moderado por alta automatización y trazabilidad parcial."
+        },
+        "RG-002": {
+          "asset": "APIs administrativas IAM",
+          "threat": "aceptación de token inválido en endpoint crítico",
+          "vulnerability": "validación heterogénea por servicio",
+          "probability": "media",
+          "impact": "critico",
+          "businessLoss": 120000,
+          "finding": "El control principal está implementado con brechas puntuales."
+        },
+        "RG-003": {
+          "asset": "scopes de clientes técnicos",
+          "threat": "privilegios excesivos",
+          "vulnerability": "roles heredados por compatibilidad",
+          "probability": "alta",
+          "impact": "alto",
+          "businessLoss": 110000,
+          "finding": "Persisten scopes administrativos amplios en clientes históricos."
+        },
+        "RG-004": {
+          "asset": "secretos de cliente y certificados",
+          "threat": "filtración de credenciales",
+          "vulnerability": "custodia parcial fuera de vault",
+          "probability": "media",
+          "impact": "critico",
+          "businessLoss": 140000,
+          "finding": "Se requiere cierre de brechas de custodia y rotación."
+        },
+        "RG-005": {
+          "asset": "logs de decisiones de autorización",
+          "threat": "detección tardía de abuso de client_id",
+          "vulnerability": "alertamiento manual en algunos procesos",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 90000,
+          "finding": "Correlación en mejora con foco en operaciones privilegiadas."
+        },
+        "RE2-001": {
+          "asset": "cliente técnico privilegiado",
+          "threat": "uso fuera de propósito",
+          "vulnerability": "recertificación y separación incompletas",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 120000,
+          "finding": "Riesgo dominante por exceso de privilegio en cuentas técnicas."
+        },
+        "RE2-002": {
+          "asset": "credenciales M2M",
+          "threat": "exposición o falta de rotación",
+          "vulnerability": "pipeline con secretos heredados",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 95000,
+          "finding": "Existe vault, pero no todos los secretos rotan en la misma cadencia."
+        },
+        "RE2-003": {
+          "asset": "plano AS+RS administrativo",
+          "threat": "falta de segregación funcional",
+          "vulnerability": "misma plataforma emite y protege recursos críticos",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 105000,
+          "finding": "Se necesita reforzar separación por propósito y monitoreo por client_id."
+        }
+      },
+      "controls": {
+        "CG-001": {
+          "controlCost": 2500,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "Validación completa de token aplicada en APIs administrativas.",
+          "evidenceSource": "Gateway policies y pruebas de API"
+        },
+        "CG-002": {
+          "controlCost": 1900,
+          "maturity": "implementado",
+          "automation": "semiautomatico",
+          "timing": "preventivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Scopes mínimos definidos con excepciones temporales.",
+          "evidenceSource": "Revisión de scopes por client_id"
+        },
+        "CG-004": {
+          "controlCost": 1250,
+          "maturity": "diseniado",
+          "automation": "semiautomatico",
+          "timing": "preventivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Gobierno de clientes con backlog de normalización.",
+          "evidenceSource": "Comité IAM y evidencias de recertificación"
+        },
+        "CG-005": {
+          "controlCost": 2200,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "Secretos productivos en vault con control de acceso.",
+          "evidenceSource": "Vault policy y auditoría interna"
+        },
+        "CG-006": {
+          "controlCost": 1150,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "TLS mTLS en enlaces críticos y no uso de URI para tokens.",
+          "evidenceSource": "Configuración de red y gateway"
+        },
+        "CG-007": {
+          "controlCost": 3100,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "detectivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Monitoreo por client_id con reglas en tuning.",
+          "evidenceSource": "SIEM y alertas SOC"
+        },
+        "CE2-001": {
+          "controlCost": 2500,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Uso de vault en producción; faltan integraciones heredadas.",
+          "evidenceSource": "Logs de vault y pipeline CI/CD"
+        },
+        "CE2-002": {
+          "controlCost": 950,
+          "maturity": "implementado",
+          "automation": "semiautomatico",
+          "timing": "preventivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Clientes separados por ambiente con excepciones por legado.",
+          "evidenceSource": "Catálogo de clientes OAuth"
+        },
+        "CE2-003": {
+          "controlCost": 4250,
+          "maturity": "diseniado",
+          "automation": "manual",
+          "timing": "preventivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Autenticación fuerte planificada para operaciones de alto riesgo.",
+          "evidenceSource": "Roadmap IAM"
+        },
+        "CE2-004": {
+          "controlCost": 2150,
+          "maturity": "diseniado",
+          "automation": "semiautomatico",
+          "timing": "detectivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Recertificación por client_id ejecutada con cobertura parcial.",
+          "evidenceSource": "Actas de recertificación trimestral"
+        }
+      }
+    },
+    "API_GATEWAY_FEDERADO": {
+      "context": {
+        "organization": "Holding APIs Federadas",
+        "evaluator": "Arquitecto de seguridad API",
+        "environment": "Producción",
+        "systemName": "Gateway federado multirecurso",
+        "scopeNotes": "Demo académico de validación de audiencia y downscoping en arquitectura federada."
+      },
+      "risks": {
+        "RG-001": {
+          "asset": "token bearer entre gateway y backends",
+          "threat": "replay en canales internos",
+          "vulnerability": "propagación amplia de token",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 85000,
+          "finding": "Riesgo moderado por controles de transporte y validación activa."
+        },
+        "RG-002": {
+          "asset": "decisión de autorización distribuida",
+          "threat": "aceptación de tokens en backend sin validación mínima",
+          "vulnerability": "consistencia incompleta entre capas",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 95000,
+          "finding": "La validación es robusta en gateway, parcial en APIs internas."
+        },
+        "RG-003": {
+          "asset": "audiencias y scopes por dominio",
+          "threat": "uso de token fuera de recurso destino",
+          "vulnerability": "diseño multipropósito en algunos servicios",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 90000,
+          "finding": "Se requiere mayor granularidad de audiencias por API."
+        },
+        "RG-004": {
+          "asset": "claves/JWKS federadas",
+          "threat": "uso de material criptográfico desactualizado",
+          "vulnerability": "rotación no homogénea entre dominios",
+          "probability": "baja",
+          "impact": "alto",
+          "businessLoss": 70000,
+          "finding": "El gobierno de claves es bueno, pero con brechas puntuales de sincronización."
+        },
+        "RG-005": {
+          "asset": "trazabilidad cross-domain",
+          "threat": "dificultad de investigación forense",
+          "vulnerability": "correlación parcial de eventos entre gateway y backend",
+          "probability": "media",
+          "impact": "medio",
+          "businessLoss": 60000,
+          "finding": "La correlación existe, con oportunidades de mejora en latencia y cobertura."
+        },
+        "RE3-001": {
+          "asset": "audience por API destino",
+          "threat": "confusión de audiencia",
+          "vulnerability": "validaciones inconsistentes por backend",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 110000,
+          "finding": "Control principal activo en gateway; revalidación backend parcial."
+        },
+        "RE3-002": {
+          "asset": "confianza backend en gateway",
+          "threat": "autorización insuficiente en microservicio",
+          "vulnerability": "ausencia de controles de negocio en ciertos endpoints",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 115000,
+          "finding": "Persisten servicios que confían ciegamente en el perímetro."
+        },
+        "RE3-003": {
+          "asset": "propagación de permisos entre APIs",
+          "threat": "token sin downscoping",
+          "vulnerability": "token exchange no desplegado de forma uniforme",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 140000,
+          "finding": "Riesgo dominante por falta de downscoping operativo completo."
+        }
+      },
+      "controls": {
+        "CG-001": {
+          "controlCost": 2500,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "Validación uniforme de issuer, aud y exp en gateway.",
+          "evidenceSource": "Políticas del gateway y pruebas de seguridad"
+        },
+        "CG-002": {
+          "controlCost": 1900,
+          "maturity": "implementado",
+          "automation": "semiautomatico",
+          "timing": "preventivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "Scopes mínimos por recurso en la mayoría de APIs.",
+          "evidenceSource": "Matriz de scopes y auditoría de endpoints"
+        },
+        "CG-003": {
+          "controlCost": 1600,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Vigencias por riesgo con excepciones en integraciones legadas.",
+          "evidenceSource": "Configuración del AS corporativo"
+        },
+        "CG-005": {
+          "controlCost": 2200,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "Rotación de claves y actualización de JWKS controlada.",
+          "evidenceSource": "Procedimiento KMS/JWKS"
+        },
+        "CG-007": {
+          "controlCost": 3100,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "detectivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "Correlación gateway-AS-RS con identificador transaccional.",
+          "evidenceSource": "SIEM corporativo y tablero SOC"
+        },
+        "CE3-001": {
+          "controlCost": 2750,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "Validación de audience por API destino en gateway.",
+          "evidenceSource": "Policy engine del gateway"
+        },
+        "CE3-002": {
+          "controlCost": 5000,
+          "maturity": "diseniado",
+          "automation": "semiautomatico",
+          "timing": "preventivo",
+          "periodicity": "periodico",
+          "scope": "especifico",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Token exchange diseñado, despliegue parcial por dominio.",
+          "evidenceSource": "Diseño de seguridad y backlog de implementación"
+        },
+        "CE3-003": {
+          "controlCost": 3100,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "detectivo",
+          "periodicity": "periodico",
+          "scope": "general",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Política uniforme aplicada con diferencias menores por legado.",
+          "evidenceSource": "Repositorio de políticas compartidas"
+        },
+        "CE3-004": {
+          "controlCost": 2750,
+          "maturity": "implementado",
+          "automation": "automatico",
+          "timing": "detectivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "Trazabilidad correlacionada en eventos gateway-AS-RS.",
+          "evidenceSource": "Bitácoras correlacionadas en SIEM"
+        }
+      }
+    }
+  }
+}
