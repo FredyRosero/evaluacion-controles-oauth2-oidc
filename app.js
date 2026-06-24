@@ -130,9 +130,12 @@ const scenarioSummary = document.getElementById('scenarioSummary');
 const loadStatus = document.getElementById('loadStatus');
 const calculateBtn = document.getElementById('calculateBtn');
 const exportBtn = document.getElementById('exportBtn');
-const demoSpaBtn = document.getElementById('demoSpaBtn');
-const demoM2mBtn = document.getElementById('demoM2mBtn');
-const demoGatewayBtn = document.getElementById('demoGatewayBtn');
+const demoSpaGoodBtn = document.getElementById('demoSpaGoodBtn');
+const demoSpaBadBtn = document.getElementById('demoSpaBadBtn');
+const demoM2mGoodBtn = document.getElementById('demoM2mGoodBtn');
+const demoM2mBadBtn = document.getElementById('demoM2mBadBtn');
+const demoGatewayGoodBtn = document.getElementById('demoGatewayGoodBtn');
+const demoGatewayBadBtn = document.getElementById('demoGatewayBadBtn');
 const demoNotice = document.getElementById('demoNotice');
 
 function escapeHtml(value) {
@@ -362,6 +365,12 @@ function getControlEvaluationFromCard(controlCard) {
   const scoreMap = state.catalog.mapeoScoreInicial;
   const dimensionValues = {};
   const dimensionLabels = {};
+  const normalize01 = (value) => {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return 0;
+    const normalized = numeric > 1 ? numeric / 100 : numeric;
+    return Math.max(0, Math.min(1, normalized));
+  };
 
   const resolveDimensionScore = (dimensionKey, selectedValue) => {
     const map = scoreMap?.[dimensionKey] || {};
@@ -389,16 +398,18 @@ function getControlEvaluationFromCard(controlCard) {
 
   const evidenceSelect = controlCard.querySelector('select[name="evidenceFactor"]');
   const evidenceMap = scoreMap?.factorEvidencia || DEFAULT_FACTOR_EVIDENCIA;
-  const evidenceFactor = Number.isFinite(evidenceMap[evidenceSelect.value])
+  const evidenceFactorRaw = Number.isFinite(evidenceMap[evidenceSelect.value])
     ? evidenceMap[evidenceSelect.value]
     : DEFAULT_FACTOR_EVIDENCIA[evidenceSelect.value] ?? 0;
-  const baseScore = (
+  const baseScoreRaw = (
     SCORE_WEIGHTS.madurez * dimensionValues.madurez +
     SCORE_WEIGHTS.automatizacion * dimensionValues.automatizacion +
     SCORE_WEIGHTS.momento * dimensionValues.momento +
     SCORE_WEIGHTS.periodicidad * dimensionValues.periodicidad +
     SCORE_WEIGHTS.alcance * dimensionValues.alcance
   );
+  const baseScore = normalize01(baseScoreRaw);
+  const evidenceFactor = normalize01(evidenceFactorRaw);
   const scoreControl = baseScore * evidenceFactor;
 
   return {
@@ -526,6 +537,38 @@ function showDemoMessage(message) {
   demoNotice.style.display = 'block';
 }
 
+function buildDemoPayloadMap(demoPayloadData) {
+  if (!demoPayloadData || typeof demoPayloadData !== 'object') return null;
+
+  if (demoPayloadData.demosPlanos && typeof demoPayloadData.demosPlanos === 'object') {
+    return demoPayloadData.demosPlanos;
+  }
+
+  if (demoPayloadData.demos && typeof demoPayloadData.demos === 'object') {
+    return demoPayloadData.demos;
+  }
+
+  if (demoPayloadData.demosAgrupados && typeof demoPayloadData.demosAgrupados === 'object') {
+    const flattened = {};
+    Object.entries(demoPayloadData.demosAgrupados).forEach(([scenarioId, qualityMap]) => {
+      if (!qualityMap || typeof qualityMap !== 'object') return;
+      Object.entries(qualityMap).forEach(([quality, payload]) => {
+        const key = `${scenarioId}_${String(quality || '').toUpperCase()}`;
+        flattened[key] = {
+          ...(payload || {}),
+          scenarioId: payload?.scenarioId || scenarioId,
+          quality: payload?.quality || quality
+        };
+      });
+    });
+    return flattened;
+  }
+
+  return (demoPayloadData.metadata || demoPayloadData.fieldLabels)
+    ? null
+    : demoPayloadData;
+}
+
 function applyDemoToRenderedForm(architectureId, payload) {
   const activeFilter = getActiveFilter();
   if (!activeFilter) return { applied: false, filledFields: 0 };
@@ -566,17 +609,24 @@ function applyDemoToRenderedForm(architectureId, payload) {
   };
 }
 
-function loadDemoData(architectureId) {
+function loadDemoData(demoKey) {
   if (!state.catalog || !state.lookups) return;
-  const payload = DEMO_PAYLOADS[architectureId];
+  const payload = DEMO_PAYLOADS[demoKey];
   if (!payload) return;
 
+  const architectureId = payload.scenarioId || payload.architectureId;
+  if (!architectureId) {
+    showDemoMessage(`No se encontró escenario asociado para el demo ${demoKey}.`);
+    return;
+  }
+
   clearDemoUpdatedMarks();
-  setFieldValue(document, '#organization', payload.context.organization);
-  setFieldValue(document, '#evaluator', payload.context.evaluator);
-  setFieldValue(document, '#environment', payload.context.environment);
-  setFieldValue(document, '#systemName', payload.context.systemName);
-  setFieldValue(document, '#scopeNotes', payload.context.scopeNotes);
+  const context = payload.context || {};
+  setFieldValue(document, '#organization', context.organization);
+  setFieldValue(document, '#evaluator', context.evaluator);
+  setFieldValue(document, '#environment', context.environment);
+  setFieldValue(document, '#systemName', context.systemName);
+  setFieldValue(document, '#scopeNotes', context.scopeNotes);
 
   architectureSelect.value = architectureId;
   architectureSelect.dispatchEvent(new Event('change'));
@@ -599,10 +649,11 @@ function loadDemoData(architectureId) {
     drawRiskResults(evaluation.risks);
 
     const scenarioName = state.lookups.escenarios.get(architectureId)?.nombre || architectureId;
+    const demoLabel = payload.label || demoKey;
     const suffix = result.applied
       ? `Campos diligenciados y resaltados: ${result.filledFields}.`
       : 'No fue posible aplicar el demo en esta carga; intente nuevamente.';
-    showDemoMessage(`${DEMO_SOURCE_MESSAGE} Escenario cargado: ${scenarioName}. ${suffix}`);
+    showDemoMessage(`${DEMO_SOURCE_MESSAGE} Escenario cargado: ${scenarioName}. Demo aplicado: ${demoLabel}. ${suffix}`);
   };
 
   requestAnimationFrame(applyWithRetry);
@@ -933,9 +984,12 @@ function exportToExcel(data) {
 function setButtonsEnabled(enabled) {
   calculateBtn.disabled = !enabled;
   exportBtn.disabled = !enabled;
-  demoSpaBtn.disabled = !enabled;
-  demoM2mBtn.disabled = !enabled;
-  demoGatewayBtn.disabled = !enabled;
+  demoSpaGoodBtn.disabled = !enabled;
+  demoSpaBadBtn.disabled = !enabled;
+  demoM2mGoodBtn.disabled = !enabled;
+  demoM2mBadBtn.disabled = !enabled;
+  demoGatewayGoodBtn.disabled = !enabled;
+  demoGatewayBadBtn.disabled = !enabled;
 }
 
 async function initializeApp() {
@@ -960,9 +1014,9 @@ async function initializeApp() {
 
     state.catalog = await catalogResponse.json();
     const demoPayloadData = await demoPayloadsResponse.json();
-    const demoPayloadMap = demoPayloadData?.demos || demoPayloadData;
+    const demoPayloadMap = buildDemoPayloadMap(demoPayloadData);
     if (!demoPayloadMap || typeof demoPayloadMap !== 'object') {
-      throw new Error(`Estructura inválida en ${DEMO_PAYLOADS_URL}: se esperaba un objeto de escenarios demo.`);
+      throw new Error(`Estructura inválida en ${DEMO_PAYLOADS_URL}: se esperaba demosPlanos, demosAgrupados o un mapa plano de demos.`);
     }
     Object.keys(DEMO_PAYLOADS).forEach((key) => delete DEMO_PAYLOADS[key]);
     Object.assign(DEMO_PAYLOADS, demoPayloadMap);
@@ -1037,9 +1091,12 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   exportToExcel(evaluation);
 });
 
-demoSpaBtn.addEventListener('click', () => loadDemoData('SPA_BFF_IDP'));
-demoM2mBtn.addEventListener('click', () => loadDemoData('M2M_AS_RS'));
-demoGatewayBtn.addEventListener('click', () => loadDemoData('API_GATEWAY_FEDERADO'));
+demoSpaGoodBtn.addEventListener('click', () => loadDemoData('SPA_BFF_IDP_BUENO'));
+demoSpaBadBtn.addEventListener('click', () => loadDemoData('SPA_BFF_IDP_MALO'));
+demoM2mGoodBtn.addEventListener('click', () => loadDemoData('M2M_AS_RS_BUENO'));
+demoM2mBadBtn.addEventListener('click', () => loadDemoData('M2M_AS_RS_MALO'));
+demoGatewayGoodBtn.addEventListener('click', () => loadDemoData('API_GATEWAY_FEDERADO_BUENO'));
+demoGatewayBadBtn.addEventListener('click', () => loadDemoData('API_GATEWAY_FEDERADO_MALO'));
 
 initializeApp();
 

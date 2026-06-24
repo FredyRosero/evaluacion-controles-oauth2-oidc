@@ -1,11 +1,22 @@
 {
   "metadata": {
-    "id": "DEMO-PREDILIGENCIAMIENTO-OAUTH2-OIDC-V15",
-    "version": "1.0.0",
-    "descripcion": "Datos de demostración para prediligenciar el formulario de evaluación de controles OAuth2/OIDC en los tres escenarios de la tesis.",
+    "id": "DEMO-PREDILIGENCIAMIENTO-OAUTH2-OIDC-V15-6DEMOS",
+    "version": "2.0.0",
+    "descripcion": "Datos de demostración para prediligenciar el formulario con un demo bueno y un demo malo por cada uno de los tres escenarios OAuth2/OIDC.",
     "base": "Tesis.v15.md, app.js y catálogo maestro de riesgos/controles.",
     "moneda": "USD",
-    "nota": "businessLoss representa el lucro cesante o impacto económico estimado del activo en la misma moneda usada por el formulario."
+    "nota": "businessLoss representa el lucro cesante o impacto económico estimado del activo en la misma moneda usada por el formulario.",
+    "totalDemos": 6,
+    "escenarios": [
+      "SPA_BFF_IDP",
+      "M2M_AS_RS",
+      "API_GATEWAY_FEDERADO"
+    ],
+    "calidades": [
+      "bueno",
+      "malo"
+    ],
+    "notaUso": "La propiedad demosAgrupados organiza por escenario y calidad. La propiedad demosPlanos permite cargar un demo directamente por clave única, útil para botones en app.js."
   },
   "fieldLabels": {
     "context.organization": "Organización",
@@ -30,144 +41,1365 @@
     "controls.*.evidenceFound": "Evidencia encontrada",
     "controls.*.evidenceSource": "Fuente de evidencia"
   },
-  "demos": {
+  "demosAgrupados": {
     "SPA_BFF_IDP": {
+      "bueno": {
+        "quality": "bueno",
+        "scenarioId": "SPA_BFF_IDP",
+        "label": "Demo bueno - SPA + BFF + IdP",
+        "context": {
+          "organization": "Banco Demo OAuth - Caso bueno",
+          "evaluator": "Equipo de seguridad de identidad",
+          "environment": "Preproducción",
+          "systemName": "Portal SPA con BFF endurecido",
+          "scopeNotes": "Demo bueno del escenario SPA + BFF + IdP: controles OIDC, sesión, PKCE, cookie y trazabilidad suficientemente evidenciados."
+        },
+        "risks": {
+          "RG-001": {
+            "asset": "access_token en tránsito API",
+            "threat": "intercepción o replay de bearer token",
+            "vulnerability": "Controles principales implementados y evidenciados para access_token en tránsito API.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 65000,
+            "finding": "Demo bueno: el riesgo RG-001 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RG-002": {
+            "asset": "API protegida por BFF",
+            "threat": "aceptación de token fuera de contexto",
+            "vulnerability": "Controles principales implementados y evidenciados para API protegida por BFF.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 80000,
+            "finding": "Demo bueno: el riesgo RG-002 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RG-003": {
+            "asset": "scopes de acceso de usuario",
+            "threat": "sobreasignación de permisos",
+            "vulnerability": "Controles principales implementados y evidenciados para scopes de acceso de usuario.",
+            "probability": "media",
+            "impact": "medio",
+            "businessLoss": 50000,
+            "finding": "Demo bueno: el riesgo RG-003 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RG-004": {
+            "asset": "secretos y claves del cliente OAuth",
+            "threat": "exposición accidental de secretos",
+            "vulnerability": "Controles principales implementados y evidenciados para secretos y claves del cliente OAuth.",
+            "probability": "baja",
+            "impact": "alto",
+            "businessLoss": 45000,
+            "finding": "Demo bueno: el riesgo RG-004 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RG-005": {
+            "asset": "telemetría de autenticación y autorización",
+            "threat": "detección tardía de abuso de token",
+            "vulnerability": "Controles principales implementados y evidenciados para telemetría de autenticación y autorización.",
+            "probability": "media",
+            "impact": "medio",
+            "businessLoss": 40000,
+            "finding": "Demo bueno: el riesgo RG-005 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RE1-001": {
+            "asset": "authorization_code en callback OIDC",
+            "threat": "sustitución o interceptación de código",
+            "vulnerability": "PKCE S256 obligatorio, rechazo de plain y validación consistente de state en callback.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 100000,
+            "finding": "PKCE, state y nonce están implementados y probados; la probabilidad de canje indebido es baja."
+          },
+          "RE1-002": {
+            "asset": "material de sesión en navegador",
+            "threat": "exfiltración vía XSS o extensión",
+            "vulnerability": "Tokens custodiados server-side y navegador limitado a cookie HttpOnly/Secure/SameSite.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 150000,
+            "finding": "No se evidencian tokens en localStorage/sessionStorage; la exposición del navegador queda controlada."
+          },
+          "RE1-003": {
+            "asset": "integridad de transacción OAuth/OIDC",
+            "threat": "CSRF o login mix-up",
+            "vulnerability": "Callback ligado a sesión con state y nonce validados y pruebas negativas documentadas.",
+            "probability": "media",
+            "impact": "medio",
+            "businessLoss": 90000,
+            "finding": "La transacción OIDC queda ligada a la sesión; riesgo de CSRF/login mix-up reducido."
+          }
+        },
+        "controls": {
+          "CG-001": {
+            "controlCost": 2500,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Validación de firma, issuer, aud y exp en BFF. Evidencia suficiente y verificable del control CG-001.",
+            "evidenceSource": "Repositorio BFF y pruebas de integración; pruebas documentadas; revisión de configuración"
+          },
+          "CG-002": {
+            "controlCost": 1900,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Scopes mínimos en endpoints críticos, pendiente normalización total. Evidencia suficiente y verificable del control CG-002.",
+            "evidenceSource": "Consola IdP y matriz de permisos; pruebas documentadas; revisión de configuración"
+          },
+          "CG-003": {
+            "controlCost": 1600,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Vigencias definidas con excepciones en algunos clientes legacy. Evidencia suficiente y verificable del control CG-003.",
+            "evidenceSource": "Política IAM y ticket de arquitectura; pruebas documentadas; revisión de configuración"
+          },
+          "CG-004": {
+            "controlCost": 1250,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Inventario de clientes con responsables en actualización. Evidencia suficiente y verificable del control CG-004.",
+            "evidenceSource": "CMDB IAM y reportes mensuales; pruebas documentadas; revisión de configuración"
+          },
+          "CG-005": {
+            "controlCost": 2200,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Secretos centralizados en vault con control de acceso. Evidencia suficiente y verificable del control CG-005.",
+            "evidenceSource": "Vault audit logs; pruebas documentadas; revisión de configuración"
+          },
+          "CG-006": {
+            "controlCost": 1150,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: TLS obligado y sin tokens en URI. Evidencia suficiente y verificable del control CG-006.",
+            "evidenceSource": "Gateway policies y escaneo de logs; pruebas documentadas; revisión de configuración"
+          },
+          "CG-007": {
+            "controlCost": 3100,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Correlación parcial de eventos entre IdP y BFF. Evidencia suficiente y verificable del control CG-007.",
+            "evidenceSource": "SIEM y dashboard de observabilidad; pruebas documentadas; revisión de configuración"
+          },
+          "CG-008": {
+            "controlCost": 5000,
+            "maturity": "implementado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "suficiente",
+            "evidenceFound": "Demo bueno: control CG-008 implementado en el alcance crítico y documentado para casos de alto riesgo.",
+            "evidenceSource": "Acta de alcance; pruebas documentadas; revisión de configuración"
+          },
+          "CE1-001": {
+            "controlCost": 1650,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: PKCE S256 en todos los clientes SPA/BFF activos. Evidencia suficiente y verificable del control CE1-001.",
+            "evidenceSource": "Consola IdP y pruebas de canje; pruebas documentadas; revisión de configuración"
+          },
+          "CE1-002": {
+            "controlCost": 950,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: State y nonce ligados a sesión con cobertura casi total. Evidencia suficiente y verificable del control CE1-002.",
+            "evidenceSource": "Repositorio callback handler; pruebas documentadas; revisión de configuración"
+          },
+          "CE1-003": {
+            "controlCost": 3750,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Persisten trazas de material de sesión en cliente. Evidencia suficiente y verificable del control CE1-003.",
+            "evidenceSource": "Inspección de navegador y pruebas QA; pruebas documentadas; revisión de configuración"
+          },
+          "CE1-004": {
+            "controlCost": 1450,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Cookie Secure/HttpOnly/SameSite con anti-CSRF activo. Evidencia suficiente y verificable del control CE1-004.",
+            "evidenceSource": "Configuración BFF y pruebas de seguridad; pruebas documentadas; revisión de configuración"
+          }
+        }
+      },
+      "malo": {
+        "quality": "malo",
+        "scenarioId": "SPA_BFF_IDP",
+        "label": "Demo malo - SPA + BFF + IdP",
+        "context": {
+          "organization": "Banco Demo OAuth - Caso malo",
+          "evaluator": "Equipo de seguridad de identidad",
+          "environment": "Preproducción",
+          "systemName": "Portal SPA con BFF débil",
+          "scopeNotes": "Demo malo del escenario SPA + BFF + IdP: PKCE inconsistente, exposición de material de sesión, validación parcial de state/nonce y evidencia insuficiente."
+        },
+        "risks": {
+          "RG-001": {
+            "asset": "access_token en tránsito API",
+            "threat": "intercepción o replay de bearer token",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre access_token en tránsito API.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 81250,
+            "finding": "Demo malo: el riesgo RG-001 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RG-002": {
+            "asset": "API protegida por BFF",
+            "threat": "aceptación de token fuera de contexto",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre API protegida por BFF.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 100000,
+            "finding": "Demo malo: el riesgo RG-002 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RG-003": {
+            "asset": "scopes de acceso de usuario",
+            "threat": "sobreasignación de permisos",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre scopes de acceso de usuario.",
+            "probability": "alta",
+            "impact": "alto",
+            "businessLoss": 62500,
+            "finding": "Demo malo: el riesgo RG-003 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RG-004": {
+            "asset": "secretos y claves del cliente OAuth",
+            "threat": "exposición accidental de secretos",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre secretos y claves del cliente OAuth.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 56250,
+            "finding": "Demo malo: el riesgo RG-004 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RG-005": {
+            "asset": "telemetría de autenticación y autorización",
+            "threat": "detección tardía de abuso de token",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre telemetría de autenticación y autorización.",
+            "probability": "alta",
+            "impact": "alto",
+            "businessLoss": 50000,
+            "finding": "Demo malo: el riesgo RG-005 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RE1-001": {
+            "asset": "authorization_code en callback OIDC",
+            "threat": "sustitución o interceptación de código",
+            "vulnerability": "PKCE no es obligatorio en todos los clientes, se acepta plain o no hay prueba de rechazo.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 125000,
+            "finding": "El canje indebido del authorization_code sigue siendo plausible por PKCE incompleto y callback débil."
+          },
+          "RE1-002": {
+            "asset": "material de sesión en navegador",
+            "threat": "exfiltración vía XSS o extensión",
+            "vulnerability": "Material de sesión o tokens visibles en navegador, storage, logs o herramientas de cliente.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 187500,
+            "finding": "La SPA conserva exposición alta frente a XSS/extensiones por manejo inseguro de material sensible."
+          },
+          "RE1-003": {
+            "asset": "integridad de transacción OAuth/OIDC",
+            "threat": "CSRF o login mix-up",
+            "vulnerability": "State/nonce no están ligados consistentemente a la sesión o no hay evidencia de validación.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 112500,
+            "finding": "El callback permite riesgo de CSRF, replay o login mix-up por validación incompleta."
+          }
+        },
+        "controls": {
+          "CG-001": {
+            "controlCost": 2500,
+            "maturity": "diseniado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "parcial",
+            "evidenceFound": "Demo malo: hay diseño parcial del control CG-001, pero no hay prueba integral ni cobertura completa.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-002": {
+            "controlCost": 1900,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-002; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-003": {
+            "controlCost": 1600,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-003; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-004": {
+            "controlCost": 1250,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-004; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-005": {
+            "controlCost": 2200,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-005; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-006": {
+            "controlCost": 1150,
+            "maturity": "diseniado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "parcial",
+            "evidenceFound": "Demo malo: hay diseño parcial del control CG-006, pero no hay prueba integral ni cobertura completa.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-007": {
+            "controlCost": 3100,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-007; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-008": {
+            "controlCost": 5000,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-008; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CE1-001": {
+            "controlCost": 1650,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE1-001; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CE1-002": {
+            "controlCost": 950,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE1-002; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CE1-003": {
+            "controlCost": 3750,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE1-003; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CE1-004": {
+            "controlCost": 1450,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE1-004; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          }
+        }
+      }
+    },
+    "M2M_AS_RS": {
+      "bueno": {
+        "quality": "bueno",
+        "scenarioId": "M2M_AS_RS",
+        "label": "Demo bueno - M2M AS=RS",
+        "context": {
+          "organization": "Fintech Demo M2M - Caso bueno",
+          "evaluator": "Auditor de identidad no humana",
+          "environment": "Producción",
+          "systemName": "Servicios M2M IAM gobernados",
+          "scopeNotes": "Demo bueno del escenario M2M AS=RS: clientes técnicos segregados, secretos en vault, scopes mínimos, rotación y monitoreo por client_id."
+        },
+        "risks": {
+          "RG-001": {
+            "asset": "access_token de servicio",
+            "threat": "replay de token técnico",
+            "vulnerability": "Controles principales implementados y evidenciados para access_token de servicio.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 70000,
+            "finding": "Demo bueno: el riesgo RG-001 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RG-002": {
+            "asset": "APIs administrativas IAM",
+            "threat": "aceptación de token inválido en endpoint crítico",
+            "vulnerability": "Controles principales implementados y evidenciados para APIs administrativas IAM.",
+            "probability": "media",
+            "impact": "critico",
+            "businessLoss": 120000,
+            "finding": "Demo bueno: el riesgo RG-002 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RG-003": {
+            "asset": "scopes de clientes técnicos",
+            "threat": "privilegios excesivos",
+            "vulnerability": "Controles principales implementados y evidenciados para scopes de clientes técnicos.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 110000,
+            "finding": "Demo bueno: el riesgo RG-003 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RG-004": {
+            "asset": "secretos de cliente y certificados",
+            "threat": "filtración de credenciales",
+            "vulnerability": "Controles principales implementados y evidenciados para secretos de cliente y certificados.",
+            "probability": "baja",
+            "impact": "critico",
+            "businessLoss": 140000,
+            "finding": "Demo bueno: el riesgo RG-004 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RG-005": {
+            "asset": "logs de decisiones de autorización",
+            "threat": "detección tardía de abuso de client_id",
+            "vulnerability": "Controles principales implementados y evidenciados para logs de decisiones de autorización.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 90000,
+            "finding": "Demo bueno: el riesgo RG-005 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RE2-001": {
+            "asset": "cliente técnico privilegiado",
+            "threat": "uso fuera de propósito",
+            "vulnerability": "Clientes técnicos separados por propósito, ambiente y mínimo privilegio.",
+            "probability": "media",
+            "impact": "critico",
+            "businessLoss": 120000,
+            "finding": "Los clientes M2M tienen dueño, scopes mínimos y recertificación vigente."
+          },
+          "RE2-002": {
+            "asset": "credenciales M2M",
+            "threat": "exposición o falta de rotación",
+            "vulnerability": "Credenciales en vault, sin secretos en código y con rotación programada.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 95000,
+            "finding": "La exposición de credenciales M2M queda reducida por vault, rotación y evidencias de auditoría."
+          },
+          "RE2-003": {
+            "asset": "plano AS+RS administrativo",
+            "threat": "falta de segregación funcional",
+            "vulnerability": "AS y RS conviven físicamente, pero con autorización fina y trazabilidad administrativa.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 105000,
+            "finding": "La concentración AS=RS queda compensada por segregación lógica, scopes mínimos y monitoreo."
+          }
+        },
+        "controls": {
+          "CG-001": {
+            "controlCost": 2500,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Validación completa de token aplicada en APIs administrativas. Evidencia suficiente y verificable del control CG-001.",
+            "evidenceSource": "Gateway policies y pruebas de API; pruebas documentadas; revisión de configuración"
+          },
+          "CG-002": {
+            "controlCost": 1900,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Scopes mínimos definidos con excepciones temporales. Evidencia suficiente y verificable del control CG-002.",
+            "evidenceSource": "Revisión de scopes por client_id; pruebas documentadas; revisión de configuración"
+          },
+          "CG-004": {
+            "controlCost": 1250,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Gobierno de clientes con backlog de normalización. Evidencia suficiente y verificable del control CG-004.",
+            "evidenceSource": "Comité IAM y evidencias de recertificación; pruebas documentadas; revisión de configuración"
+          },
+          "CG-005": {
+            "controlCost": 2200,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Secretos productivos en vault con control de acceso. Evidencia suficiente y verificable del control CG-005.",
+            "evidenceSource": "Vault policy y auditoría interna; pruebas documentadas; revisión de configuración"
+          },
+          "CG-006": {
+            "controlCost": 1150,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: TLS mTLS en enlaces críticos y no uso de URI para tokens. Evidencia suficiente y verificable del control CG-006.",
+            "evidenceSource": "Configuración de red y gateway; pruebas documentadas; revisión de configuración"
+          },
+          "CG-007": {
+            "controlCost": 3100,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Monitoreo por client_id con reglas en tuning. Evidencia suficiente y verificable del control CG-007.",
+            "evidenceSource": "SIEM y alertas SOC; pruebas documentadas; revisión de configuración"
+          },
+          "CE2-001": {
+            "controlCost": 2500,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Uso de vault en producción; faltan integraciones heredadas. Evidencia suficiente y verificable del control CE2-001.",
+            "evidenceSource": "Logs de vault y pipeline CI/CD; pruebas documentadas; revisión de configuración"
+          },
+          "CE2-002": {
+            "controlCost": 950,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Clientes separados por ambiente con excepciones por legado. Evidencia suficiente y verificable del control CE2-002.",
+            "evidenceSource": "Catálogo de clientes OAuth; pruebas documentadas; revisión de configuración"
+          },
+          "CE2-003": {
+            "controlCost": 4250,
+            "maturity": "implementado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "suficiente",
+            "evidenceFound": "Demo bueno: control CE2-003 implementado en el alcance crítico y documentado para casos de alto riesgo.",
+            "evidenceSource": "Roadmap IAM; pruebas documentadas; revisión de configuración"
+          },
+          "CE2-004": {
+            "controlCost": 2150,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Recertificación por client_id ejecutada con cobertura parcial. Evidencia suficiente y verificable del control CE2-004.",
+            "evidenceSource": "Actas de recertificación trimestral; pruebas documentadas; revisión de configuración"
+          }
+        }
+      },
+      "malo": {
+        "quality": "malo",
+        "scenarioId": "M2M_AS_RS",
+        "label": "Demo malo - M2M AS=RS",
+        "context": {
+          "organization": "Fintech Demo M2M - Caso malo",
+          "evaluator": "Auditor de identidad no humana",
+          "environment": "Producción",
+          "systemName": "Servicios M2M IAM con brechas",
+          "scopeNotes": "Demo malo del escenario M2M AS=RS: secretos fuera de vault, clientes técnicos compartidos, scopes excesivos y baja trazabilidad por client_id."
+        },
+        "risks": {
+          "RG-001": {
+            "asset": "access_token de servicio",
+            "threat": "replay de token técnico",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre access_token de servicio.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 87500,
+            "finding": "Demo malo: el riesgo RG-001 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RG-002": {
+            "asset": "APIs administrativas IAM",
+            "threat": "aceptación de token inválido en endpoint crítico",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre APIs administrativas IAM.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 150000,
+            "finding": "Demo malo: el riesgo RG-002 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RG-003": {
+            "asset": "scopes de clientes técnicos",
+            "threat": "privilegios excesivos",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre scopes de clientes técnicos.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 137500,
+            "finding": "Demo malo: el riesgo RG-003 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RG-004": {
+            "asset": "secretos de cliente y certificados",
+            "threat": "filtración de credenciales",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre secretos de cliente y certificados.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 175000,
+            "finding": "Demo malo: el riesgo RG-004 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RG-005": {
+            "asset": "logs de decisiones de autorización",
+            "threat": "detección tardía de abuso de client_id",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre logs de decisiones de autorización.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 112500,
+            "finding": "Demo malo: el riesgo RG-005 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RE2-001": {
+            "asset": "cliente técnico privilegiado",
+            "threat": "uso fuera de propósito",
+            "vulnerability": "Clientes técnicos compartidos, sin dueño claro, con permisos administrativos amplios.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 150000,
+            "finding": "El cliente técnico puede operar fuera de propósito y no existe recertificación efectiva."
+          },
+          "RE2-002": {
+            "asset": "credenciales M2M",
+            "threat": "exposición o falta de rotación",
+            "vulnerability": "Secretos hardcodeados, almacenados en pipeline o sin rotación verificable.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 118750,
+            "finding": "La credencial M2M mantiene exposición alta por custodia débil y ausencia de rotación."
+          },
+          "RE2-003": {
+            "asset": "plano AS+RS administrativo",
+            "threat": "falta de segregación funcional",
+            "vulnerability": "La plataforma AS=RS concentra emisión y APIs administrativas sin segregación suficiente.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 131250,
+            "finding": "La colocalización AS=RS aumenta impacto por autorización amplia y trazabilidad insuficiente."
+          }
+        },
+        "controls": {
+          "CG-001": {
+            "controlCost": 2500,
+            "maturity": "diseniado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "parcial",
+            "evidenceFound": "Demo malo: hay diseño parcial del control CG-001, pero no hay prueba integral ni cobertura completa.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-002": {
+            "controlCost": 1900,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-002; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-004": {
+            "controlCost": 1250,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-004; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-005": {
+            "controlCost": 2200,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-005; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-006": {
+            "controlCost": 1150,
+            "maturity": "diseniado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "parcial",
+            "evidenceFound": "Demo malo: hay diseño parcial del control CG-006, pero no hay prueba integral ni cobertura completa.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-007": {
+            "controlCost": 3100,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-007; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CE2-001": {
+            "controlCost": 2500,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE2-001; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CE2-002": {
+            "controlCost": 950,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE2-002; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CE2-003": {
+            "controlCost": 4250,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE2-003; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CE2-004": {
+            "controlCost": 2150,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE2-004; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          }
+        }
+      }
+    },
+    "API_GATEWAY_FEDERADO": {
+      "bueno": {
+        "quality": "bueno",
+        "scenarioId": "API_GATEWAY_FEDERADO",
+        "label": "Demo bueno - API Gateway federado",
+        "context": {
+          "organization": "Holding APIs Federadas - Caso bueno",
+          "evaluator": "Arquitecto de seguridad API",
+          "environment": "Producción",
+          "systemName": "Gateway federado con validación y downscoping",
+          "scopeNotes": "Demo bueno del escenario API Gateway federado: validación de audience, revalidación backend, token exchange y trazabilidad gateway-AS-RS."
+        },
+        "risks": {
+          "RG-001": {
+            "asset": "token bearer entre gateway y backends",
+            "threat": "replay en canales internos",
+            "vulnerability": "Controles principales implementados y evidenciados para token bearer entre gateway y backends.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 85000,
+            "finding": "Demo bueno: el riesgo RG-001 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RG-002": {
+            "asset": "decisión de autorización distribuida",
+            "threat": "aceptación de tokens en backend sin validación mínima",
+            "vulnerability": "Controles principales implementados y evidenciados para decisión de autorización distribuida.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 95000,
+            "finding": "Demo bueno: el riesgo RG-002 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RG-003": {
+            "asset": "audiencias y scopes por dominio",
+            "threat": "uso de token fuera de recurso destino",
+            "vulnerability": "Controles principales implementados y evidenciados para audiencias y scopes por dominio.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 90000,
+            "finding": "Demo bueno: el riesgo RG-003 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RG-004": {
+            "asset": "claves/JWKS federadas",
+            "threat": "uso de material criptográfico desactualizado",
+            "vulnerability": "Controles principales implementados y evidenciados para claves/JWKS federadas.",
+            "probability": "baja",
+            "impact": "alto",
+            "businessLoss": 70000,
+            "finding": "Demo bueno: el riesgo RG-004 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RG-005": {
+            "asset": "trazabilidad cross-domain",
+            "threat": "dificultad de investigación forense",
+            "vulnerability": "Controles principales implementados y evidenciados para trazabilidad cross-domain.",
+            "probability": "media",
+            "impact": "medio",
+            "businessLoss": 60000,
+            "finding": "Demo bueno: el riesgo RG-005 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+          },
+          "RE3-001": {
+            "asset": "audience por API destino",
+            "threat": "confusión de audiencia",
+            "vulnerability": "Audience validada por API destino en gateway y backend crítico.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 110000,
+            "finding": "La confusión de audiencia queda controlada por audiencias específicas y pruebas de rechazo."
+          },
+          "RE3-002": {
+            "asset": "confianza backend en gateway",
+            "threat": "autorización insuficiente en microservicio",
+            "vulnerability": "Backends críticos revalidan claims mínimos y autorización de negocio.",
+            "probability": "media",
+            "impact": "alto",
+            "businessLoss": 115000,
+            "finding": "No hay confianza ciega completa en el gateway; los backends aplican validación mínima."
+          },
+          "RE3-003": {
+            "asset": "propagación de permisos entre APIs",
+            "threat": "token sin downscoping",
+            "vulnerability": "Token exchange con downscoping para dominios que cruzan frontera de confianza.",
+            "probability": "media",
+            "impact": "critico",
+            "businessLoss": 140000,
+            "finding": "La propagación se limita mediante tokens por audiencia y scopes reducidos."
+          }
+        },
+        "controls": {
+          "CG-001": {
+            "controlCost": 2500,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Validación uniforme de issuer, aud y exp en gateway. Evidencia suficiente y verificable del control CG-001.",
+            "evidenceSource": "Políticas del gateway y pruebas de seguridad; pruebas documentadas; revisión de configuración"
+          },
+          "CG-002": {
+            "controlCost": 1900,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Scopes mínimos por recurso en la mayoría de APIs. Evidencia suficiente y verificable del control CG-002.",
+            "evidenceSource": "Matriz de scopes y auditoría de endpoints; pruebas documentadas; revisión de configuración"
+          },
+          "CG-003": {
+            "controlCost": 1600,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Vigencias por riesgo con excepciones en integraciones legadas. Evidencia suficiente y verificable del control CG-003.",
+            "evidenceSource": "Configuración del AS corporativo; pruebas documentadas; revisión de configuración"
+          },
+          "CG-005": {
+            "controlCost": 2200,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Rotación de claves y actualización de JWKS controlada. Evidencia suficiente y verificable del control CG-005.",
+            "evidenceSource": "Procedimiento KMS/JWKS; pruebas documentadas; revisión de configuración"
+          },
+          "CG-007": {
+            "controlCost": 3100,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Correlación gateway-AS-RS con identificador transaccional. Evidencia suficiente y verificable del control CG-007.",
+            "evidenceSource": "SIEM corporativo y tablero SOC; pruebas documentadas; revisión de configuración"
+          },
+          "CE3-001": {
+            "controlCost": 2750,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Validación de audience por API destino en gateway. Evidencia suficiente y verificable del control CE3-001.",
+            "evidenceSource": "Policy engine del gateway; pruebas documentadas; revisión de configuración"
+          },
+          "CE3-002": {
+            "controlCost": 5000,
+            "maturity": "implementado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "suficiente",
+            "evidenceFound": "Demo bueno: control CE3-002 implementado en el alcance crítico y documentado para casos de alto riesgo.",
+            "evidenceSource": "Diseño de seguridad y backlog de implementación; pruebas documentadas; revisión de configuración"
+          },
+          "CE3-003": {
+            "controlCost": 3100,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Política uniforme aplicada con diferencias menores por legado. Evidencia suficiente y verificable del control CE3-003.",
+            "evidenceSource": "Repositorio de políticas compartidas; pruebas documentadas; revisión de configuración"
+          },
+          "CE3-004": {
+            "controlCost": 2750,
+            "maturity": "auditado",
+            "automation": "automatico",
+            "timing": "preventivo",
+            "periodicity": "permanente",
+            "scope": "general",
+            "evidenceFactor": "independienteOAditada",
+            "evidenceFound": "Demo bueno: Trazabilidad correlacionada en eventos gateway-AS-RS. Evidencia suficiente y verificable del control CE3-004.",
+            "evidenceSource": "Bitácoras correlacionadas en SIEM; pruebas documentadas; revisión de configuración"
+          }
+        }
+      },
+      "malo": {
+        "quality": "malo",
+        "scenarioId": "API_GATEWAY_FEDERADO",
+        "label": "Demo malo - API Gateway federado",
+        "context": {
+          "organization": "Holding APIs Federadas - Caso malo",
+          "evaluator": "Arquitecto de seguridad API",
+          "environment": "Producción",
+          "systemName": "Gateway federado con propagación insegura",
+          "scopeNotes": "Demo malo del escenario API Gateway federado: propagación amplia de tokens, confusión de audiencia, backends con confianza ciega y token exchange incompleto."
+        },
+        "risks": {
+          "RG-001": {
+            "asset": "token bearer entre gateway y backends",
+            "threat": "replay en canales internos",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre token bearer entre gateway y backends.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 106250,
+            "finding": "Demo malo: el riesgo RG-001 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RG-002": {
+            "asset": "decisión de autorización distribuida",
+            "threat": "aceptación de tokens en backend sin validación mínima",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre decisión de autorización distribuida.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 118750,
+            "finding": "Demo malo: el riesgo RG-002 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RG-003": {
+            "asset": "audiencias y scopes por dominio",
+            "threat": "uso de token fuera de recurso destino",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre audiencias y scopes por dominio.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 112500,
+            "finding": "Demo malo: el riesgo RG-003 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RG-004": {
+            "asset": "claves/JWKS federadas",
+            "threat": "uso de material criptográfico desactualizado",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre claves/JWKS federadas.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 87500,
+            "finding": "Demo malo: el riesgo RG-004 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RG-005": {
+            "asset": "trazabilidad cross-domain",
+            "threat": "dificultad de investigación forense",
+            "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre trazabilidad cross-domain.",
+            "probability": "alta",
+            "impact": "alto",
+            "businessLoss": 75000,
+            "finding": "Demo malo: el riesgo RG-005 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+          },
+          "RE3-001": {
+            "asset": "audience por API destino",
+            "threat": "confusión de audiencia",
+            "vulnerability": "Backends aceptan tokens validados por gateway sin verificar audience de recurso.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 137500,
+            "finding": "Existe riesgo alto de confusión de audiencia entre APIs internas."
+          },
+          "RE3-002": {
+            "asset": "confianza backend en gateway",
+            "threat": "autorización insuficiente en microservicio",
+            "vulnerability": "Backends confían ciegamente en headers/contexto del gateway sin validación propia.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 143750,
+            "finding": "La autorización queda concentrada en el gateway y los servicios internos no reducen exposición."
+          },
+          "RE3-003": {
+            "asset": "propagación de permisos entre APIs",
+            "threat": "token sin downscoping",
+            "vulnerability": "El token de entrada se propaga a múltiples backends sin downscoping ni token exchange.",
+            "probability": "alta",
+            "impact": "critico",
+            "businessLoss": 175000,
+            "finding": "La propagación amplia conserva privilegios excesivos al cruzar dominios internos."
+          }
+        },
+        "controls": {
+          "CG-001": {
+            "controlCost": 2500,
+            "maturity": "diseniado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "parcial",
+            "evidenceFound": "Demo malo: hay diseño parcial del control CG-001, pero no hay prueba integral ni cobertura completa.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-002": {
+            "controlCost": 1900,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-002; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-003": {
+            "controlCost": 1600,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-003; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-005": {
+            "controlCost": 2200,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-005; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CG-007": {
+            "controlCost": 3100,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-007; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CE3-001": {
+            "controlCost": 2750,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE3-001; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CE3-002": {
+            "controlCost": 5000,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE3-002; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CE3-003": {
+            "controlCost": 3100,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE3-003; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          },
+          "CE3-004": {
+            "controlCost": 2750,
+            "maturity": "declarado",
+            "automation": "manual",
+            "timing": "correctivo",
+            "periodicity": "ocasional",
+            "scope": "especifico",
+            "evidenceFactor": "sinEvidencia",
+            "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE3-004; solo existen declaraciones o planes.",
+            "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+          }
+        }
+      }
+    }
+  },
+  "demosPlanos": {
+    "SPA_BFF_IDP_BUENO": {
+      "quality": "bueno",
+      "scenarioId": "SPA_BFF_IDP",
+      "label": "Demo bueno - SPA + BFF + IdP",
       "context": {
-        "organization": "Banco Demo OAuth",
+        "organization": "Banco Demo OAuth - Caso bueno",
         "evaluator": "Equipo de seguridad de identidad",
         "environment": "Preproducción",
-        "systemName": "Portal SPA con BFF",
-        "scopeNotes": "Demo académico del escenario SPA + BFF + IdP con evidencias de sesión y callback OIDC."
+        "systemName": "Portal SPA con BFF endurecido",
+        "scopeNotes": "Demo bueno del escenario SPA + BFF + IdP: controles OIDC, sesión, PKCE, cookie y trazabilidad suficientemente evidenciados."
       },
       "risks": {
         "RG-001": {
           "asset": "access_token en tránsito API",
           "threat": "intercepción o replay de bearer token",
-          "vulnerability": "rotación parcial y ventanas de vigencia altas",
+          "vulnerability": "Controles principales implementados y evidenciados para access_token en tránsito API.",
           "probability": "media",
           "impact": "alto",
           "businessLoss": 65000,
-          "finding": "Riesgo contenido parcialmente por TLS y política de vigencia."
+          "finding": "Demo bueno: el riesgo RG-001 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
         },
         "RG-002": {
           "asset": "API protegida por BFF",
           "threat": "aceptación de token fuera de contexto",
-          "vulnerability": "validaciones incompletas en capas internas",
+          "vulnerability": "Controles principales implementados y evidenciados para API protegida por BFF.",
           "probability": "media",
           "impact": "alto",
           "businessLoss": 80000,
-          "finding": "El BFF valida bien, pero existen rutas internas con validación parcial."
+          "finding": "Demo bueno: el riesgo RG-002 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
         },
         "RG-003": {
           "asset": "scopes de acceso de usuario",
           "threat": "sobreasignación de permisos",
-          "vulnerability": "catálogo de scopes sin depuración completa",
+          "vulnerability": "Controles principales implementados y evidenciados para scopes de acceso de usuario.",
           "probability": "media",
           "impact": "medio",
           "businessLoss": 50000,
-          "finding": "Se observan scopes heredados con mayor alcance del requerido."
+          "finding": "Demo bueno: el riesgo RG-003 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
         },
         "RG-004": {
           "asset": "secretos y claves del cliente OAuth",
           "threat": "exposición accidental de secretos",
-          "vulnerability": "rotación no uniforme entre ambientes",
+          "vulnerability": "Controles principales implementados y evidenciados para secretos y claves del cliente OAuth.",
           "probability": "baja",
           "impact": "alto",
           "businessLoss": 45000,
-          "finding": "Gobierno de secretos en progreso con cobertura parcial."
+          "finding": "Demo bueno: el riesgo RG-004 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
         },
         "RG-005": {
           "asset": "telemetría de autenticación y autorización",
           "threat": "detección tardía de abuso de token",
-          "vulnerability": "correlación incompleta entre BFF e IdP",
+          "vulnerability": "Controles principales implementados y evidenciados para telemetría de autenticación y autorización.",
           "probability": "media",
           "impact": "medio",
           "businessLoss": 40000,
-          "finding": "Se requiere consolidar correlación de eventos extremo a extremo."
+          "finding": "Demo bueno: el riesgo RG-005 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
         },
         "RE1-001": {
           "asset": "authorization_code en callback OIDC",
           "threat": "sustitución o interceptación de código",
-          "vulnerability": "flujo de callback expuesto sin controles consistentes",
+          "vulnerability": "PKCE S256 obligatorio, rechazo de plain y validación consistente de state en callback.",
           "probability": "media",
           "impact": "alto",
           "businessLoss": 100000,
-          "finding": "PKCE y state/nonce reducen fuertemente la probabilidad de canje indebido."
+          "finding": "PKCE, state y nonce están implementados y probados; la probabilidad de canje indebido es baja."
         },
         "RE1-002": {
           "asset": "material de sesión en navegador",
           "threat": "exfiltración vía XSS o extensión",
-          "vulnerability": "persistencia indebida de material sensible en cliente",
-          "probability": "alta",
+          "vulnerability": "Tokens custodiados server-side y navegador limitado a cookie HttpOnly/Secure/SameSite.",
+          "probability": "media",
           "impact": "alto",
           "businessLoss": 150000,
-          "finding": "Persisten prácticas de exposición del lado navegador; riesgo alto."
+          "finding": "No se evidencian tokens en localStorage/sessionStorage; la exposición del navegador queda controlada."
         },
         "RE1-003": {
           "asset": "integridad de transacción OAuth/OIDC",
           "threat": "CSRF o login mix-up",
-          "vulnerability": "validaciones parciales de nonce y state",
+          "vulnerability": "Callback ligado a sesión con state y nonce validados y pruebas negativas documentadas.",
           "probability": "media",
           "impact": "medio",
           "businessLoss": 90000,
-          "finding": "La ligadura transaccional está implementada pero requiere endurecimiento operativo."
+          "finding": "La transacción OIDC queda ligada a la sesión; riesgo de CSRF/login mix-up reducido."
         }
       },
       "controls": {
         "CG-001": {
           "controlCost": 2500,
-          "maturity": "implementado",
+          "maturity": "auditado",
           "automation": "automatico",
           "timing": "preventivo",
           "periodicity": "permanente",
           "scope": "general",
-          "evidenceFactor": "suficiente",
-          "evidenceFound": "Validación de firma, issuer, aud y exp en BFF.",
-          "evidenceSource": "Repositorio BFF y pruebas de integración"
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Validación de firma, issuer, aud y exp en BFF. Evidencia suficiente y verificable del control CG-001.",
+          "evidenceSource": "Repositorio BFF y pruebas de integración; pruebas documentadas; revisión de configuración"
         },
         "CG-002": {
           "controlCost": 1900,
-          "maturity": "implementado",
-          "automation": "semiautomatico",
+          "maturity": "auditado",
+          "automation": "automatico",
           "timing": "preventivo",
-          "periodicity": "periodico",
+          "periodicity": "permanente",
           "scope": "general",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Scopes mínimos en endpoints críticos, pendiente normalización total.",
-          "evidenceSource": "Consola IdP y matriz de permisos"
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Scopes mínimos en endpoints críticos, pendiente normalización total. Evidencia suficiente y verificable del control CG-002.",
+          "evidenceSource": "Consola IdP y matriz de permisos; pruebas documentadas; revisión de configuración"
         },
         "CG-003": {
           "controlCost": 1600,
-          "maturity": "diseniado",
+          "maturity": "auditado",
           "automation": "automatico",
           "timing": "preventivo",
-          "periodicity": "periodico",
+          "periodicity": "permanente",
           "scope": "general",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Vigencias definidas con excepciones en algunos clientes legacy.",
-          "evidenceSource": "Política IAM y ticket de arquitectura"
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Vigencias definidas con excepciones en algunos clientes legacy. Evidencia suficiente y verificable del control CG-003.",
+          "evidenceSource": "Política IAM y ticket de arquitectura; pruebas documentadas; revisión de configuración"
         },
         "CG-004": {
           "controlCost": 1250,
-          "maturity": "diseniado",
-          "automation": "semiautomatico",
+          "maturity": "auditado",
+          "automation": "automatico",
           "timing": "preventivo",
-          "periodicity": "periodico",
+          "periodicity": "permanente",
           "scope": "general",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Inventario de clientes con responsables en actualización.",
-          "evidenceSource": "CMDB IAM y reportes mensuales"
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Inventario de clientes con responsables en actualización. Evidencia suficiente y verificable del control CG-004.",
+          "evidenceSource": "CMDB IAM y reportes mensuales; pruebas documentadas; revisión de configuración"
         },
         "CG-005": {
           "controlCost": 2200,
-          "maturity": "implementado",
+          "maturity": "auditado",
           "automation": "automatico",
           "timing": "preventivo",
-          "periodicity": "periodico",
+          "periodicity": "permanente",
           "scope": "general",
-          "evidenceFactor": "suficiente",
-          "evidenceFound": "Secretos centralizados en vault con control de acceso.",
-          "evidenceSource": "Vault audit logs"
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Secretos centralizados en vault con control de acceso. Evidencia suficiente y verificable del control CG-005.",
+          "evidenceSource": "Vault audit logs; pruebas documentadas; revisión de configuración"
         },
         "CG-006": {
           "controlCost": 1150,
@@ -176,31 +1408,31 @@
           "timing": "preventivo",
           "periodicity": "permanente",
           "scope": "general",
-          "evidenceFactor": "suficiente",
-          "evidenceFound": "TLS obligado y sin tokens en URI.",
-          "evidenceSource": "Gateway policies y escaneo de logs"
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: TLS obligado y sin tokens en URI. Evidencia suficiente y verificable del control CG-006.",
+          "evidenceSource": "Gateway policies y escaneo de logs; pruebas documentadas; revisión de configuración"
         },
         "CG-007": {
           "controlCost": 3100,
-          "maturity": "implementado",
+          "maturity": "auditado",
           "automation": "automatico",
-          "timing": "detectivo",
+          "timing": "preventivo",
           "periodicity": "permanente",
           "scope": "general",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Correlación parcial de eventos entre IdP y BFF.",
-          "evidenceSource": "SIEM y dashboard de observabilidad"
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Correlación parcial de eventos entre IdP y BFF. Evidencia suficiente y verificable del control CG-007.",
+          "evidenceSource": "SIEM y dashboard de observabilidad; pruebas documentadas; revisión de configuración"
         },
         "CG-008": {
           "controlCost": 5000,
-          "maturity": "declarado",
-          "automation": "manual",
+          "maturity": "implementado",
+          "automation": "automatico",
           "timing": "preventivo",
-          "periodicity": "ocasional",
-          "scope": "especifico",
-          "evidenceFactor": "sinEvidencia",
-          "evidenceFound": "No se aplica sender-constrained en este alcance demo.",
-          "evidenceSource": "Acta de alcance"
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "suficiente",
+          "evidenceFound": "Demo bueno: control CG-008 implementado en el alcance crítico y documentado para casos de alto riesgo.",
+          "evidenceSource": "Acta de alcance; pruebas documentadas; revisión de configuración"
         },
         "CE1-001": {
           "controlCost": 1650,
@@ -209,20 +1441,240 @@
           "timing": "preventivo",
           "periodicity": "permanente",
           "scope": "general",
-          "evidenceFactor": "suficiente",
-          "evidenceFound": "PKCE S256 en todos los clientes SPA/BFF activos.",
-          "evidenceSource": "Consola IdP y pruebas de canje"
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: PKCE S256 en todos los clientes SPA/BFF activos. Evidencia suficiente y verificable del control CE1-001.",
+          "evidenceSource": "Consola IdP y pruebas de canje; pruebas documentadas; revisión de configuración"
         },
         "CE1-002": {
           "controlCost": 950,
-          "maturity": "implementado",
-          "automation": "semiautomatico",
+          "maturity": "auditado",
+          "automation": "automatico",
           "timing": "preventivo",
           "periodicity": "permanente",
           "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: State y nonce ligados a sesión con cobertura casi total. Evidencia suficiente y verificable del control CE1-002.",
+          "evidenceSource": "Repositorio callback handler; pruebas documentadas; revisión de configuración"
+        },
+        "CE1-003": {
+          "controlCost": 3750,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Persisten trazas de material de sesión en cliente. Evidencia suficiente y verificable del control CE1-003.",
+          "evidenceSource": "Inspección de navegador y pruebas QA; pruebas documentadas; revisión de configuración"
+        },
+        "CE1-004": {
+          "controlCost": 1450,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Cookie Secure/HttpOnly/SameSite con anti-CSRF activo. Evidencia suficiente y verificable del control CE1-004.",
+          "evidenceSource": "Configuración BFF y pruebas de seguridad; pruebas documentadas; revisión de configuración"
+        }
+      }
+    },
+    "SPA_BFF_IDP_MALO": {
+      "quality": "malo",
+      "scenarioId": "SPA_BFF_IDP",
+      "label": "Demo malo - SPA + BFF + IdP",
+      "context": {
+        "organization": "Banco Demo OAuth - Caso malo",
+        "evaluator": "Equipo de seguridad de identidad",
+        "environment": "Preproducción",
+        "systemName": "Portal SPA con BFF débil",
+        "scopeNotes": "Demo malo del escenario SPA + BFF + IdP: PKCE inconsistente, exposición de material de sesión, validación parcial de state/nonce y evidencia insuficiente."
+      },
+      "risks": {
+        "RG-001": {
+          "asset": "access_token en tránsito API",
+          "threat": "intercepción o replay de bearer token",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre access_token en tránsito API.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 81250,
+          "finding": "Demo malo: el riesgo RG-001 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RG-002": {
+          "asset": "API protegida por BFF",
+          "threat": "aceptación de token fuera de contexto",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre API protegida por BFF.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 100000,
+          "finding": "Demo malo: el riesgo RG-002 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RG-003": {
+          "asset": "scopes de acceso de usuario",
+          "threat": "sobreasignación de permisos",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre scopes de acceso de usuario.",
+          "probability": "alta",
+          "impact": "alto",
+          "businessLoss": 62500,
+          "finding": "Demo malo: el riesgo RG-003 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RG-004": {
+          "asset": "secretos y claves del cliente OAuth",
+          "threat": "exposición accidental de secretos",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre secretos y claves del cliente OAuth.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 56250,
+          "finding": "Demo malo: el riesgo RG-004 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RG-005": {
+          "asset": "telemetría de autenticación y autorización",
+          "threat": "detección tardía de abuso de token",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre telemetría de autenticación y autorización.",
+          "probability": "alta",
+          "impact": "alto",
+          "businessLoss": 50000,
+          "finding": "Demo malo: el riesgo RG-005 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RE1-001": {
+          "asset": "authorization_code en callback OIDC",
+          "threat": "sustitución o interceptación de código",
+          "vulnerability": "PKCE no es obligatorio en todos los clientes, se acepta plain o no hay prueba de rechazo.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 125000,
+          "finding": "El canje indebido del authorization_code sigue siendo plausible por PKCE incompleto y callback débil."
+        },
+        "RE1-002": {
+          "asset": "material de sesión en navegador",
+          "threat": "exfiltración vía XSS o extensión",
+          "vulnerability": "Material de sesión o tokens visibles en navegador, storage, logs o herramientas de cliente.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 187500,
+          "finding": "La SPA conserva exposición alta frente a XSS/extensiones por manejo inseguro de material sensible."
+        },
+        "RE1-003": {
+          "asset": "integridad de transacción OAuth/OIDC",
+          "threat": "CSRF o login mix-up",
+          "vulnerability": "State/nonce no están ligados consistentemente a la sesión o no hay evidencia de validación.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 112500,
+          "finding": "El callback permite riesgo de CSRF, replay o login mix-up por validación incompleta."
+        }
+      },
+      "controls": {
+        "CG-001": {
+          "controlCost": 2500,
+          "maturity": "diseniado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
           "evidenceFactor": "parcial",
-          "evidenceFound": "State y nonce ligados a sesión con cobertura casi total.",
-          "evidenceSource": "Repositorio callback handler"
+          "evidenceFound": "Demo malo: hay diseño parcial del control CG-001, pero no hay prueba integral ni cobertura completa.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-002": {
+          "controlCost": 1900,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-002; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-003": {
+          "controlCost": 1600,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-003; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-004": {
+          "controlCost": 1250,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-004; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-005": {
+          "controlCost": 2200,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-005; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-006": {
+          "controlCost": 1150,
+          "maturity": "diseniado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Demo malo: hay diseño parcial del control CG-006, pero no hay prueba integral ni cobertura completa.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-007": {
+          "controlCost": 3100,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-007; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-008": {
+          "controlCost": 5000,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-008; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CE1-001": {
+          "controlCost": 1650,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE1-001; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CE1-002": {
+          "controlCost": 950,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE1-002; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
         },
         "CE1-003": {
           "controlCost": 3750,
@@ -231,298 +1683,106 @@
           "timing": "correctivo",
           "periodicity": "ocasional",
           "scope": "especifico",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Persisten trazas de material de sesión en cliente.",
-          "evidenceSource": "Inspección de navegador y pruebas QA"
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE1-003; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
         },
         "CE1-004": {
           "controlCost": 1450,
-          "maturity": "implementado",
-          "automation": "automatico",
-          "timing": "preventivo",
-          "periodicity": "periodico",
-          "scope": "general",
-          "evidenceFactor": "suficiente",
-          "evidenceFound": "Cookie Secure/HttpOnly/SameSite con anti-CSRF activo.",
-          "evidenceSource": "Configuración BFF y pruebas de seguridad"
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE1-004; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
         }
       }
     },
-    "M2M_AS_RS": {
+    "M2M_AS_RS_BUENO": {
+      "quality": "bueno",
+      "scenarioId": "M2M_AS_RS",
+      "label": "Demo bueno - M2M AS=RS",
       "context": {
-        "organization": "Fintech Demo M2M",
+        "organization": "Fintech Demo M2M - Caso bueno",
         "evaluator": "Auditor de identidad no humana",
         "environment": "Producción",
-        "systemName": "Servicios machine-to-machine IAM",
-        "scopeNotes": "Demo académico para clientes técnicos con client_credentials en AS que también expone APIs administrativas."
+        "systemName": "Servicios M2M IAM gobernados",
+        "scopeNotes": "Demo bueno del escenario M2M AS=RS: clientes técnicos segregados, secretos en vault, scopes mínimos, rotación y monitoreo por client_id."
       },
       "risks": {
         "RG-001": {
           "asset": "access_token de servicio",
           "threat": "replay de token técnico",
-          "vulnerability": "caducidades amplias en integraciones legadas",
+          "vulnerability": "Controles principales implementados y evidenciados para access_token de servicio.",
           "probability": "media",
           "impact": "alto",
           "businessLoss": 70000,
-          "finding": "Riesgo moderado por alta automatización y trazabilidad parcial."
+          "finding": "Demo bueno: el riesgo RG-001 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
         },
         "RG-002": {
           "asset": "APIs administrativas IAM",
           "threat": "aceptación de token inválido en endpoint crítico",
-          "vulnerability": "validación heterogénea por servicio",
+          "vulnerability": "Controles principales implementados y evidenciados para APIs administrativas IAM.",
           "probability": "media",
           "impact": "critico",
           "businessLoss": 120000,
-          "finding": "El control principal está implementado con brechas puntuales."
+          "finding": "Demo bueno: el riesgo RG-002 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
         },
         "RG-003": {
           "asset": "scopes de clientes técnicos",
           "threat": "privilegios excesivos",
-          "vulnerability": "roles heredados por compatibilidad",
-          "probability": "alta",
+          "vulnerability": "Controles principales implementados y evidenciados para scopes de clientes técnicos.",
+          "probability": "media",
           "impact": "alto",
           "businessLoss": 110000,
-          "finding": "Persisten scopes administrativos amplios en clientes históricos."
+          "finding": "Demo bueno: el riesgo RG-003 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
         },
         "RG-004": {
           "asset": "secretos de cliente y certificados",
           "threat": "filtración de credenciales",
-          "vulnerability": "custodia parcial fuera de vault",
-          "probability": "media",
+          "vulnerability": "Controles principales implementados y evidenciados para secretos de cliente y certificados.",
+          "probability": "baja",
           "impact": "critico",
           "businessLoss": 140000,
-          "finding": "Se requiere cierre de brechas de custodia y rotación."
+          "finding": "Demo bueno: el riesgo RG-004 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
         },
         "RG-005": {
           "asset": "logs de decisiones de autorización",
           "threat": "detección tardía de abuso de client_id",
-          "vulnerability": "alertamiento manual en algunos procesos",
+          "vulnerability": "Controles principales implementados y evidenciados para logs de decisiones de autorización.",
           "probability": "media",
           "impact": "alto",
           "businessLoss": 90000,
-          "finding": "Correlación en mejora con foco en operaciones privilegiadas."
+          "finding": "Demo bueno: el riesgo RG-005 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
         },
         "RE2-001": {
           "asset": "cliente técnico privilegiado",
           "threat": "uso fuera de propósito",
-          "vulnerability": "recertificación y separación incompletas",
-          "probability": "alta",
+          "vulnerability": "Clientes técnicos separados por propósito, ambiente y mínimo privilegio.",
+          "probability": "media",
           "impact": "critico",
           "businessLoss": 120000,
-          "finding": "Riesgo dominante por exceso de privilegio en cuentas técnicas."
+          "finding": "Los clientes M2M tienen dueño, scopes mínimos y recertificación vigente."
         },
         "RE2-002": {
           "asset": "credenciales M2M",
           "threat": "exposición o falta de rotación",
-          "vulnerability": "pipeline con secretos heredados",
+          "vulnerability": "Credenciales en vault, sin secretos en código y con rotación programada.",
           "probability": "media",
           "impact": "alto",
           "businessLoss": 95000,
-          "finding": "Existe vault, pero no todos los secretos rotan en la misma cadencia."
+          "finding": "La exposición de credenciales M2M queda reducida por vault, rotación y evidencias de auditoría."
         },
         "RE2-003": {
           "asset": "plano AS+RS administrativo",
           "threat": "falta de segregación funcional",
-          "vulnerability": "misma plataforma emite y protege recursos críticos",
+          "vulnerability": "AS y RS conviven físicamente, pero con autorización fina y trazabilidad administrativa.",
           "probability": "media",
           "impact": "alto",
           "businessLoss": 105000,
-          "finding": "Se necesita reforzar separación por propósito y monitoreo por client_id."
-        }
-      },
-      "controls": {
-        "CG-001": {
-          "controlCost": 2500,
-          "maturity": "implementado",
-          "automation": "automatico",
-          "timing": "preventivo",
-          "periodicity": "permanente",
-          "scope": "general",
-          "evidenceFactor": "suficiente",
-          "evidenceFound": "Validación completa de token aplicada en APIs administrativas.",
-          "evidenceSource": "Gateway policies y pruebas de API"
-        },
-        "CG-002": {
-          "controlCost": 1900,
-          "maturity": "implementado",
-          "automation": "semiautomatico",
-          "timing": "preventivo",
-          "periodicity": "periodico",
-          "scope": "general",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Scopes mínimos definidos con excepciones temporales.",
-          "evidenceSource": "Revisión de scopes por client_id"
-        },
-        "CG-004": {
-          "controlCost": 1250,
-          "maturity": "diseniado",
-          "automation": "semiautomatico",
-          "timing": "preventivo",
-          "periodicity": "periodico",
-          "scope": "general",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Gobierno de clientes con backlog de normalización.",
-          "evidenceSource": "Comité IAM y evidencias de recertificación"
-        },
-        "CG-005": {
-          "controlCost": 2200,
-          "maturity": "implementado",
-          "automation": "automatico",
-          "timing": "preventivo",
-          "periodicity": "periodico",
-          "scope": "general",
-          "evidenceFactor": "suficiente",
-          "evidenceFound": "Secretos productivos en vault con control de acceso.",
-          "evidenceSource": "Vault policy y auditoría interna"
-        },
-        "CG-006": {
-          "controlCost": 1150,
-          "maturity": "implementado",
-          "automation": "automatico",
-          "timing": "preventivo",
-          "periodicity": "permanente",
-          "scope": "general",
-          "evidenceFactor": "suficiente",
-          "evidenceFound": "TLS mTLS en enlaces críticos y no uso de URI para tokens.",
-          "evidenceSource": "Configuración de red y gateway"
-        },
-        "CG-007": {
-          "controlCost": 3100,
-          "maturity": "implementado",
-          "automation": "automatico",
-          "timing": "detectivo",
-          "periodicity": "permanente",
-          "scope": "general",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Monitoreo por client_id con reglas en tuning.",
-          "evidenceSource": "SIEM y alertas SOC"
-        },
-        "CE2-001": {
-          "controlCost": 2500,
-          "maturity": "implementado",
-          "automation": "automatico",
-          "timing": "preventivo",
-          "periodicity": "permanente",
-          "scope": "general",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Uso de vault en producción; faltan integraciones heredadas.",
-          "evidenceSource": "Logs de vault y pipeline CI/CD"
-        },
-        "CE2-002": {
-          "controlCost": 950,
-          "maturity": "implementado",
-          "automation": "semiautomatico",
-          "timing": "preventivo",
-          "periodicity": "periodico",
-          "scope": "general",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Clientes separados por ambiente con excepciones por legado.",
-          "evidenceSource": "Catálogo de clientes OAuth"
-        },
-        "CE2-003": {
-          "controlCost": 4250,
-          "maturity": "diseniado",
-          "automation": "manual",
-          "timing": "preventivo",
-          "periodicity": "ocasional",
-          "scope": "especifico",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Autenticación fuerte planificada para operaciones de alto riesgo.",
-          "evidenceSource": "Roadmap IAM"
-        },
-        "CE2-004": {
-          "controlCost": 2150,
-          "maturity": "diseniado",
-          "automation": "semiautomatico",
-          "timing": "detectivo",
-          "periodicity": "periodico",
-          "scope": "general",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Recertificación por client_id ejecutada con cobertura parcial.",
-          "evidenceSource": "Actas de recertificación trimestral"
-        }
-      }
-    },
-    "API_GATEWAY_FEDERADO": {
-      "context": {
-        "organization": "Holding APIs Federadas",
-        "evaluator": "Arquitecto de seguridad API",
-        "environment": "Producción",
-        "systemName": "Gateway federado multirecurso",
-        "scopeNotes": "Demo académico de validación de audiencia y downscoping en arquitectura federada."
-      },
-      "risks": {
-        "RG-001": {
-          "asset": "token bearer entre gateway y backends",
-          "threat": "replay en canales internos",
-          "vulnerability": "propagación amplia de token",
-          "probability": "media",
-          "impact": "alto",
-          "businessLoss": 85000,
-          "finding": "Riesgo moderado por controles de transporte y validación activa."
-        },
-        "RG-002": {
-          "asset": "decisión de autorización distribuida",
-          "threat": "aceptación de tokens en backend sin validación mínima",
-          "vulnerability": "consistencia incompleta entre capas",
-          "probability": "media",
-          "impact": "alto",
-          "businessLoss": 95000,
-          "finding": "La validación es robusta en gateway, parcial en APIs internas."
-        },
-        "RG-003": {
-          "asset": "audiencias y scopes por dominio",
-          "threat": "uso de token fuera de recurso destino",
-          "vulnerability": "diseño multipropósito en algunos servicios",
-          "probability": "media",
-          "impact": "alto",
-          "businessLoss": 90000,
-          "finding": "Se requiere mayor granularidad de audiencias por API."
-        },
-        "RG-004": {
-          "asset": "claves/JWKS federadas",
-          "threat": "uso de material criptográfico desactualizado",
-          "vulnerability": "rotación no homogénea entre dominios",
-          "probability": "baja",
-          "impact": "alto",
-          "businessLoss": 70000,
-          "finding": "El gobierno de claves es bueno, pero con brechas puntuales de sincronización."
-        },
-        "RG-005": {
-          "asset": "trazabilidad cross-domain",
-          "threat": "dificultad de investigación forense",
-          "vulnerability": "correlación parcial de eventos entre gateway y backend",
-          "probability": "media",
-          "impact": "medio",
-          "businessLoss": 60000,
-          "finding": "La correlación existe, con oportunidades de mejora en latencia y cobertura."
-        },
-        "RE3-001": {
-          "asset": "audience por API destino",
-          "threat": "confusión de audiencia",
-          "vulnerability": "validaciones inconsistentes por backend",
-          "probability": "media",
-          "impact": "alto",
-          "businessLoss": 110000,
-          "finding": "Control principal activo en gateway; revalidación backend parcial."
-        },
-        "RE3-002": {
-          "asset": "confianza backend en gateway",
-          "threat": "autorización insuficiente en microservicio",
-          "vulnerability": "ausencia de controles de negocio en ciertos endpoints",
-          "probability": "media",
-          "impact": "alto",
-          "businessLoss": 115000,
-          "finding": "Persisten servicios que confían ciegamente en el perímetro."
-        },
-        "RE3-003": {
-          "asset": "propagación de permisos entre APIs",
-          "threat": "token sin downscoping",
-          "vulnerability": "token exchange no desplegado de forma uniforme",
-          "probability": "alta",
-          "impact": "critico",
-          "businessLoss": 140000,
-          "finding": "Riesgo dominante por falta de downscoping operativo completo."
+          "finding": "La concentración AS=RS queda compensada por segregación lógica, scopes mínimos y monitoreo."
         }
       },
       "controls": {
@@ -533,97 +1793,680 @@
           "timing": "preventivo",
           "periodicity": "permanente",
           "scope": "general",
-          "evidenceFactor": "suficiente",
-          "evidenceFound": "Validación uniforme de issuer, aud y exp en gateway.",
-          "evidenceSource": "Políticas del gateway y pruebas de seguridad"
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Validación completa de token aplicada en APIs administrativas. Evidencia suficiente y verificable del control CG-001.",
+          "evidenceSource": "Gateway policies y pruebas de API; pruebas documentadas; revisión de configuración"
         },
         "CG-002": {
           "controlCost": 1900,
-          "maturity": "implementado",
-          "automation": "semiautomatico",
-          "timing": "preventivo",
-          "periodicity": "periodico",
-          "scope": "general",
-          "evidenceFactor": "suficiente",
-          "evidenceFound": "Scopes mínimos por recurso en la mayoría de APIs.",
-          "evidenceSource": "Matriz de scopes y auditoría de endpoints"
-        },
-        "CG-003": {
-          "controlCost": 1600,
-          "maturity": "implementado",
+          "maturity": "auditado",
           "automation": "automatico",
           "timing": "preventivo",
-          "periodicity": "periodico",
+          "periodicity": "permanente",
           "scope": "general",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Vigencias por riesgo con excepciones en integraciones legadas.",
-          "evidenceSource": "Configuración del AS corporativo"
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Scopes mínimos definidos con excepciones temporales. Evidencia suficiente y verificable del control CG-002.",
+          "evidenceSource": "Revisión de scopes por client_id; pruebas documentadas; revisión de configuración"
+        },
+        "CG-004": {
+          "controlCost": 1250,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Gobierno de clientes con backlog de normalización. Evidencia suficiente y verificable del control CG-004.",
+          "evidenceSource": "Comité IAM y evidencias de recertificación; pruebas documentadas; revisión de configuración"
         },
         "CG-005": {
           "controlCost": 2200,
-          "maturity": "implementado",
+          "maturity": "auditado",
           "automation": "automatico",
           "timing": "preventivo",
-          "periodicity": "periodico",
+          "periodicity": "permanente",
           "scope": "general",
-          "evidenceFactor": "suficiente",
-          "evidenceFound": "Rotación de claves y actualización de JWKS controlada.",
-          "evidenceSource": "Procedimiento KMS/JWKS"
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Secretos productivos en vault con control de acceso. Evidencia suficiente y verificable del control CG-005.",
+          "evidenceSource": "Vault policy y auditoría interna; pruebas documentadas; revisión de configuración"
+        },
+        "CG-006": {
+          "controlCost": 1150,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: TLS mTLS en enlaces críticos y no uso de URI para tokens. Evidencia suficiente y verificable del control CG-006.",
+          "evidenceSource": "Configuración de red y gateway; pruebas documentadas; revisión de configuración"
         },
         "CG-007": {
           "controlCost": 3100,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Monitoreo por client_id con reglas en tuning. Evidencia suficiente y verificable del control CG-007.",
+          "evidenceSource": "SIEM y alertas SOC; pruebas documentadas; revisión de configuración"
+        },
+        "CE2-001": {
+          "controlCost": 2500,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Uso de vault en producción; faltan integraciones heredadas. Evidencia suficiente y verificable del control CE2-001.",
+          "evidenceSource": "Logs de vault y pipeline CI/CD; pruebas documentadas; revisión de configuración"
+        },
+        "CE2-002": {
+          "controlCost": 950,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Clientes separados por ambiente con excepciones por legado. Evidencia suficiente y verificable del control CE2-002.",
+          "evidenceSource": "Catálogo de clientes OAuth; pruebas documentadas; revisión de configuración"
+        },
+        "CE2-003": {
+          "controlCost": 4250,
           "maturity": "implementado",
           "automation": "automatico",
-          "timing": "detectivo",
+          "timing": "preventivo",
           "periodicity": "permanente",
           "scope": "general",
           "evidenceFactor": "suficiente",
-          "evidenceFound": "Correlación gateway-AS-RS con identificador transaccional.",
-          "evidenceSource": "SIEM corporativo y tablero SOC"
+          "evidenceFound": "Demo bueno: control CE2-003 implementado en el alcance crítico y documentado para casos de alto riesgo.",
+          "evidenceSource": "Roadmap IAM; pruebas documentadas; revisión de configuración"
+        },
+        "CE2-004": {
+          "controlCost": 2150,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Recertificación por client_id ejecutada con cobertura parcial. Evidencia suficiente y verificable del control CE2-004.",
+          "evidenceSource": "Actas de recertificación trimestral; pruebas documentadas; revisión de configuración"
+        }
+      }
+    },
+    "M2M_AS_RS_MALO": {
+      "quality": "malo",
+      "scenarioId": "M2M_AS_RS",
+      "label": "Demo malo - M2M AS=RS",
+      "context": {
+        "organization": "Fintech Demo M2M - Caso malo",
+        "evaluator": "Auditor de identidad no humana",
+        "environment": "Producción",
+        "systemName": "Servicios M2M IAM con brechas",
+        "scopeNotes": "Demo malo del escenario M2M AS=RS: secretos fuera de vault, clientes técnicos compartidos, scopes excesivos y baja trazabilidad por client_id."
+      },
+      "risks": {
+        "RG-001": {
+          "asset": "access_token de servicio",
+          "threat": "replay de token técnico",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre access_token de servicio.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 87500,
+          "finding": "Demo malo: el riesgo RG-001 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RG-002": {
+          "asset": "APIs administrativas IAM",
+          "threat": "aceptación de token inválido en endpoint crítico",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre APIs administrativas IAM.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 150000,
+          "finding": "Demo malo: el riesgo RG-002 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RG-003": {
+          "asset": "scopes de clientes técnicos",
+          "threat": "privilegios excesivos",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre scopes de clientes técnicos.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 137500,
+          "finding": "Demo malo: el riesgo RG-003 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RG-004": {
+          "asset": "secretos de cliente y certificados",
+          "threat": "filtración de credenciales",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre secretos de cliente y certificados.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 175000,
+          "finding": "Demo malo: el riesgo RG-004 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RG-005": {
+          "asset": "logs de decisiones de autorización",
+          "threat": "detección tardía de abuso de client_id",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre logs de decisiones de autorización.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 112500,
+          "finding": "Demo malo: el riesgo RG-005 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RE2-001": {
+          "asset": "cliente técnico privilegiado",
+          "threat": "uso fuera de propósito",
+          "vulnerability": "Clientes técnicos compartidos, sin dueño claro, con permisos administrativos amplios.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 150000,
+          "finding": "El cliente técnico puede operar fuera de propósito y no existe recertificación efectiva."
+        },
+        "RE2-002": {
+          "asset": "credenciales M2M",
+          "threat": "exposición o falta de rotación",
+          "vulnerability": "Secretos hardcodeados, almacenados en pipeline o sin rotación verificable.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 118750,
+          "finding": "La credencial M2M mantiene exposición alta por custodia débil y ausencia de rotación."
+        },
+        "RE2-003": {
+          "asset": "plano AS+RS administrativo",
+          "threat": "falta de segregación funcional",
+          "vulnerability": "La plataforma AS=RS concentra emisión y APIs administrativas sin segregación suficiente.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 131250,
+          "finding": "La colocalización AS=RS aumenta impacto por autorización amplia y trazabilidad insuficiente."
+        }
+      },
+      "controls": {
+        "CG-001": {
+          "controlCost": 2500,
+          "maturity": "diseniado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Demo malo: hay diseño parcial del control CG-001, pero no hay prueba integral ni cobertura completa.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-002": {
+          "controlCost": 1900,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-002; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-004": {
+          "controlCost": 1250,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-004; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-005": {
+          "controlCost": 2200,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-005; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-006": {
+          "controlCost": 1150,
+          "maturity": "diseniado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Demo malo: hay diseño parcial del control CG-006, pero no hay prueba integral ni cobertura completa.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-007": {
+          "controlCost": 3100,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-007; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CE2-001": {
+          "controlCost": 2500,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE2-001; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CE2-002": {
+          "controlCost": 950,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE2-002; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CE2-003": {
+          "controlCost": 4250,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE2-003; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CE2-004": {
+          "controlCost": 2150,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE2-004; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        }
+      }
+    },
+    "API_GATEWAY_FEDERADO_BUENO": {
+      "quality": "bueno",
+      "scenarioId": "API_GATEWAY_FEDERADO",
+      "label": "Demo bueno - API Gateway federado",
+      "context": {
+        "organization": "Holding APIs Federadas - Caso bueno",
+        "evaluator": "Arquitecto de seguridad API",
+        "environment": "Producción",
+        "systemName": "Gateway federado con validación y downscoping",
+        "scopeNotes": "Demo bueno del escenario API Gateway federado: validación de audience, revalidación backend, token exchange y trazabilidad gateway-AS-RS."
+      },
+      "risks": {
+        "RG-001": {
+          "asset": "token bearer entre gateway y backends",
+          "threat": "replay en canales internos",
+          "vulnerability": "Controles principales implementados y evidenciados para token bearer entre gateway y backends.",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 85000,
+          "finding": "Demo bueno: el riesgo RG-001 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+        },
+        "RG-002": {
+          "asset": "decisión de autorización distribuida",
+          "threat": "aceptación de tokens en backend sin validación mínima",
+          "vulnerability": "Controles principales implementados y evidenciados para decisión de autorización distribuida.",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 95000,
+          "finding": "Demo bueno: el riesgo RG-002 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+        },
+        "RG-003": {
+          "asset": "audiencias y scopes por dominio",
+          "threat": "uso de token fuera de recurso destino",
+          "vulnerability": "Controles principales implementados y evidenciados para audiencias y scopes por dominio.",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 90000,
+          "finding": "Demo bueno: el riesgo RG-003 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+        },
+        "RG-004": {
+          "asset": "claves/JWKS federadas",
+          "threat": "uso de material criptográfico desactualizado",
+          "vulnerability": "Controles principales implementados y evidenciados para claves/JWKS federadas.",
+          "probability": "baja",
+          "impact": "alto",
+          "businessLoss": 70000,
+          "finding": "Demo bueno: el riesgo RG-004 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+        },
+        "RG-005": {
+          "asset": "trazabilidad cross-domain",
+          "threat": "dificultad de investigación forense",
+          "vulnerability": "Controles principales implementados y evidenciados para trazabilidad cross-domain.",
+          "probability": "media",
+          "impact": "medio",
+          "businessLoss": 60000,
+          "finding": "Demo bueno: el riesgo RG-005 queda razonablemente mitigado por controles implementados, evidencia suficiente y trazabilidad operativa."
+        },
+        "RE3-001": {
+          "asset": "audience por API destino",
+          "threat": "confusión de audiencia",
+          "vulnerability": "Audience validada por API destino en gateway y backend crítico.",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 110000,
+          "finding": "La confusión de audiencia queda controlada por audiencias específicas y pruebas de rechazo."
+        },
+        "RE3-002": {
+          "asset": "confianza backend en gateway",
+          "threat": "autorización insuficiente en microservicio",
+          "vulnerability": "Backends críticos revalidan claims mínimos y autorización de negocio.",
+          "probability": "media",
+          "impact": "alto",
+          "businessLoss": 115000,
+          "finding": "No hay confianza ciega completa en el gateway; los backends aplican validación mínima."
+        },
+        "RE3-003": {
+          "asset": "propagación de permisos entre APIs",
+          "threat": "token sin downscoping",
+          "vulnerability": "Token exchange con downscoping para dominios que cruzan frontera de confianza.",
+          "probability": "media",
+          "impact": "critico",
+          "businessLoss": 140000,
+          "finding": "La propagación se limita mediante tokens por audiencia y scopes reducidos."
+        }
+      },
+      "controls": {
+        "CG-001": {
+          "controlCost": 2500,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Validación uniforme de issuer, aud y exp en gateway. Evidencia suficiente y verificable del control CG-001.",
+          "evidenceSource": "Políticas del gateway y pruebas de seguridad; pruebas documentadas; revisión de configuración"
+        },
+        "CG-002": {
+          "controlCost": 1900,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Scopes mínimos por recurso en la mayoría de APIs. Evidencia suficiente y verificable del control CG-002.",
+          "evidenceSource": "Matriz de scopes y auditoría de endpoints; pruebas documentadas; revisión de configuración"
+        },
+        "CG-003": {
+          "controlCost": 1600,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Vigencias por riesgo con excepciones en integraciones legadas. Evidencia suficiente y verificable del control CG-003.",
+          "evidenceSource": "Configuración del AS corporativo; pruebas documentadas; revisión de configuración"
+        },
+        "CG-005": {
+          "controlCost": 2200,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Rotación de claves y actualización de JWKS controlada. Evidencia suficiente y verificable del control CG-005.",
+          "evidenceSource": "Procedimiento KMS/JWKS; pruebas documentadas; revisión de configuración"
+        },
+        "CG-007": {
+          "controlCost": 3100,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Correlación gateway-AS-RS con identificador transaccional. Evidencia suficiente y verificable del control CG-007.",
+          "evidenceSource": "SIEM corporativo y tablero SOC; pruebas documentadas; revisión de configuración"
         },
         "CE3-001": {
           "controlCost": 2750,
-          "maturity": "implementado",
+          "maturity": "auditado",
           "automation": "automatico",
           "timing": "preventivo",
           "periodicity": "permanente",
           "scope": "general",
-          "evidenceFactor": "suficiente",
-          "evidenceFound": "Validación de audience por API destino en gateway.",
-          "evidenceSource": "Policy engine del gateway"
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Validación de audience por API destino en gateway. Evidencia suficiente y verificable del control CE3-001.",
+          "evidenceSource": "Policy engine del gateway; pruebas documentadas; revisión de configuración"
         },
         "CE3-002": {
           "controlCost": 5000,
-          "maturity": "diseniado",
-          "automation": "semiautomatico",
+          "maturity": "implementado",
+          "automation": "automatico",
           "timing": "preventivo",
-          "periodicity": "periodico",
-          "scope": "especifico",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Token exchange diseñado, despliegue parcial por dominio.",
-          "evidenceSource": "Diseño de seguridad y backlog de implementación"
-        },
-        "CE3-003": {
-          "controlCost": 3100,
-          "maturity": "implementado",
-          "automation": "automatico",
-          "timing": "detectivo",
-          "periodicity": "periodico",
-          "scope": "general",
-          "evidenceFactor": "parcial",
-          "evidenceFound": "Política uniforme aplicada con diferencias menores por legado.",
-          "evidenceSource": "Repositorio de políticas compartidas"
-        },
-        "CE3-004": {
-          "controlCost": 2750,
-          "maturity": "implementado",
-          "automation": "automatico",
-          "timing": "detectivo",
           "periodicity": "permanente",
           "scope": "general",
           "evidenceFactor": "suficiente",
-          "evidenceFound": "Trazabilidad correlacionada en eventos gateway-AS-RS.",
-          "evidenceSource": "Bitácoras correlacionadas en SIEM"
+          "evidenceFound": "Demo bueno: control CE3-002 implementado en el alcance crítico y documentado para casos de alto riesgo.",
+          "evidenceSource": "Diseño de seguridad y backlog de implementación; pruebas documentadas; revisión de configuración"
+        },
+        "CE3-003": {
+          "controlCost": 3100,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Política uniforme aplicada con diferencias menores por legado. Evidencia suficiente y verificable del control CE3-003.",
+          "evidenceSource": "Repositorio de políticas compartidas; pruebas documentadas; revisión de configuración"
+        },
+        "CE3-004": {
+          "controlCost": 2750,
+          "maturity": "auditado",
+          "automation": "automatico",
+          "timing": "preventivo",
+          "periodicity": "permanente",
+          "scope": "general",
+          "evidenceFactor": "independienteOAditada",
+          "evidenceFound": "Demo bueno: Trazabilidad correlacionada en eventos gateway-AS-RS. Evidencia suficiente y verificable del control CE3-004.",
+          "evidenceSource": "Bitácoras correlacionadas en SIEM; pruebas documentadas; revisión de configuración"
+        }
+      }
+    },
+    "API_GATEWAY_FEDERADO_MALO": {
+      "quality": "malo",
+      "scenarioId": "API_GATEWAY_FEDERADO",
+      "label": "Demo malo - API Gateway federado",
+      "context": {
+        "organization": "Holding APIs Federadas - Caso malo",
+        "evaluator": "Arquitecto de seguridad API",
+        "environment": "Producción",
+        "systemName": "Gateway federado con propagación insegura",
+        "scopeNotes": "Demo malo del escenario API Gateway federado: propagación amplia de tokens, confusión de audiencia, backends con confianza ciega y token exchange incompleto."
+      },
+      "risks": {
+        "RG-001": {
+          "asset": "token bearer entre gateway y backends",
+          "threat": "replay en canales internos",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre token bearer entre gateway y backends.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 106250,
+          "finding": "Demo malo: el riesgo RG-001 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RG-002": {
+          "asset": "decisión de autorización distribuida",
+          "threat": "aceptación de tokens en backend sin validación mínima",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre decisión de autorización distribuida.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 118750,
+          "finding": "Demo malo: el riesgo RG-002 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RG-003": {
+          "asset": "audiencias y scopes por dominio",
+          "threat": "uso de token fuera de recurso destino",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre audiencias y scopes por dominio.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 112500,
+          "finding": "Demo malo: el riesgo RG-003 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RG-004": {
+          "asset": "claves/JWKS federadas",
+          "threat": "uso de material criptográfico desactualizado",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre claves/JWKS federadas.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 87500,
+          "finding": "Demo malo: el riesgo RG-004 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RG-005": {
+          "asset": "trazabilidad cross-domain",
+          "threat": "dificultad de investigación forense",
+          "vulnerability": "Control débil, evidencia insuficiente y configuración inconsistente sobre trazabilidad cross-domain.",
+          "probability": "alta",
+          "impact": "alto",
+          "businessLoss": 75000,
+          "finding": "Demo malo: el riesgo RG-005 conserva exposición alta por controles declarados, baja evidencia y operación no verificable."
+        },
+        "RE3-001": {
+          "asset": "audience por API destino",
+          "threat": "confusión de audiencia",
+          "vulnerability": "Backends aceptan tokens validados por gateway sin verificar audience de recurso.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 137500,
+          "finding": "Existe riesgo alto de confusión de audiencia entre APIs internas."
+        },
+        "RE3-002": {
+          "asset": "confianza backend en gateway",
+          "threat": "autorización insuficiente en microservicio",
+          "vulnerability": "Backends confían ciegamente en headers/contexto del gateway sin validación propia.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 143750,
+          "finding": "La autorización queda concentrada en el gateway y los servicios internos no reducen exposición."
+        },
+        "RE3-003": {
+          "asset": "propagación de permisos entre APIs",
+          "threat": "token sin downscoping",
+          "vulnerability": "El token de entrada se propaga a múltiples backends sin downscoping ni token exchange.",
+          "probability": "alta",
+          "impact": "critico",
+          "businessLoss": 175000,
+          "finding": "La propagación amplia conserva privilegios excesivos al cruzar dominios internos."
+        }
+      },
+      "controls": {
+        "CG-001": {
+          "controlCost": 2500,
+          "maturity": "diseniado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "parcial",
+          "evidenceFound": "Demo malo: hay diseño parcial del control CG-001, pero no hay prueba integral ni cobertura completa.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-002": {
+          "controlCost": 1900,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-002; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-003": {
+          "controlCost": 1600,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-003; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-005": {
+          "controlCost": 2200,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-005; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CG-007": {
+          "controlCost": 3100,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CG-007; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CE3-001": {
+          "controlCost": 2750,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE3-001; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CE3-002": {
+          "controlCost": 5000,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE3-002; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CE3-003": {
+          "controlCost": 3100,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE3-003; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
+        },
+        "CE3-004": {
+          "controlCost": 2750,
+          "maturity": "declarado",
+          "automation": "manual",
+          "timing": "correctivo",
+          "periodicity": "ocasional",
+          "scope": "especifico",
+          "evidenceFactor": "sinEvidencia",
+          "evidenceFound": "Demo malo: no se encuentra evidencia suficiente de operación del control CE3-004; solo existen declaraciones o planes.",
+          "evidenceSource": "Declaración verbal, ticket incompleto o documentación sin verificación técnica"
         }
       }
     }
